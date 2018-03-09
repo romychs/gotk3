@@ -30,7 +30,9 @@ Short list of changes made:
 1) Code refacrored and reformated for better mix of widgets in corresponding files.
 2) Some amount of error was fixed including memory leaks.
 3) GOTK3 examples which in original version located separately, here integrated in one project.
-4) CoolApp example application created to demonstrate golang code patterns to build
+4) New GLIB, GTK+ objects and widgets supported, including GAction, GSimpleAction, GActionMap,
+GMenuModel, GMenu, GtkActionable, GFile and so on.
+5) CoolApp example application created to demonstrate golang code patterns to build
 modern GTK+3 application, which incude menus, toolbars, actions and others
 widgets and tools (including pattern for fullscreen wrap/unwrap, preference dialog,
 save/restore settings and so on).
