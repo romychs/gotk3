@@ -83,7 +83,7 @@ func (v *Object) TypeFromInstance() Type {
 // ToGObject type converts an unsafe.Pointer as a native C GObject.
 // This function is exported for visibility in other gotk3 packages and
 // is not meant to be used by applications.
-func ToGObject(ptr unsafe.Pointer) *C.GObject {
+func toGObject(ptr unsafe.Pointer) *C.GObject {
 	return C.toGObject(ptr)
 }
 
