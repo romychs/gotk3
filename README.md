@@ -1,6 +1,15 @@
 Improved GOTK3 (go bindings for GTK+3)
 ======================================
-Original gotk3 project provides Go bindings for GTK+3 and dependent
+
+[![Build Status](https://travis-ci.org/d2r2/gotk3.svg?branch=master)](https://travis-ci.org/d2r2/gotk3)
+[![Go Report Card](https://goreportcard.com/badge/github.com/d2r2/gotk3)](https://goreportcard.com/report/github.com/d2r2/gotk3)
+[![GoDoc](https://godoc.org/github.com/d2r2/gotk3?status.svg)](https://godoc.org/github.com/d2r2/gotk3)
+<!--
+[![Coverage Status](https://coveralls.io/repos/d2r2/gotk3/badge.svg?branch=master)](https://coveralls.io/r/d2r2/gotk3?branch=master)
+-->
+
+
+Original [GOTK3](https://godoc.org/github.com/gotk3) project provides Go bindings for GTK+3 and dependent
 projects.  Each component is given its own subdirectory, which is used
 as the import path for the package.  Partial binding support for the
 following libraries is currently implemented:
