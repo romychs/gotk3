@@ -995,17 +995,6 @@ func (v *Dialog) GetContentArea() (*Box, error) {
 	return box, nil
 }
 
-// GetHeaderBar() is a wrapper around gtk_dialog_get_header_bar().
-func (v *Dialog) GetHeaderBar() (*HeaderBar, error) {
-	c := C.gtk_dialog_get_header_bar(v.native())
-	if c == nil {
-		return nil, nilPtrErr
-	}
-	obj := glib.Take(unsafe.Pointer(c))
-	headerbar := wrapHeaderBar(obj)
-	return headerbar, nil
-}
-
 func init() {
 	tm := []glib.TypeMarshaler{
 		{glib.Type(C.gtk_about_dialog_get_type()), marshalAboutDialog},
