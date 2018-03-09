@@ -19,8 +19,9 @@ following libraries is currently implemented:
   - GLib 2 (2.36 and later)
   - Cairo (1.10 and later)
 
-Idea to create a fork from the original [GTK+3 adaptation](https://godoc.org/github.com/gotk3)
-for golang was not just add another API functions, but came from the other side - create
+Idea to create a fork from the original one of the best
+[GTK+3 adaptation for golang](https://godoc.org/github.com/gotk3) was
+not just add another API functions, but came from the other side - create
 good application example which demostrate all modern GTK+ features (as well as old-style one).
 
 As a results a lot of refactoring was done with original code, to create in
