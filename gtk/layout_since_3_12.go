@@ -14,7 +14,7 @@
 // ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 // OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
-// +build !gtk_3_6,!gtk_3_8
+// +build !gtk_3_6,!gtk_3_8,!gtk_3_10
 // not use this: go build -tags gtk_3_8'. Otherwise, if no build tags are used, GTK 3.10
 
 package gtk
@@ -27,6 +27,10 @@ import (
 	"unsafe"
 
 	"github.com/d2r2/gotk3/glib"
+)
+
+const (
+	BUTTONBOX_EXPAND ButtonBoxStyle = C.GTK_BUTTONBOX_EXPAND
 )
 
 /*

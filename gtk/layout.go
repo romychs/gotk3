@@ -367,7 +367,6 @@ const (
 	BUTTONBOX_START  ButtonBoxStyle = C.GTK_BUTTONBOX_START
 	BUTTONBOX_END    ButtonBoxStyle = C.GTK_BUTTONBOX_END
 	BUTTONBOX_CENTER ButtonBoxStyle = C.GTK_BUTTONBOX_CENTER
-	BUTTONBOX_EXPAND ButtonBoxStyle = C.GTK_BUTTONBOX_EXPAND
 )
 
 func marshalButtonBoxStyle(p uintptr) (interface{}, error) {

@@ -14,7 +14,7 @@
 // ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 // OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
-// +build !gtk_3_6,!gtk_3_8,!gtk_3_14,!gtk_3_16
+// +build !gtk_3_6,!gtk_3_8,!gtk_3_10,!gtk_3_12,!gtk_3_14,!gtk_3_16
 // not use this: go build -tags gtk_3_8'. Otherwise, if no build tags are used, GTK 3.18
 
 package gtk
