@@ -342,6 +342,7 @@ func wrapFileEnumerator(obj *Object) *FileEnumerator {
 	return &FileEnumerator{obj}
 }
 
+/*
 // gboolean	g_file_enumerator_iterate ()
 func (v *FileEnumerator) Iterate(cancel *Cancellable) (*FileInfo, *File, error) {
 	var err *C.GError
@@ -364,6 +365,7 @@ func (v *FileEnumerator) Iterate(cancel *Cancellable) (*FileInfo, *File, error) 
 	}
 	return info2, child2, nil
 }
+*/
 
 // GFileInfo *	g_file_enumerator_next_file ()
 func (v *FileEnumerator) NextFile(cancel *Cancellable) (*FileInfo, error) {
