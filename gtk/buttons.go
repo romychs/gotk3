@@ -567,13 +567,6 @@ func (v *MenuButton) GetPopup() *Menu {
 }
 
 // void
-// gtk_menu_button_set_use_popover (GtkMenuButton *menu_button,
-//                                  gboolean use_popover);
-func (v *MenuButton) SetUsePopover(usePopover bool) {
-	C.gtk_menu_button_set_use_popover(v.native(), gbool(usePopover))
-}
-
-// void
 // gtk_menu_button_set_menu_model (GtkMenuButton *menu_button,
 //                                 GMenuModel *menu_model);
 func (v *MenuButton) SetMenuModel(model glib.IMenuModel) {
