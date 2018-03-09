@@ -6,19 +6,39 @@ package glib
 // #include <glib-object.h>
 // #include "glib.go.h"
 import "C"
-import "unsafe"
+import (
+	"unsafe"
+)
+
+// IMenuModel is an interface type implemented by all structs
+// embedding a MenuModel.
+type IMenuModel interface {
+	toMenuModel() *C.GMenuModel
+	// Use this method to expose access to GLIB underlying object
+	// in external packages.
+	Native() uintptr
+}
 
 // MenuModel is a representation of GMenuModel.
 type MenuModel struct {
 	*Object
 }
 
+// Static cast to verify at compile time that type on the right side
+// implement corresponding interface on the left.
+var _ IMenuModel = &MenuModel{}
+
 // native() returns a pointer to the underlying GMenuModel.
 func (v *MenuModel) native() *C.GMenuModel {
-	if v == nil || v.GObject == nil {
+	if v == nil {
 		return nil
 	}
-	return C.toGMenuModel(unsafe.Pointer(v.GObject))
+	ptr := unsafe.Pointer(v.Object.Native())
+	return C.toGMenuModel(ptr)
+}
+
+func (v *MenuModel) toMenuModel() *C.GMenuModel {
+	return v.native()
 }
 
 func (v *MenuModel) Native() uintptr {
@@ -46,9 +66,9 @@ func (v *MenuModel) GetNItems() int {
 
 // GetItemLink is a wrapper around g_menu_model_get_item_link().
 func (v *MenuModel) GetItemLink(index int, link string) *MenuModel {
-	cstr := (*C.gchar)(C.CString(link))
+	cstr := C.CString(link)
 	defer C.free(unsafe.Pointer(cstr))
-	c := C.g_menu_model_get_item_link(v.native(), C.gint(index), cstr)
+	c := C.g_menu_model_get_item_link(v.native(), C.gint(index), (*C.gchar)(cstr))
 	if c == nil {
 		return nil
 	}
@@ -70,13 +90,17 @@ type Menu struct {
 	MenuModel
 }
 
+// Static cast to verify at compile time that type on the right side
+// implement corresponding interface on the left.
+var _ IMenuModel = &Menu{}
+
 // native() returns a pointer to the underlying GMenu.
-func (m *Menu) native() *C.GMenu {
-	if m == nil || m.GObject == nil {
+func (v *Menu) native() *C.GMenu {
+	if v == nil {
 		return nil
 	}
-	p := unsafe.Pointer(m.GObject)
-	return C.toGMenu(p)
+	ptr := unsafe.Pointer(v.Object.Native())
+	return C.toGMenu(ptr)
 }
 
 func marshalMenu(p uintptr) (interface{}, error) {
@@ -89,12 +113,12 @@ func wrapMenu(obj *Object) *Menu {
 }
 
 // MenuNew is a wrapper around g_menu_new().
-func MenuNew() *Menu {
+func MenuNew() (*Menu, error) {
 	c := C.g_menu_new()
 	if c == nil {
-		return nil
+		return nil, errNilPtr
 	}
-	return wrapMenu(wrapObject(unsafe.Pointer(c)))
+	return wrapMenu(wrapObject(unsafe.Pointer(c))), nil
 }
 
 // Freeze is a wrapper around g_menu_freeze().
@@ -103,36 +127,51 @@ func (v *Menu) Freeze() {
 }
 
 // Insert is a wrapper around g_menu_insert().
-func (v *Menu) Insert(position int, label, detailed_action string) {
-	cstr1 := (*C.gchar)(C.CString(label))
-	defer C.free(unsafe.Pointer(cstr1))
+func (v *Menu) Insert(position int, label, detailedAction string) {
+	var cstr1, cstr2 *C.char
+	if label != "" {
+		cstr1 = C.CString(label)
+		defer C.free(unsafe.Pointer(cstr1))
+	}
 
-	cstr2 := (*C.gchar)(C.CString(detailed_action))
-	defer C.free(unsafe.Pointer(cstr2))
+	if detailedAction != "" {
+		cstr2 = C.CString(detailedAction)
+		defer C.free(unsafe.Pointer(cstr2))
+	}
 
-	C.g_menu_insert(v.native(), C.gint(position), cstr1, cstr2)
+	C.g_menu_insert(v.native(), C.gint(position), (*C.gchar)(cstr1), (*C.gchar)(cstr2))
 }
 
 // Prepend is a wrapper around g_menu_prepend().
-func (v *Menu) Prepend(label, detailed_action string) {
-	cstr1 := (*C.gchar)(C.CString(label))
-	defer C.free(unsafe.Pointer(cstr1))
+func (v *Menu) Prepend(label, detailedAction string) {
+	var cstr1, cstr2 *C.char
+	if label != "" {
+		cstr1 = C.CString(label)
+		defer C.free(unsafe.Pointer(cstr1))
+	}
 
-	cstr2 := (*C.gchar)(C.CString(detailed_action))
-	defer C.free(unsafe.Pointer(cstr2))
+	if detailedAction != "" {
+		cstr2 = C.CString(detailedAction)
+		defer C.free(unsafe.Pointer(cstr2))
+	}
 
-	C.g_menu_prepend(v.native(), cstr1, cstr2)
+	C.g_menu_prepend(v.native(), (*C.gchar)(cstr1), (*C.gchar)(cstr2))
 }
 
 // Append is a wrapper around g_menu_append().
-func (v *Menu) Append(label, detailed_action string) {
-	cstr1 := (*C.gchar)(C.CString(label))
-	defer C.free(unsafe.Pointer(cstr1))
+func (v *Menu) Append(label, detailedAction string) {
+	var cstr1, cstr2 *C.char
+	if label != "" {
+		cstr1 = C.CString(label)
+		defer C.free(unsafe.Pointer(cstr1))
+	}
 
-	cstr2 := (*C.gchar)(C.CString(detailed_action))
-	defer C.free(unsafe.Pointer(cstr2))
+	if detailedAction != "" {
+		cstr2 = C.CString(detailedAction)
+		defer C.free(unsafe.Pointer(cstr2))
+	}
 
-	C.g_menu_append(v.native(), cstr1, cstr2)
+	C.g_menu_append(v.native(), (*C.gchar)(cstr1), (*C.gchar)(cstr2))
 }
 
 // InsertItem is a wrapper around g_menu_insert_item().
@@ -151,51 +190,75 @@ func (v *Menu) PrependItem(item *MenuItem) {
 }
 
 // InsertSection is a wrapper around g_menu_insert_section().
-func (v *Menu) InsertSection(position int, label string, section *MenuModel) {
-	cstr1 := (*C.gchar)(C.CString(label))
-	defer C.free(unsafe.Pointer(cstr1))
+func (v *Menu) InsertSection(position int, label string, section IMenuModel) {
+	var cstr *C.char
+	if label != "" {
+		cstr = C.CString(label)
+		defer C.free(unsafe.Pointer(cstr))
+	}
 
-	C.g_menu_insert_section(v.native(), C.gint(position), cstr1, section.native())
+	C.g_menu_insert_section(v.native(), C.gint(position), (*C.gchar)(cstr),
+		section.toMenuModel())
 }
 
 // PrependSection is a wrapper around g_menu_prepend_section().
-func (v *Menu) PrependSection(label string, section *MenuModel) {
-	cstr1 := (*C.gchar)(C.CString(label))
-	defer C.free(unsafe.Pointer(cstr1))
+func (v *Menu) PrependSection(label string, section IMenuModel) {
+	var cstr *C.char
+	if label != "" {
+		cstr = C.CString(label)
+		defer C.free(unsafe.Pointer(cstr))
+	}
 
-	C.g_menu_prepend_section(v.native(), cstr1, section.native())
+	C.g_menu_prepend_section(v.native(), (*C.gchar)(cstr),
+		section.toMenuModel())
 }
 
 // AppendSection is a wrapper around g_menu_append_section().
-func (v *Menu) AppendSection(label string, section *MenuModel) {
-	cstr1 := (*C.gchar)(C.CString(label))
-	defer C.free(unsafe.Pointer(cstr1))
+func (v *Menu) AppendSection(label string, section IMenuModel) {
+	var cstr *C.char
+	if label != "" {
+		cstr = C.CString(label)
+		defer C.free(unsafe.Pointer(cstr))
+	}
 
-	C.g_menu_append_section(v.native(), cstr1, section.native())
+	C.g_menu_append_section(v.native(), (*C.gchar)(cstr),
+		section.toMenuModel())
 }
 
 // InsertSubmenu is a wrapper around g_menu_insert_submenu().
-func (v *Menu) InsertSubmenu(position int, label string, submenu *MenuModel) {
-	cstr1 := (*C.gchar)(C.CString(label))
-	defer C.free(unsafe.Pointer(cstr1))
+func (v *Menu) InsertSubmenu(position int, label string, submenu IMenuModel) {
+	var cstr *C.char
+	if label != "" {
+		cstr = C.CString(label)
+		defer C.free(unsafe.Pointer(cstr))
+	}
 
-	C.g_menu_insert_submenu(v.native(), C.gint(position), cstr1, submenu.native())
+	C.g_menu_insert_submenu(v.native(), C.gint(position), (*C.gchar)(cstr),
+		submenu.toMenuModel())
 }
 
 // PrependSubmenu is a wrapper around g_menu_prepend_submenu().
-func (v *Menu) PrependSubmenu(label string, submenu *MenuModel) {
-	cstr1 := (*C.gchar)(C.CString(label))
-	defer C.free(unsafe.Pointer(cstr1))
+func (v *Menu) PrependSubmenu(label string, submenu IMenuModel) {
+	var cstr *C.char
+	if label != "" {
+		cstr = C.CString(label)
+		defer C.free(unsafe.Pointer(cstr))
+	}
 
-	C.g_menu_prepend_submenu(v.native(), cstr1, submenu.native())
+	C.g_menu_prepend_submenu(v.native(), (*C.gchar)(cstr),
+		submenu.toMenuModel())
 }
 
 // AppendSubmenu is a wrapper around g_menu_append_submenu().
-func (v *Menu) AppendSubmenu(label string, submenu *MenuModel) {
-	cstr1 := (*C.gchar)(C.CString(label))
-	defer C.free(unsafe.Pointer(cstr1))
+func (v *Menu) AppendSubmenu(label string, submenu IMenuModel) {
+	var cstr *C.char
+	if label != "" {
+		cstr = C.CString(label)
+		defer C.free(unsafe.Pointer((*C.gchar)(cstr)))
+	}
 
-	C.g_menu_append_submenu(v.native(), cstr1, submenu.native())
+	C.g_menu_append_submenu(v.native(), (*C.gchar)(cstr),
+		submenu.toMenuModel())
 }
 
 // Remove is a wrapper around g_menu_remove().
@@ -214,12 +277,12 @@ type MenuItem struct {
 }
 
 // native() returns a pointer to the underlying GMenuItem.
-func (m *MenuItem) native() *C.GMenuItem {
-	if m == nil || m.GObject == nil {
+func (v *MenuItem) native() *C.GMenuItem {
+	if v == nil {
 		return nil
 	}
-	p := unsafe.Pointer(m.GObject)
-	return C.toGMenuItem(p)
+	ptr := unsafe.Pointer(v.Object.Native())
+	return C.toGMenuItem(ptr)
 }
 
 func marshalMenuItem(p uintptr) (interface{}, error) {
@@ -232,97 +295,127 @@ func wrapMenuItem(obj *Object) *MenuItem {
 }
 
 // MenuItemNew is a wrapper around g_menu_item_new().
-func MenuItemNew(label, detailed_action string) *MenuItem {
-	cstr1 := (*C.gchar)(C.CString(label))
-	defer C.free(unsafe.Pointer(cstr1))
-
-	cstr2 := (*C.gchar)(C.CString(detailed_action))
-	defer C.free(unsafe.Pointer(cstr2))
-
-	c := C.g_menu_item_new(cstr1, cstr2)
-	if c == nil {
-		return nil
+func MenuItemNew(label, detailedAction string) (*MenuItem, error) {
+	var cstr1, cstr2 *C.char
+	if label != "" {
+		cstr1 = C.CString(label)
+		defer C.free(unsafe.Pointer(cstr1))
 	}
-	return wrapMenuItem(wrapObject(unsafe.Pointer(c)))
+
+	if detailedAction != "" {
+		cstr2 = C.CString(detailedAction)
+		defer C.free(unsafe.Pointer(cstr2))
+	}
+
+	c := C.g_menu_item_new((*C.gchar)(cstr1), (*C.gchar)(cstr2))
+	if c == nil {
+		return nil, errNilPtr
+	}
+	return wrapMenuItem(wrapObject(unsafe.Pointer(c))), nil
 }
 
-// MenuItemNewSection is a wrapper around g_menu_item_new_section().
-func MenuItemNewSection(label string, section *MenuModel) *MenuItem {
-	cstr1 := (*C.gchar)(C.CString(label))
-	defer C.free(unsafe.Pointer(cstr1))
-
-	c := C.g_menu_item_new_section(cstr1, section.native())
-	if c == nil {
-		return nil
+/*
+// MenuItemSectionNew is a wrapper around g_menu_item_new_section().
+func MenuItemSectionNew(label string, section IMenuModel) (*MenuItem, error) {
+	var cstr1 *C.gchar
+	if label != "" {
+		cstr1 := C.CString(label)
+		defer C.free(unsafe.Pointer(cstr1))
 	}
-	return wrapMenuItem(wrapObject(unsafe.Pointer(c)))
+
+	c := C.g_menu_item_new_section((*C.gchar)(cstr1), section.toMenuModel().native())
+	if c == nil {
+		return nil, errNilPtr
+	}
+	return wrapMenuItem(wrapObject(unsafe.Pointer(c))), nil
 }
 
-// MenuItemNewSubmenu is a wrapper around g_menu_item_new_submenu().
-func MenuItemNewSubmenu(label string, submenu *MenuModel) *MenuItem {
-	cstr1 := (*C.gchar)(C.CString(label))
+// MenuItemSubmenuNew is a wrapper around g_menu_item_new_submenu().
+func MenuItemSubmenuNew(label string, submenu IMenuModel) (*MenuItem, error) {
+	cstr1 := C.CString(label)
 	defer C.free(unsafe.Pointer(cstr1))
 
-	c := C.g_menu_item_new_submenu(cstr1, submenu.native())
+	c := C.g_menu_item_new_submenu((*C.gchar)(cstr1), submenu.toMenuModel().native())
 	if c == nil {
-		return nil
+		return nil, errNilPtr
 	}
-	return wrapMenuItem(wrapObject(unsafe.Pointer(c)))
+	return wrapMenuItem(wrapObject(unsafe.Pointer(c))), nil
 }
 
-// MenuItemNewFromModel is a wrapper around g_menu_item_new_from_model().
-func MenuItemNewFromModel(model *MenuModel, index int) *MenuItem {
+// MenuItemFromModelNew is a wrapper around g_menu_item_new_from_model().
+func MenuItemFromModelNew(model IMenuModel, index int) (*MenuItem, error) {
 	c := C.g_menu_item_new_from_model(model.native(), C.gint(index))
 	if c == nil {
-		return nil
+		return nil, errNilPtr
 	}
-	return wrapMenuItem(wrapObject(unsafe.Pointer(c)))
+	return wrapMenuItem(wrapObject(unsafe.Pointer(c))), nil
 }
-
+*/
 //SetLabel is a wrapper around g_menu_item_set_label().
 func (v *MenuItem) SetLabel(label string) {
-	cstr1 := (*C.gchar)(C.CString(label))
-	defer C.free(unsafe.Pointer(cstr1))
+	cstr := C.CString(label)
+	defer C.free(unsafe.Pointer(cstr))
 
-	C.g_menu_item_set_label(v.native(), cstr1)
+	C.g_menu_item_set_label(v.native(), (*C.gchar)(cstr))
 }
 
 //SetDetailedAction is a wrapper around g_menu_item_set_detailed_action().
 func (v *MenuItem) SetDetailedAction(act string) {
-	cstr1 := (*C.gchar)(C.CString(act))
-	defer C.free(unsafe.Pointer(cstr1))
+	cstr := C.CString(act)
+	defer C.free(unsafe.Pointer(cstr))
 
-	C.g_menu_item_set_detailed_action(v.native(), cstr1)
+	C.g_menu_item_set_detailed_action(v.native(), (*C.gchar)(cstr))
 }
 
 //SetSection is a wrapper around g_menu_item_set_section().
-func (v *MenuItem) SetSection(section *MenuModel) {
-	C.g_menu_item_set_section(v.native(), section.native())
+func (v *MenuItem) SetSection(section IMenuModel) {
+	C.g_menu_item_set_section(v.native(),
+		section.toMenuModel())
 }
 
 //SetSubmenu is a wrapper around g_menu_item_set_submenu().
-func (v *MenuItem) SetSubmenu(submenu *MenuModel) {
-	C.g_menu_item_set_submenu(v.native(), submenu.native())
+func (v *MenuItem) SetSubmenu(submenu IMenuModel) {
+	C.g_menu_item_set_submenu(v.native(),
+		submenu.toMenuModel())
 }
 
 //GetLink is a wrapper around g_menu_item_get_link().
-func (v *MenuItem) GetLink(link string) *MenuModel {
-	cstr1 := (*C.gchar)(C.CString(link))
-	defer C.free(unsafe.Pointer(cstr1))
+func (v *MenuItem) GetLink(link string) (*MenuModel, error) {
+	cstr := C.CString(link)
+	defer C.free(unsafe.Pointer(cstr))
 
-	c := C.g_menu_item_get_link(v.native(), cstr1)
+	c := C.g_menu_item_get_link(v.native(), (*C.gchar)(cstr))
 	if c == nil {
-		return nil
+		return nil, errNilPtr
 	}
-	return wrapMenuModel(wrapObject(unsafe.Pointer(c)))
+	return wrapMenuModel(wrapObject(unsafe.Pointer(c))), nil
 }
 
 //SetLink is a wrapper around g_menu_item_Set_link().
-func (v *MenuItem) SetLink(link string, model *MenuModel) {
-	cstr1 := (*C.gchar)(C.CString(link))
-	defer C.free(unsafe.Pointer(cstr1))
+func (v *MenuItem) SetLink(link string, model IMenuModel) {
+	cstr := C.CString(link)
+	defer C.free(unsafe.Pointer(cstr))
 
-	C.g_menu_item_set_link(v.native(), cstr1, model.native())
+	C.g_menu_item_set_link(v.native(), (*C.gchar)(cstr),
+		model.toMenuModel())
+}
+
+// void
+// g_menu_item_set_attribute_value (GMenuItev *menu_item,
+//                                  const gchar *attribute,
+//                                  GVariant *value);
+func (v *MenuItem) SetAttributeValue(attribute string, value *Variant) {
+	cstr := C.CString(attribute)
+	defer C.free(unsafe.Pointer(cstr))
+
+	C.g_menu_item_set_attribute_value(v.native(), (*C.gchar)(cstr), value.native())
+}
+
+// void
+// g_menu_item_set_icon (GMenuItev *menu_item,
+//                       GIcon *icon);
+func (v *MenuItem) SetIcon(icon *Icon) {
+	C.g_menu_item_set_icon(v.native(), icon.native())
 }
 
 // void 	g_menu_item_set_action_and_target_value ()
@@ -331,3 +424,13 @@ func (v *MenuItem) SetLink(link string, model *MenuModel) {
 // gboolean 	g_menu_item_get_attribute ()
 // void 	g_menu_item_set_attribute_value ()
 // void 	g_menu_item_set_attribute ()
+
+func init() {
+	tm := []TypeMarshaler{
+		// Enums
+		{Type(C.g_menu_model_get_type()), marshalMenuModel},
+		{Type(C.g_menu_get_type()), marshalMenu},
+		{Type(C.g_menu_item_get_type()), marshalMenuItem},
+	}
+	RegisterGValueMarshalers(tm)
+}

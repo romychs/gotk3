@@ -25,10 +25,10 @@ package pango
 // #include "pango.go.h"
 import "C"
 import (
-	//	"github.com/gotk3/gotk3/glib"
+	//	"github.com/d2r2/gotk3/glib"
 	"unsafe"
 
-	"github.com/gotk3/gotk3/cairo"
+	"github.com/d2r2/gotk3/cairo"
 )
 
 func init() {
@@ -85,7 +85,7 @@ func CairoShowGlyphString(cr *cairo.Context, font *Font, glyphs *GlyphString) {
 func CairoShowGlyphItem(cr *cairo.Context, text string, glyph_item *GlyphItem) {
 	cstr := C.CString(text)
 	defer C.free(unsafe.Pointer(cstr))
-	C.pango_cairo_show_glyph_item(cairo_context(cr), (*C.char)(cstr), glyph_item.native())
+	C.pango_cairo_show_glyph_item(cairo_context(cr), cstr, glyph_item.native())
 }
 
 //void pango_cairo_show_layout_line  (cairo_t          *cr,

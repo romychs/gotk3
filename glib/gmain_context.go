@@ -7,14 +7,16 @@ package glib
 // #include "glib.go.h"
 import "C"
 
-type MainContext C.GMainContext
+type MainContext struct {
+	gmainContext *C.GMainContext
+}
 
 // native returns a pointer to the underlying GMainContext.
 func (v *MainContext) native() *C.GMainContext {
 	if v == nil {
 		return nil
 	}
-	return (*C.GMainContext)(v)
+	return v.gmainContext
 }
 
 // MainContextDefault is a wrapper around g_main_context_default().
@@ -23,7 +25,7 @@ func MainContextDefault() *MainContext {
 	if c == nil {
 		return nil
 	}
-	return (*MainContext)(c)
+	return &MainContext{c}
 }
 
 // MainDepth is a wrapper around g_main_depth().

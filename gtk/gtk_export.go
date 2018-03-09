@@ -9,7 +9,7 @@ import (
 	"strings"
 	"unsafe"
 
-	"github.com/gotk3/gotk3/glib"
+	"github.com/d2r2/gotk3/glib"
 )
 
 //export substring_match_equal_func
@@ -19,8 +19,10 @@ func substring_match_equal_func(model *C.GtkTreeModel,
 	iter *C.GtkTreeIter,
 	data C.gpointer) C.gboolean {
 
-	goModel := &TreeModel{glib.Take(unsafe.Pointer(model))}
-	goIter := &TreeIter{(C.GtkTreeIter)(*iter)}
+	obj := glib.Take(unsafe.Pointer(model))
+
+	goModel := wrapTreeModel(*glib.InterfaceFromObjectNew(obj))
+	goIter := wrapTreeIter(iter)
 
 	value, err := goModel.GetValue(goIter, int(column))
 	if err != nil {
@@ -32,7 +34,7 @@ func substring_match_equal_func(model *C.GtkTreeModel,
 		return gbool(true)
 	}
 
-	subStr := C.GoString((*C.char)(key))
+	subStr := goString(key)
 	res := strings.Contains(str, subStr)
 	return gbool(!res)
 }
@@ -54,8 +56,8 @@ func goBuilderConnect(builder *C.GtkBuilder,
 		panic("no signal mapping defined for this GtkBuilder")
 	}
 
-	h := C.GoString((*C.char)(handler_name))
-	s := C.GoString((*C.char)(signal_name))
+	h := goString(handler_name)
+	s := goString(signal_name)
 
 	handler, ok := signals[h]
 	if !ok {
@@ -67,7 +69,7 @@ func goBuilderConnect(builder *C.GtkBuilder,
 	}
 
 	//TODO: figure out a better way to get a glib.Object from a *C.GObject
-	gobj := glib.Object{glib.ToGObject(unsafe.Pointer(object))}
+	gobj := glib.ToObject(unsafe.Pointer(object))
 	gobj.Connect(s, handler)
 }
 
@@ -100,6 +102,6 @@ func goPrintSettings(key *C.gchar,
 	//delete(printSettingsCallbackRegistry.m, id)
 	printSettingsCallbackRegistry.Unlock()
 
-	r.fn(C.GoString((*C.char)(key)), C.GoString((*C.char)(value)), r.userData)
+	r.fn(goString(key), goString(value), r.userData)
 
 }

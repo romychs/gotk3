@@ -25,7 +25,7 @@ import "C"
 import (
 	"unsafe"
 
-	"github.com/gotk3/gotk3/glib"
+	"github.com/d2r2/gotk3/glib"
 )
 
 func init() {
@@ -52,7 +52,10 @@ func (v *Context) Native() uintptr {
 }
 
 func (v *Context) native() *C.PangoContext {
-	return (*C.PangoContext)(unsafe.Pointer(v.pangoContext))
+	if v == nil {
+		return nil
+	}
+	return v.pangoContext
 }
 
 /*

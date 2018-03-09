@@ -40,5 +40,8 @@ func (v *GlyphItem) Native() uintptr {
 }
 
 func (v *GlyphItem) native() *C.PangoGlyphItem {
-	return (*C.PangoGlyphItem)(unsafe.Pointer(v.pangoGlyphItem))
+	if v == nil {
+		return nil
+	}
+	return v.pangoGlyphItem
 }

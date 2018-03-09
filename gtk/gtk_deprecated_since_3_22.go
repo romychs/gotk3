@@ -13,16 +13,8 @@ import (
 
 // PopupAtMouse() is a wrapper for gtk_menu_popup(), without the option for a custom positioning function.
 func (v *Menu) PopupAtMouseCursor(parentMenuShell IMenu, parentMenuItem IMenuItem, button int, activateTime uint32) {
-	wshell := nullableWidget(parentMenuShell)
-	witem := nullableWidget(parentMenuItem)
-
-	C.gtk_menu_popup(v.native(),
-		wshell,
-		witem,
-		nil,
-		nil,
-		C.guint(button),
-		C.guint32(activateTime))
+	C.gtk_menu_popup(v.native(), parentMenuShell.toWidget(), parentMenuItem.toWidget(),
+		nil, nil, C.guint(button), C.guint32(activateTime))
 }
 
 func (v *SizeGroup) GetIgnoreHidden() bool {

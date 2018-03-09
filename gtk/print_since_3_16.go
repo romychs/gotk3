@@ -23,13 +23,13 @@ func PaperSizeNewFromIPP(name string, width, height float64) (*PaperSize, error)
 		return nil, nilPtrErr
 	}
 
-	t := &PaperSize{c}
-	runtime.SetFinalizer(t, (*PaperSize).free)
-	return t, nil
+	ps := wrapPaperSize(c)
+	runtime.SetFinalizer(ps, (*PaperSize).free)
+	return ps, nil
 }
 
 // IsIPP() is a wrapper around gtk_paper_size_is_ipp().
-func (ps *PaperSize) IsIPP() bool {
-	c := C.gtk_paper_size_is_ipp(ps.native())
+func (v *PaperSize) IsIPP() bool {
+	c := C.gtk_paper_size_is_ipp(v.native())
 	return gobool(c)
 }

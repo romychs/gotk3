@@ -1,0 +1,117 @@
+package glib
+
+// #cgo pkg-config: glib-2.0 gobject-2.0
+// #include <gio/gio.h>
+// #include <glib.h>
+// #include <glib-object.h>
+// #include "glib.go.h"
+// #include "list_store.go.h"
+import "C"
+
+/*
+
+// IAction is an interface type implemented by all structs
+// embedding a Action.
+type IListModel interface {
+	toListModel() *C.GListModel
+}
+
+// ListModel is a representation of GListModel GInterface.
+type ListModel struct {
+	Interface
+}
+
+// Static cast to verify at compile time that type on the right side
+// implement corresponding interface on the left.
+var _ IListModel = &ListModel{}
+
+// native() returns a pointer to the underlying GAction.
+func (v *ListModel) native() *C.GListModel {
+	return C.toGListModel(unsafe.Pointer(v.Native()))
+}
+
+func (v *ListModel) toListModel() *C.GListModel {
+	return v.native()
+}
+
+func marshalListModel(p uintptr) (interface{}, error) {
+	c := C.g_value_get_object((*C.GValue)(unsafe.Pointer(p)))
+	obj := Take(unsafe.Pointer(c))
+	ls := wrapListModel(InterfaceFromObjectNew(obj))
+	return ls, nil
+}
+
+func wrapListModel(intf Interface) *ListModel {
+	return &ListModel{intf}
+}
+
+func (v *ListModel) GetItemType() Type {
+	c := C.g_list_model_get_item_type(v.native())
+	return Type(c)
+}
+
+func (v *ListModel) GetNItems() int {
+	c := C.g_list_model_get_n_items(v.native())
+	return int(c)
+}
+
+func (v *ListModel) GetItem(pos int) uintptr {
+	c := C.g_list_model_get_item(v.native(), C.guint(pos))
+	ptr := uintptr(unsafe.Pointer(c))
+	return ptr
+}
+
+func (v *ListModel) GetObject(pos int) (*Object, error) {
+	c := C.g_list_model_get_object(v.native(), C.guint(pos))
+	if c == nil {
+		return nil, errNilPtr
+	}
+	obj := Take(unsafe.Pointer(c))
+	return obj, nil
+}
+
+// ListStore is a representation of GListStore.
+type ListStore struct {
+	// This must be a pointer so copies of the ref-sinked object
+	// do not outlive the original object, causing an unref
+	// finalizer to prematurely run.
+	*Object
+	// Interfaces
+	ListModel
+}
+
+// Static cast to verify at compile time that type on the right side
+// implement corresponding interface on the left.
+var _ IListModel = &ListStore{}
+
+// native() returns a pointer to the underlying GListStore.
+func (v *ListStore) native() *C.GListStore {
+	if v == nil {
+		return nil
+	}
+	ptr := unsafe.Pointer(v.Object.Native())
+	return C.toGListStore(ptr)
+}
+
+func marshalListStore(p uintptr) (interface{}, error) {
+	c := C.g_value_get_object((*C.GValue)(unsafe.Pointer(p)))
+	obj := Take(unsafe.Pointer(c))
+	return wrapListStore(obj), nil
+}
+
+func wrapListStore(obj *Object) *ListStore {
+	lm := wrapListModel(InterfaceFromObjectNew(obj))
+	return &ListStore{obj, *lm}
+}
+
+func ListStoreNew(itemType Type) (*ListStore, error) {
+	c := C.g_list_store_new(C.GType(itemType))
+	if c == nil {
+		return nil, errNilPtr
+	}
+
+	obj := Take(unsafe.Pointer(c))
+	return wrapListStore(obj), nil
+}
+
+*/

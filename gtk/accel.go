@@ -9,8 +9,8 @@ import "C"
 import (
 	"unsafe"
 
-	"github.com/gotk3/gotk3/gdk"
-	"github.com/gotk3/gotk3/glib"
+	"github.com/d2r2/gotk3/gdk"
+	"github.com/d2r2/gotk3/glib"
 )
 
 // AccelFlags is a representation of GTK's GtkAccelFlags
@@ -23,15 +23,15 @@ const (
 )
 
 func marshalAccelFlags(p uintptr) (interface{}, error) {
-	c := C.g_value_get_enum((*C.GValue)(unsafe.Pointer(p)))
+	c := C.g_value_get_enum(C.toGValue(unsafe.Pointer(p)))
 	return AccelFlags(c), nil
 }
 
 // AcceleratorName is a wrapper around gtk_accelerator_name().
 func AcceleratorName(key uint, mods gdk.ModifierType) string {
 	c := C.gtk_accelerator_name(C.guint(key), C.GdkModifierType(mods))
-	defer C.free(unsafe.Pointer(c))
-	return C.GoString((*C.char)(c))
+	defer C.g_free(C.gpointer(c))
+	return goString(c)
 }
 
 // AcceleratorValid is a wrapper around gtk_accelerator_valid().
@@ -59,8 +59,8 @@ func AcceleratorParse(acc string) (key uint, mods gdk.ModifierType) {
 // AcceleratorGetLabel is a wrapper around gtk_accelerator_get_label().
 func AcceleratorGetLabel(key uint, mods gdk.ModifierType) string {
 	c := C.gtk_accelerator_get_label(C.guint(key), C.GdkModifierType(mods))
-	defer C.free(unsafe.Pointer(c))
-	return C.GoString((*C.char)(c))
+	defer C.g_free(C.gpointer(c))
+	return goString(c)
 }
 
 // AcceleratorSetDefaultModMask is a wrapper around gtk_accelerator_set_default_mod_mask().
@@ -79,15 +79,15 @@ type AccelGroup struct {
 
 // native returns a pointer to the underlying GtkAccelGroup.
 func (v *AccelGroup) native() *C.GtkAccelGroup {
-	if v == nil || v.GObject == nil {
+	if v == nil {
 		return nil
 	}
-	p := unsafe.Pointer(v.GObject)
-	return C.toGtkAccelGroup(p)
+	ptr := unsafe.Pointer(v.Object.Native())
+	return C.toGtkAccelGroup(ptr)
 }
 
 func marshalAccelGroup(p uintptr) (interface{}, error) {
-	c := C.g_value_get_object((*C.GValue)(unsafe.Pointer(p)))
+	c := C.g_value_get_object(C.toGValue(unsafe.Pointer(p)))
 	obj := glib.Take(unsafe.Pointer(c))
 	return wrapAccelGroup(obj), nil
 }
@@ -109,7 +109,7 @@ func AccelGroupNew() (*AccelGroup, error) {
 // Connect is a wrapper around gtk_accel_group_connect().
 func (v *AccelGroup) Connect(key uint, mods gdk.ModifierType, flags AccelFlags, f interface{}) {
 	closure, _ := glib.ClosureNew(f)
-	cl := (*C.struct__GClosure)(unsafe.Pointer(closure))
+	cl := (*C.GClosure)(unsafe.Pointer(closure))
 	C.gtk_accel_group_connect(
 		v.native(),
 		C.guint(key),
@@ -121,21 +121,18 @@ func (v *AccelGroup) Connect(key uint, mods gdk.ModifierType, flags AccelFlags, 
 // ConnectByPath is a wrapper around gtk_accel_group_connect_by_path().
 func (v *AccelGroup) ConnectByPath(path string, f interface{}) {
 	closure, _ := glib.ClosureNew(f)
-	cl := (*C.struct__GClosure)(unsafe.Pointer(closure))
+	cl := (*C.GClosure)(unsafe.Pointer(closure))
 
 	cstr := C.CString(path)
 	defer C.free(unsafe.Pointer(cstr))
 
-	C.gtk_accel_group_connect_by_path(
-		v.native(),
-		(*C.gchar)(cstr),
-		cl)
+	C.gtk_accel_group_connect_by_path(v.native(), (*C.gchar)(cstr), cl)
 }
 
 // Disconnect is a wrapper around gtk_accel_group_disconnect().
 func (v *AccelGroup) Disconnect(f interface{}) {
 	closure, _ := glib.ClosureNew(f)
-	cl := (*C.struct__GClosure)(unsafe.Pointer(closure))
+	cl := (*C.GClosure)(unsafe.Pointer(closure))
 	C.gtk_accel_group_disconnect(v.native(), cl)
 }
 
@@ -162,12 +159,13 @@ func (v *AccelGroup) IsLocked() bool {
 // AccelGroupFromClosure is a wrapper around gtk_accel_group_from_accel_closure().
 func AccelGroupFromClosure(f interface{}) *AccelGroup {
 	closure, _ := glib.ClosureNew(f)
-	cl := (*C.struct__GClosure)(unsafe.Pointer(closure))
+	cl := (*C.GClosure)(unsafe.Pointer(closure))
 	c := C.gtk_accel_group_from_accel_closure(cl)
 	if c == nil {
 		return nil
 	}
-	return wrapAccelGroup(glib.Take(unsafe.Pointer(c)))
+	obj := glib.Take(unsafe.Pointer(c))
+	return wrapAccelGroup(obj)
 }
 
 // GetModifierMask is a wrapper around gtk_accel_group_get_modifier_mask().
@@ -177,17 +175,21 @@ func (v *AccelGroup) GetModifierMask() gdk.ModifierType {
 
 // AccelGroupsActivate is a wrapper around gtk_accel_groups_activate().
 func AccelGroupsActivate(obj *glib.Object, key uint, mods gdk.ModifierType) bool {
-	return gobool(C.gtk_accel_groups_activate((*C.GObject)(unsafe.Pointer(obj.Native())), C.guint(key), C.GdkModifierType(mods)))
+	o := C.toGObject(unsafe.Pointer(obj.Native()))
+	return gobool(C.gtk_accel_groups_activate(o, C.guint(key), C.GdkModifierType(mods)))
 }
 
 // Activate is a wrapper around gtk_accel_group_activate().
 func (v *AccelGroup) Activate(quark glib.Quark, acceleratable *glib.Object, key uint, mods gdk.ModifierType) bool {
-	return gobool(C.gtk_accel_group_activate(v.native(), C.GQuark(quark), (*C.GObject)(unsafe.Pointer(acceleratable.Native())), C.guint(key), C.GdkModifierType(mods)))
+	o := C.toGObject(unsafe.Pointer(acceleratable.Native()))
+	return gobool(C.gtk_accel_group_activate(v.native(), C.GQuark(quark),
+		o, C.guint(key), C.GdkModifierType(mods)))
 }
 
 // AccelGroupsFromObject is a wrapper around gtk_accel_groups_from_object().
 func AccelGroupsFromObject(obj *glib.Object) *glib.SList {
-	res := C.gtk_accel_groups_from_object((*C.GObject)(unsafe.Pointer(obj.Native())))
+	o := C.toGObject(unsafe.Pointer(obj.Native()))
+	res := C.gtk_accel_groups_from_object(o)
 	if res == nil {
 		return nil
 	}
@@ -205,15 +207,15 @@ type AccelMap struct {
 
 // native returns a pointer to the underlying GtkAccelMap.
 func (v *AccelMap) native() *C.GtkAccelMap {
-	if v == nil || v.GObject == nil {
+	if v == nil {
 		return nil
 	}
-	p := unsafe.Pointer(v.GObject)
-	return C.toGtkAccelMap(p)
+	ptr := unsafe.Pointer(v.Object.Native())
+	return C.toGtkAccelMap(ptr)
 }
 
 func marshalAccelMap(p uintptr) (interface{}, error) {
-	c := C.g_value_get_object((*C.GValue)(unsafe.Pointer(p)))
+	c := C.g_value_get_object(C.toGValue(unsafe.Pointer(p)))
 	obj := glib.Take(unsafe.Pointer(c))
 	return wrapAccelMap(obj), nil
 }
@@ -231,31 +233,18 @@ func AccelMapAddEntry(path string, key uint, mods gdk.ModifierType) {
 }
 
 type AccelKey struct {
-	key   uint
-	mods  gdk.ModifierType
-	flags uint16
+	accelKey *C.GtkAccelKey
 }
 
-func (v *AccelKey) native() *C.struct__GtkAccelKey {
+func (v *AccelKey) native() *C.GtkAccelKey {
 	if v == nil {
 		return nil
 	}
-
-	var val C.struct__GtkAccelKey
-	val.accel_key = C.guint(v.key)
-	val.accel_mods = C.GdkModifierType(v.mods)
-	val.accel_flags = v.flags
-	return &val
+	return v.accelKey
 }
 
-func wrapAccelKey(obj *C.struct__GtkAccelKey) *AccelKey {
-	var v AccelKey
-
-	v.key = uint(obj.accel_key)
-	v.mods = gdk.ModifierType(obj.accel_mods)
-	v.flags = uint16(obj.accel_flags)
-
-	return &v
+func wrapAccelKey(obj *C.GtkAccelKey) *AccelKey {
+	return &AccelKey{obj}
 }
 
 // AccelMapLookupEntry is a wrapper around gtk_accel_map_lookup_entry().
@@ -263,10 +252,13 @@ func AccelMapLookupEntry(path string) *AccelKey {
 	cstr := C.CString(path)
 	defer C.free(unsafe.Pointer(cstr))
 
-	var v *C.struct__GtkAccelKey
+	var v C.GtkAccelKey
 
-	C.gtk_accel_map_lookup_entry((*C.gchar)(cstr), v)
-	return wrapAccelKey(v)
+	c := C.gtk_accel_map_lookup_entry((*C.gchar)(cstr), &v)
+	if gobool(c) {
+		return wrapAccelKey(&v)
+	}
+	return nil
 }
 
 // AccelMapChangeEntry is a wrapper around gtk_accel_map_change_entry().
@@ -317,7 +309,8 @@ func AccelMapGet() *AccelMap {
 	if c == nil {
 		return nil
 	}
-	return wrapAccelMap(glib.Take(unsafe.Pointer(c)))
+	obj := glib.Take(unsafe.Pointer(c))
+	return wrapAccelMap(obj)
 }
 
 // AccelMapLockPath is a wrapper around gtk_accel_map_lock_path().
@@ -334,92 +327,6 @@ func AccelMapUnlockPath(path string) {
 	defer C.free(unsafe.Pointer(cstr))
 
 	C.gtk_accel_map_unlock_path((*C.gchar)(cstr))
-}
-
-// SetAccelGroup is a wrapper around gtk_menu_set_accel_group().
-func (v *Menu) SetAccelGroup(accelGroup *AccelGroup) {
-	C.gtk_menu_set_accel_group(v.native(), accelGroup.native())
-}
-
-// GetAccelGroup is a wrapper around gtk_menu_get_accel_group().
-func (v *Menu) GetAccelGroup() *AccelGroup {
-	c := C.gtk_menu_get_accel_group(v.native())
-	if c == nil {
-		return nil
-	}
-	return wrapAccelGroup(glib.Take(unsafe.Pointer(c)))
-}
-
-// SetAccelPath is a wrapper around gtk_menu_set_accel_path().
-func (v *Menu) SetAccelPath(path string) {
-	cstr := C.CString(path)
-	defer C.free(unsafe.Pointer(cstr))
-
-	C.gtk_menu_set_accel_path(v.native(), (*C.gchar)(cstr))
-}
-
-// GetAccelPath is a wrapper around gtk_menu_get_accel_path().
-func (v *Menu) GetAccelPath() string {
-	c := C.gtk_menu_get_accel_path(v.native())
-	return C.GoString((*C.char)(c))
-}
-
-// SetAccelPath is a wrapper around gtk_menu_item_set_accel_path().
-func (v *MenuItem) SetAccelPath(path string) {
-	cstr := C.CString(path)
-	defer C.free(unsafe.Pointer(cstr))
-
-	C.gtk_menu_item_set_accel_path(v.native(), (*C.gchar)(cstr))
-}
-
-// GetAccelPath is a wrapper around gtk_menu_item_get_accel_path().
-func (v *MenuItem) GetAccelPath() string {
-	c := C.gtk_menu_item_get_accel_path(v.native())
-	return C.GoString((*C.char)(c))
-}
-
-// AddAccelerator is a wrapper around gtk_widget_add_accelerator().
-func (v *Widget) AddAccelerator(signal string, group *AccelGroup, key uint, mods gdk.ModifierType, flags AccelFlags) {
-	csignal := (*C.gchar)(C.CString(signal))
-	defer C.free(unsafe.Pointer(csignal))
-
-	C.gtk_widget_add_accelerator(v.native(),
-		csignal,
-		group.native(),
-		C.guint(key),
-		C.GdkModifierType(mods),
-		C.GtkAccelFlags(flags))
-}
-
-// RemoveAccelerator is a wrapper around gtk_widget_remove_accelerator().
-func (v *Widget) RemoveAccelerator(group *AccelGroup, key uint, mods gdk.ModifierType) bool {
-	return gobool(C.gtk_widget_remove_accelerator(v.native(),
-		group.native(),
-		C.guint(key),
-		C.GdkModifierType(mods)))
-}
-
-// SetAccelPath is a wrapper around gtk_widget_set_accel_path().
-func (v *Widget) SetAccelPath(path string, group *AccelGroup) {
-	cstr := (*C.gchar)(C.CString(path))
-	defer C.free(unsafe.Pointer(cstr))
-
-	C.gtk_widget_set_accel_path(v.native(), cstr, group.native())
-}
-
-// CanActivateAccel is a wrapper around gtk_widget_can_activate_accel().
-func (v *Widget) CanActivateAccel(signalId uint) bool {
-	return gobool(C.gtk_widget_can_activate_accel(v.native(), C.guint(signalId)))
-}
-
-// AddAccelGroup() is a wrapper around gtk_window_add_accel_group().
-func (v *Window) AddAccelGroup(accelGroup *AccelGroup) {
-	C.gtk_window_add_accel_group(v.native(), accelGroup.native())
-}
-
-// RemoveAccelGroup() is a wrapper around gtk_window_add_accel_group().
-func (v *Window) RemoveAccelGroup(accelGroup *AccelGroup) {
-	C.gtk_window_remove_accel_group(v.native(), accelGroup.native())
 }
 
 // These three functions are for system level access - thus not as high priority to implement

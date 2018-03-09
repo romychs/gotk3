@@ -30,39 +30,16 @@ import "C"
 import (
 	"unsafe"
 
-	"github.com/gotk3/gotk3/glib"
+	"github.com/d2r2/gotk3/glib"
 )
-
-// ButtonNewFromStock is a wrapper around gtk_button_new_from_stock().
-func ButtonNewFromStock(stock Stock) (*Button, error) {
-	cstr := C.CString(string(stock))
-	defer C.free(unsafe.Pointer(cstr))
-	c := C.gtk_button_new_from_stock((*C.gchar)(cstr))
-	if c == nil {
-		return nil, nilPtrErr
-	}
-	return wrapButton(glib.Take(unsafe.Pointer(c))), nil
-}
-
-// SetUseStock is a wrapper around gtk_button_set_use_stock().
-func (v *Button) SetUseStock(useStock bool) {
-	C.gtk_button_set_use_stock(v.native(), gbool(useStock))
-}
-
-// GetUseStock is a wrapper around gtk_button_get_use_stock().
-func (v *Button) GetUseStock() bool {
-	c := C.gtk_button_get_use_stock(v.native())
-	return gobool(c)
-}
 
 // GetIconStock is a wrapper around gtk_entry_get_icon_stock().
 func (v *Entry) GetIconStock(iconPos EntryIconPosition) (string, error) {
-	c := C.gtk_entry_get_icon_stock(v.native(),
-		C.GtkEntryIconPosition(iconPos))
+	c := C.gtk_entry_get_icon_stock(v.native(), C.GtkEntryIconPosition(iconPos))
 	if c == nil {
 		return "", nilPtrErr
 	}
-	return C.GoString((*C.char)(c)), nil
+	return goString(c), nil
 }
 
 // SetIconFromStock is a wrapper around gtk_entry_set_icon_from_stock().
@@ -81,7 +58,8 @@ func ImageNewFromStock(stock Stock, size IconSize) (*Image, error) {
 	if c == nil {
 		return nil, nilPtrErr
 	}
-	return wrapImage(glib.Take(unsafe.Pointer(c))), nil
+	obj := glib.Take(unsafe.Pointer(c))
+	return wrapImage(obj), nil
 }
 
 // SetFromStock is a wrapper around gtk_image_set_from_stock().

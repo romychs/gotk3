@@ -26,14 +26,11 @@ type Notification struct {
 
 // native() returns a pointer to the underlying GNotification.
 func (v *Notification) native() *C.GNotification {
-	if v == nil || v.GObject == nil {
+	if v == nil {
 		return nil
 	}
-	return C.toGNotification(unsafe.Pointer(v.GObject))
-}
-
-func (v *Notification) Native() uintptr {
-	return uintptr(unsafe.Pointer(v.native()))
+	ptr := unsafe.Pointer(v.Object.Native())
+	return C.toGNotification(ptr)
 }
 
 func marshalNotification(p uintptr) (interface{}, error) {
@@ -46,31 +43,31 @@ func wrapNotification(obj *Object) *Notification {
 }
 
 // NotificationNew is a wrapper around g_notification_new().
-func NotificationNew(title string) *Notification {
-	cstr1 := (*C.gchar)(C.CString(title))
-	defer C.free(unsafe.Pointer(cstr1))
+func NotificationNew(title string) (*Notification, error) {
+	cstr := C.CString(title)
+	defer C.free(unsafe.Pointer(cstr))
 
-	c := C.g_notification_new(cstr1)
+	c := C.g_notification_new((*C.gchar)(cstr))
 	if c == nil {
-		return nil
+		return nil, errNilPtr
 	}
-	return wrapNotification(wrapObject(unsafe.Pointer(c)))
+	return wrapNotification(wrapObject(unsafe.Pointer(c))), nil
 }
 
 // SetTitle is a wrapper around g_notification_set_title().
 func (v *Notification) SetTitle(title string) {
-	cstr1 := (*C.gchar)(C.CString(title))
-	defer C.free(unsafe.Pointer(cstr1))
+	cstr := C.CString(title)
+	defer C.free(unsafe.Pointer(cstr))
 
-	C.g_notification_set_title(v.native(), cstr1)
+	C.g_notification_set_title(v.native(), (*C.gchar)(cstr))
 }
 
 // SetBody is a wrapper around g_notification_set_body().
 func (v *Notification) SetBody(body string) {
-	cstr1 := (*C.gchar)(C.CString(body))
-	defer C.free(unsafe.Pointer(cstr1))
+	cstr := C.CString(body)
+	defer C.free(unsafe.Pointer(cstr))
 
-	C.g_notification_set_body(v.native(), cstr1)
+	C.g_notification_set_body(v.native(), (*C.gchar)(cstr))
 }
 
 // Only available from 2.42
@@ -81,21 +78,21 @@ func (v *Notification) SetBody(body string) {
 
 // SetDefaultAction is a wrapper around g_notification_set_default_action().
 func (v *Notification) SetDefaultAction(detailedAction string) {
-	cstr1 := (*C.gchar)(C.CString(detailedAction))
-	defer C.free(unsafe.Pointer(cstr1))
+	cstr := C.CString(detailedAction)
+	defer C.free(unsafe.Pointer(cstr))
 
-	C.g_notification_set_default_action(v.native(), cstr1)
+	C.g_notification_set_default_action(v.native(), (*C.gchar)(cstr))
 }
 
 // AddButton is a wrapper around g_notification_add_button().
 func (v *Notification) AddButton(label, detailedAction string) {
-	cstr1 := (*C.gchar)(C.CString(label))
+	cstr1 := C.CString(label)
 	defer C.free(unsafe.Pointer(cstr1))
 
-	cstr2 := (*C.gchar)(C.CString(detailedAction))
+	cstr2 := C.CString(detailedAction)
 	defer C.free(unsafe.Pointer(cstr2))
 
-	C.g_notification_add_button(v.native(), cstr1, cstr2)
+	C.g_notification_add_button(v.native(), (*C.gchar)(cstr1), (*C.gchar)(cstr2))
 }
 
 // void 	g_notification_set_default_action_and_target () // requires varargs

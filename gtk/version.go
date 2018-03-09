@@ -11,7 +11,7 @@ func CheckVersion(major, minor, micro uint) error {
 		return nil
 	}
 
-	return errors.New(C.GoString((*C.char)(errChar)))
+	return errors.New(goString(errChar))
 }
 
 func GetMajorVersion() uint {

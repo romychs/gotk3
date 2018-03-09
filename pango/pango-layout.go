@@ -25,7 +25,7 @@ import "C"
 import (
 	"unsafe"
 
-	"github.com/gotk3/gotk3/glib"
+	"github.com/d2r2/gotk3/glib"
 )
 
 func init() {
@@ -52,7 +52,10 @@ func (v *Layout) Native() uintptr {
 }
 
 func (v *Layout) native() *C.PangoLayout {
-	return (*C.PangoLayout)(unsafe.Pointer(v.pangoLayout))
+	if v == nil {
+		return nil
+	}
+	return v.pangoLayout
 }
 
 func WrapLayout(p uintptr) *Layout {
@@ -63,7 +66,7 @@ func WrapLayout(p uintptr) *Layout {
 
 // LayoutLine is a representation of PangoLayoutLine.
 type LayoutLine struct {
-	pangoLayoutLine *C.PangoLayout
+	pangoLayoutLine *C.PangoLayoutLine
 }
 
 // Native returns a pointer to the underlying PangoLayoutLine.
@@ -72,7 +75,10 @@ func (v *LayoutLine) Native() uintptr {
 }
 
 func (v *LayoutLine) native() *C.PangoLayoutLine {
-	return (*C.PangoLayoutLine)(unsafe.Pointer(v.pangoLayoutLine))
+	if v == nil {
+		return nil
+	}
+	return v.pangoLayoutLine
 }
 
 /*
@@ -184,13 +190,13 @@ func (v *Layout) GetAttributes() *AttrList {
 func (v *Layout) SetText(text string, length int) {
 	cstr := C.CString(text)
 	defer C.free(unsafe.Pointer(cstr))
-	C.pango_layout_set_text(v.native(), (*C.char)(cstr), (C.int)(length))
+	C.pango_layout_set_text(v.native(), cstr, (C.int)(length))
 }
 
 //const char    *pango_layout_get_text       (PangoLayout    *layout);
 func (v *Layout) GetText() string {
 	c := C.pango_layout_get_text(v.native())
-	return C.GoString((*C.char)(c))
+	return goString(c)
 }
 
 //gint           pango_layout_get_character_count (PangoLayout *layout);
@@ -205,7 +211,7 @@ func (v *Layout) GetCharacterCount() int {
 func (v *Layout) SetMarkup(text string, length int) {
 	cstr := C.CString(text)
 	defer C.free(unsafe.Pointer(cstr))
-	C.pango_layout_set_markup(v.native(), (*C.char)(cstr), (C.int)(length))
+	C.pango_layout_set_markup(v.native(), cstr, (C.int)(length))
 }
 
 //void           pango_layout_set_markup_with_accel (PangoLayout    *layout,

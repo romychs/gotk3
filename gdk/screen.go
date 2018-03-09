@@ -7,7 +7,7 @@ import "C"
 import (
 	"unsafe"
 
-	"github.com/gotk3/gotk3/glib"
+	"github.com/d2r2/gotk3/glib"
 )
 
 /*
@@ -21,21 +21,16 @@ type Screen struct {
 
 // native returns a pointer to the underlying GdkScreen.
 func (v *Screen) native() *C.GdkScreen {
-	if v == nil || v.GObject == nil {
+	if v == nil {
 		return nil
 	}
-	p := unsafe.Pointer(v.GObject)
-	return C.toGdkScreen(p)
-}
-
-// Native returns a pointer to the underlying GdkScreen.
-func (v *Screen) Native() uintptr {
-	return uintptr(unsafe.Pointer(v.native()))
+	ptr := unsafe.Pointer(v.Object.Native())
+	return C.toGdkScreen(ptr)
 }
 
 func marshalScreen(p uintptr) (interface{}, error) {
 	c := C.g_value_get_object((*C.GValue)(unsafe.Pointer(p)))
-	obj := &glib.Object{glib.ToGObject(unsafe.Pointer(c))}
+	obj := glib.ToObject(unsafe.Pointer(c))
 	return &Screen{obj}, nil
 }
 
@@ -43,7 +38,7 @@ func toScreen(s *C.GdkScreen) (*Screen, error) {
 	if s == nil {
 		return nil, nilPtrErr
 	}
-	obj := &glib.Object{glib.ToGObject(unsafe.Pointer(s))}
+	obj := glib.ToObject(unsafe.Pointer(s))
 	return &Screen{obj}, nil
 }
 
@@ -91,7 +86,7 @@ func toString(c *C.gchar) (string, error) {
 	if c == nil {
 		return "", nilPtrErr
 	}
-	return C.GoString((*C.char)(c)), nil
+	return goString(c), nil
 }
 
 // GetResolution is a wrapper around gdk_screen_get_resolution().

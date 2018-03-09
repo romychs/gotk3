@@ -7,12 +7,1397 @@ package gtk
 // #include "gtk.go.h"
 import "C"
 import (
+	"errors"
 	"runtime"
 	"unsafe"
 
-	"github.com/gotk3/gotk3/gdk"
-	"github.com/gotk3/gotk3/glib"
+	"github.com/d2r2/gotk3/gdk"
+	"github.com/d2r2/gotk3/glib"
 )
+
+/*
+ * GtkTreeIter
+ */
+
+// TreeIter is a representation of GTK's GtkTreeIter.
+type TreeIter struct {
+	gtkTreeIter *C.GtkTreeIter
+}
+
+// native returns a pointer to the underlying GtkTreeIter.
+func (v *TreeIter) native() *C.GtkTreeIter {
+	if v == nil {
+		return nil
+	}
+	return v.gtkTreeIter
+}
+
+func marshalTreeIter(p uintptr) (interface{}, error) {
+	c := C.g_value_get_boxed(C.toGValue(unsafe.Pointer(p)))
+	c2 := (*C.GtkTreeIter)(unsafe.Pointer(c))
+	return wrapTreeIter(c2), nil
+}
+
+func wrapTreeIter(obj *C.GtkTreeIter) *TreeIter {
+	return &TreeIter{obj}
+}
+
+func (v *TreeIter) free() {
+	C.gtk_tree_iter_free(v.native())
+}
+
+// Copy() is a wrapper around gtk_tree_iter_copy().
+func (v *TreeIter) Copy() (*TreeIter, error) {
+	c := C.gtk_tree_iter_copy(v.native())
+	if c == nil {
+		return nil, nilPtrErr
+	}
+	ti := wrapTreeIter(c)
+	runtime.SetFinalizer(ti, (*TreeIter).free)
+	return ti, nil
+}
+
+/*
+ * GtkTreeModel
+ */
+
+// TreeModel is a representation of GTK's GtkTreeModel GInterface.
+type TreeModel struct {
+	glib.Interface
+}
+
+// ITreeModel is an interface type implemented by all structs
+// embedding a TreeModel.  It is meant to be used as an argument type
+// for wrapper functions that wrap around a C GTK function taking a
+// GtkTreeModel.
+type ITreeModel interface {
+	toTreeModel() *C.GtkTreeModel
+}
+
+// native returns a pointer to the underlying GObject as a GtkTreeModel.
+func (v *TreeModel) native() *C.GtkTreeModel {
+	return C.toGtkTreeModel(unsafe.Pointer(v.Native()))
+}
+
+func (v *TreeModel) toTreeModel() *C.GtkTreeModel {
+	if v == nil {
+		return nil
+	}
+	return v.native()
+}
+
+func marshalTreeModel(p uintptr) (interface{}, error) {
+	c := C.g_value_get_object(C.toGValue(unsafe.Pointer(p)))
+	obj := glib.Take(unsafe.Pointer(c))
+	return wrapTreeModel(*glib.InterfaceFromObjectNew(obj)), nil
+}
+
+func wrapTreeModel(intf glib.Interface) *TreeModel {
+	return &TreeModel{intf}
+}
+
+// GetFlags() is a wrapper around gtk_tree_model_get_flags().
+func (v *TreeModel) GetFlags() TreeModelFlags {
+	c := C.gtk_tree_model_get_flags(v.native())
+	return TreeModelFlags(c)
+}
+
+// GetNColumns() is a wrapper around gtk_tree_model_get_n_columns().
+func (v *TreeModel) GetNColumns() int {
+	c := C.gtk_tree_model_get_n_columns(v.native())
+	return int(c)
+}
+
+// GetColumnType() is a wrapper around gtk_tree_model_get_column_type().
+func (v *TreeModel) GetColumnType(index int) glib.Type {
+	c := C.gtk_tree_model_get_column_type(v.native(), C.gint(index))
+	return glib.Type(c)
+}
+
+// GetIter() is a wrapper around gtk_tree_model_get_iter().
+func (v *TreeModel) GetIter(path *TreePath) (*TreeIter, error) {
+	var iter C.GtkTreeIter
+	c := C.gtk_tree_model_get_iter(v.native(), &iter, path.native())
+	if !gobool(c) {
+		return nil, errors.New("Unable to set iterator")
+	}
+	t := wrapTreeIter(&iter)
+	return t, nil
+}
+
+// GetIterFromString() is a wrapper around
+// gtk_tree_model_get_iter_from_string().
+func (v *TreeModel) GetIterFromString(path string) (*TreeIter, error) {
+	var iter C.GtkTreeIter
+	cstr := C.CString(path)
+	defer C.free(unsafe.Pointer(cstr))
+	c := C.gtk_tree_model_get_iter_from_string(v.native(), &iter,
+		(*C.gchar)(cstr))
+	if !gobool(c) {
+		return nil, errors.New("Unable to set iterator")
+	}
+	t := wrapTreeIter(&iter)
+	return t, nil
+}
+
+// GetIterFirst() is a wrapper around gtk_tree_model_get_iter_first().
+func (v *TreeModel) GetIterFirst() (*TreeIter, bool) {
+	var iter C.GtkTreeIter
+	c := C.gtk_tree_model_get_iter_first(v.native(), &iter)
+	if !gobool(c) {
+		return nil, false
+	}
+	t := wrapTreeIter(&iter)
+	return t, true
+}
+
+// GetPath() is a wrapper around gtk_tree_model_get_path().
+func (v *TreeModel) GetPath(iter *TreeIter) (*TreePath, error) {
+	c := C.gtk_tree_model_get_path(v.native(), iter.native())
+	if c == nil {
+		return nil, nilPtrErr
+	}
+	p := wrapTreePath(c)
+	runtime.SetFinalizer(p, (*TreePath).free)
+	return p, nil
+}
+
+// GetValue() is a wrapper around gtk_tree_model_get_value().
+func (v *TreeModel) GetValue(iter *TreeIter, column int) (*glib.Value, error) {
+	val, err := glib.ValueAlloc()
+	if err != nil {
+		return nil, err
+	}
+	C.gtk_tree_model_get_value(
+		v.native(),
+		iter.native(),
+		C.gint(column),
+		C.toGValue(unsafe.Pointer(val.Native())))
+	return val, nil
+}
+
+// IterNext() is a wrapper around gtk_tree_model_iter_next().
+func (v *TreeModel) IterNext(iter *TreeIter) bool {
+	c := C.gtk_tree_model_iter_next(v.native(), iter.native())
+	return gobool(c)
+}
+
+// IterPrevious is a wrapper around gtk_tree_model_iter_previous().
+func (v *TreeModel) IterPrevious(iter *TreeIter) bool {
+	c := C.gtk_tree_model_iter_previous(v.native(), iter.native())
+	return gobool(c)
+}
+
+// IterNthChild is a wrapper around gtk_tree_model_iter_nth_child().
+func (v *TreeModel) IterNthChild(iter *TreeIter, parent *TreeIter, n int) bool {
+	c := C.gtk_tree_model_iter_nth_child(v.native(), iter.native(), parent.native(), C.gint(n))
+	return gobool(c)
+}
+
+// IterChildren is a wrapper around gtk_tree_model_iter_children().
+func (v *TreeModel) IterChildren(iter, child *TreeIter) bool {
+	var cIter, cChild *C.GtkTreeIter
+	if iter != nil {
+		cIter = iter.native()
+	}
+	cChild = child.native()
+	c := C.gtk_tree_model_iter_children(v.native(), cChild, cIter)
+	return gobool(c)
+}
+
+// IterNChildren is a wrapper around gtk_tree_model_iter_n_children().
+func (v *TreeModel) IterNChildren(iter *TreeIter) int {
+	var cIter *C.GtkTreeIter
+	if iter != nil {
+		cIter = iter.native()
+	}
+	c := C.gtk_tree_model_iter_n_children(v.native(), cIter)
+	return int(c)
+}
+
+// FilterNew is a wrapper around gtk_tree_model_filter_new().
+func (v *TreeModel) FilterNew(root *TreePath) (*TreeModelFilter, error) {
+	c := C.gtk_tree_model_filter_new(v.native(), root.native())
+	if c == nil {
+		return nil, nilPtrErr
+	}
+	obj := glib.Take(unsafe.Pointer(c))
+	return wrapTreeModelFilter(obj), nil
+}
+
+/*
+ * GtkTreeModelFilter
+ */
+
+// TreeModelFilter is a representation of GTK's GtkTreeModelFilter.
+type TreeModelFilter struct {
+	*glib.Object
+	// Interfaces
+	TreeModel
+}
+
+func (v *TreeModelFilter) native() *C.GtkTreeModelFilter {
+	if v == nil {
+		return nil
+	}
+	ptr := unsafe.Pointer(v.Object.Native())
+	return C.toGtkTreeModelFilter(ptr)
+}
+
+func (v *TreeModelFilter) toTreeModelFilter() *C.GtkTreeModelFilter {
+	if v == nil {
+		return nil
+	}
+	return v.native()
+}
+
+func marshalTreeModelFilter(p uintptr) (interface{}, error) {
+	c := C.g_value_get_object(C.toGValue(unsafe.Pointer(p)))
+	obj := glib.Take(unsafe.Pointer(c))
+	return wrapTreeModelFilter(obj), nil
+}
+
+func wrapTreeModelFilter(obj *glib.Object) *TreeModelFilter {
+	tm := wrapTreeModel(*glib.InterfaceFromObjectNew(obj))
+	return &TreeModelFilter{obj, *tm}
+}
+
+// SetVisibleColumn is a wrapper around gtk_tree_model_filter_set_visible_column().
+func (v *TreeModelFilter) SetVisibleColumn(column int) {
+	C.gtk_tree_model_filter_set_visible_column(v.native(), C.gint(column))
+}
+
+/*
+ * GtkTreePath
+ */
+
+// TreePath is a representation of GTK's GtkTreePath.
+type TreePath struct {
+	gtkTreePath *C.GtkTreePath
+}
+
+// Return a TreePath from the GList
+func TreePathFromList(list *glib.List) *TreePath {
+	if list == nil {
+		return nil
+	}
+	ptr := (list.Data()).(unsafe.Pointer)
+	p := wrapTreePath((*C.GtkTreePath)(ptr))
+
+	return p
+}
+
+// native returns a pointer to the underlying GtkTreePath.
+func (v *TreePath) native() *C.GtkTreePath {
+	if v == nil {
+		return nil
+	}
+	return v.gtkTreePath
+}
+
+func marshalTreePath(p uintptr) (interface{}, error) {
+	c := C.g_value_get_boxed(C.toGValue(unsafe.Pointer(p)))
+	c2 := (*C.GtkTreePath)(unsafe.Pointer(c))
+	return wrapTreePath(c2), nil
+}
+
+func wrapTreePath(obj *C.GtkTreePath) *TreePath {
+	return &TreePath{obj}
+}
+
+func (v *TreePath) free() {
+	C.gtk_tree_path_free(v.native())
+}
+
+// GetIndices is a wrapper around gtk_tree_path_get_indices_with_depth
+func (v *TreePath) GetIndices() []int {
+	var depth C.gint
+	var goindices []int
+	var ginthelp C.gint
+	indices := uintptr(unsafe.Pointer(C.gtk_tree_path_get_indices_with_depth(v.native(), &depth)))
+	size := unsafe.Sizeof(ginthelp)
+	for i := 0; i < int(depth); i++ {
+		goind := int(*((*C.gint)(unsafe.Pointer(indices))))
+		goindices = append(goindices, goind)
+		indices += size
+	}
+	return goindices
+}
+
+// String is a wrapper around gtk_tree_path_to_string().
+func (v *TreePath) String() string {
+	c := C.gtk_tree_path_to_string(v.native())
+	return goString(c)
+}
+
+// TreePathNewFromString is a wrapper around gtk_tree_path_new_from_string().
+func TreePathNewFromString(path string) (*TreePath, error) {
+	cstr := C.CString(path)
+	defer C.free(unsafe.Pointer(cstr))
+	c := C.gtk_tree_path_new_from_string((*C.gchar)(cstr))
+	if c == nil {
+		return nil, nilPtrErr
+	}
+	t := wrapTreePath(c)
+	runtime.SetFinalizer(t, func(t *TreePath) {
+		t.free()
+	})
+	return t, nil
+}
+
+/*
+ * GtkTreeSelection
+ */
+
+// TreeSelection is a representation of GTK's GtkTreeSelection.
+type TreeSelection struct {
+	*glib.Object
+}
+
+// native returns a pointer to the underlying GtkTreeSelection.
+func (v *TreeSelection) native() *C.GtkTreeSelection {
+	if v == nil {
+		return nil
+	}
+	ptr := unsafe.Pointer(v.Object.Native())
+	return C.toGtkTreeSelection(ptr)
+}
+
+func marshalTreeSelection(p uintptr) (interface{}, error) {
+	c := C.g_value_get_object(C.toGValue(unsafe.Pointer(p)))
+	obj := glib.Take(unsafe.Pointer(c))
+	return wrapTreeSelection(obj), nil
+}
+
+func wrapTreeSelection(obj *glib.Object) *TreeSelection {
+	return &TreeSelection{obj}
+}
+
+// GetSelected() is a wrapper around gtk_tree_selection_get_selected().
+func (v *TreeSelection) GetSelected() (model ITreeModel, iter *TreeIter, ok bool) {
+	var cmodel *C.GtkTreeModel
+	var citer C.GtkTreeIter
+	c := C.gtk_tree_selection_get_selected(v.native(),
+		&cmodel, &citer)
+	obj := glib.Take(unsafe.Pointer(cmodel))
+	model = wrapTreeModel(*glib.InterfaceFromObjectNew(obj))
+	iter = wrapTreeIter(&citer)
+	ok = gobool(c)
+	return
+}
+
+// SelectPath is a wrapper around gtk_tree_selection_select_path().
+func (v *TreeSelection) SelectPath(path *TreePath) {
+	C.gtk_tree_selection_select_path(v.native(), path.native())
+}
+
+// UnselectPath is a wrapper around gtk_tree_selection_unselect_path().
+func (v *TreeSelection) UnselectPath(path *TreePath) {
+	C.gtk_tree_selection_unselect_path(v.native(), path.native())
+}
+
+// GetSelectedRows is a wrapper around gtk_tree_selection_get_selected_rows().
+// All the elements of returned list are wrapped into (*gtk.TreePath) values.
+//
+// Please note that a runtime finalizer is only set on the head of the linked
+// list, and must be kept live while accessing any item in the list, or the
+// Go garbage collector will free the whole list.
+func (v *TreeSelection) GetSelectedRows(model ITreeModel) *glib.List {
+	var pcmodel **C.GtkTreeModel
+	if model != nil {
+		cmodel := model.toTreeModel()
+		pcmodel = &cmodel
+	}
+
+	clist := C.gtk_tree_selection_get_selected_rows(v.native(), pcmodel)
+	if clist == nil {
+		return nil
+	}
+
+	glist := glib.WrapList(uintptr(unsafe.Pointer(clist)))
+	glist.DataWrapper(func(ptr unsafe.Pointer) interface{} {
+		p := wrapTreePath((*C.GtkTreePath)(ptr))
+		return p
+	})
+	runtime.SetFinalizer(glist, func(glist *glib.List) {
+		glist.FreeFull(func(item interface{}) {
+			path := item.(*TreePath)
+			C.gtk_tree_path_free(path.native())
+		})
+	})
+
+	return glist
+}
+
+// CountSelectedRows() is a wrapper around gtk_tree_selection_count_selected_rows().
+func (v *TreeSelection) CountSelectedRows() int {
+	return int(C.gtk_tree_selection_count_selected_rows(v.native()))
+}
+
+// SelectIter is a wrapper around gtk_tree_selection_select_iter().
+func (v *TreeSelection) SelectIter(iter *TreeIter) {
+	C.gtk_tree_selection_select_iter(v.native(), iter.native())
+}
+
+// SetMode() is a wrapper around gtk_tree_selection_set_mode().
+func (v *TreeSelection) SetMode(m SelectionMode) {
+	C.gtk_tree_selection_set_mode(v.native(), C.GtkSelectionMode(m))
+}
+
+// GetMode() is a wrapper around gtk_tree_selection_get_mode().
+func (v *TreeSelection) GetMode() SelectionMode {
+	return SelectionMode(C.gtk_tree_selection_get_mode(v.native()))
+}
+
+/*
+ * GtkTreeStore
+ */
+
+// TreeStore is a representation of GTK's GtkTreeStore.
+type TreeStore struct {
+	*glib.Object
+	// Interfaces
+	TreeModel
+}
+
+// native returns a pointer to the underlying GtkTreeStore.
+func (v *TreeStore) native() *C.GtkTreeStore {
+	if v == nil {
+		return nil
+	}
+	ptr := unsafe.Pointer(v.Object.Native())
+	return C.toGtkTreeStore(ptr)
+}
+
+func marshalTreeStore(p uintptr) (interface{}, error) {
+	c := C.g_value_get_object(C.toGValue(unsafe.Pointer(p)))
+	obj := glib.Take(unsafe.Pointer(c))
+	return wrapTreeStore(obj), nil
+}
+
+func wrapTreeStore(obj *glib.Object) *TreeStore {
+	tm := wrapTreeModel(*glib.InterfaceFromObjectNew(obj))
+	return &TreeStore{obj, *tm}
+}
+
+func (v *TreeStore) toTreeModel() *C.GtkTreeModel {
+	if v == nil {
+		return nil
+	}
+	return C.toGtkTreeModel(unsafe.Pointer(v.Native()))
+}
+
+// TreeStoreNew is a wrapper around gtk_tree_store_newv().
+func TreeStoreNew(types ...glib.Type) (*TreeStore, error) {
+	gtypes := C.alloc_types(C.int(len(types)))
+	for n, val := range types {
+		C.set_type(gtypes, C.int(n), C.GType(val))
+	}
+	defer C.g_free(C.gpointer(gtypes))
+	c := C.gtk_tree_store_newv(C.gint(len(types)), gtypes)
+	if c == nil {
+		return nil, nilPtrErr
+	}
+
+	obj := glib.Take(unsafe.Pointer(c))
+	return wrapTreeStore(obj), nil
+}
+
+// Append is a wrapper around gtk_tree_store_append().
+func (v *TreeStore) Append(parent *TreeIter) *TreeIter {
+	var ti C.GtkTreeIter
+	var cParent *C.GtkTreeIter
+	if parent != nil {
+		cParent = parent.native()
+	}
+	C.gtk_tree_store_append(v.native(), &ti, cParent)
+	iter := wrapTreeIter(&ti)
+	return iter
+}
+
+// Insert is a wrapper around gtk_tree_store_insert
+func (v *TreeStore) Insert(parent *TreeIter, position int) *TreeIter {
+	var ti C.GtkTreeIter
+	var cParent *C.GtkTreeIter
+	if parent != nil {
+		cParent = parent.native()
+	}
+	C.gtk_tree_store_insert(v.native(), &ti, cParent, C.gint(position))
+	iter := wrapTreeIter(&ti)
+	return iter
+}
+
+// SetValue is a wrapper around gtk_tree_store_set_value()
+func (v *TreeStore) SetValue(iter *TreeIter, column int, value interface{}) error {
+	switch value.(type) {
+	case *gdk.Pixbuf:
+		pix := value.(*gdk.Pixbuf)
+		C._gtk_tree_store_set(v.native(), iter.native(), C.gint(column), unsafe.Pointer(pix.Native()))
+
+	default:
+		gv, err := glib.GValue(value)
+		if err != nil {
+			return err
+		}
+		C.gtk_tree_store_set_value(v.native(), iter.native(),
+			C.gint(column),
+			C.toGValue(gv.Native()))
+	}
+	return nil
+}
+
+// Remove is a wrapper around gtk_tree_store_remove().
+func (v *TreeStore) Remove(iter *TreeIter) bool {
+	var ti *C.GtkTreeIter
+	if iter != nil {
+		ti = iter.native()
+	}
+	return 0 != C.gtk_tree_store_remove(v.native(), ti)
+}
+
+// Clear is a wrapper around gtk_tree_store_clear().
+func (v *TreeStore) Clear() {
+	C.gtk_tree_store_clear(v.native())
+}
+
+/*
+ * GtkCellLayout
+ */
+
+// CellLayout is a representation of GTK's GtkCellLayout GInterface.
+type CellLayout struct {
+	glib.Interface
+}
+
+// ICellLayout is an interface type implemented by all structs
+// embedding a CellLayout.  It is meant to be used as an argument type
+// for wrapper functions that wrap around a C GTK function taking a
+// GtkCellLayout.
+type ICellLayout interface {
+	toCellLayout() *C.GtkCellLayout
+}
+
+// native() returns a pointer to the underlying GObject as a GtkCellLayout.
+func (v *CellLayout) native() *C.GtkCellLayout {
+	return C.toGtkCellLayout(unsafe.Pointer(v.Native()))
+}
+
+func marshalCellLayout(p uintptr) (interface{}, error) {
+	c := C.g_value_get_object(C.toGValue(unsafe.Pointer(p)))
+	obj := glib.Take(unsafe.Pointer(c))
+	return wrapCellLayout(*glib.InterfaceFromObjectNew(obj)), nil
+}
+
+func wrapCellLayout(intf glib.Interface) *CellLayout {
+	return &CellLayout{intf}
+}
+
+func (v *CellLayout) toCellLayout() *C.GtkCellLayout {
+	return v.native()
+}
+
+// PackStart() is a wrapper around gtk_cell_layout_pack_start().
+func (v *CellLayout) PackStart(cell ICellRenderer, expand bool) {
+	C.gtk_cell_layout_pack_start(v.native(), cell.toCellRenderer(),
+		gbool(expand))
+}
+
+// AddAttribute() is a wrapper around gtk_cell_layout_add_attribute().
+func (v *CellLayout) AddAttribute(cell ICellRenderer, attribute string, column int) {
+	cstr := C.CString(attribute)
+	defer C.free(unsafe.Pointer(cstr))
+	C.gtk_cell_layout_add_attribute(v.native(), cell.toCellRenderer(),
+		(*C.gchar)(cstr), C.gint(column))
+}
+
+/*
+ * GtkCellRenderer
+ */
+
+// CellRenderer is a representation of GTK's GtkCellRenderer.
+type CellRenderer struct {
+	glib.InitiallyUnowned
+}
+
+// ICellRenderer is an interface type implemented by all structs
+// embedding a CellRenderer.  It is meant to be used as an argument type
+// for wrapper functions that wrap around a C GTK function taking a
+// GtkCellRenderer.
+type ICellRenderer interface {
+	toCellRenderer() *C.GtkCellRenderer
+}
+
+// native returns a pointer to the underlying GtkCellRenderer.
+func (v *CellRenderer) native() *C.GtkCellRenderer {
+	if v == nil {
+		return nil
+	}
+	ptr := unsafe.Pointer(v.Object.Native())
+	return C.toGtkCellRenderer(ptr)
+}
+
+func (v *CellRenderer) toCellRenderer() *C.GtkCellRenderer {
+	if v == nil {
+		return nil
+	}
+	return v.native()
+}
+
+func marshalCellRenderer(p uintptr) (interface{}, error) {
+	c := C.g_value_get_object(C.toGValue(unsafe.Pointer(p)))
+	obj := glib.Take(unsafe.Pointer(c))
+	return wrapCellRenderer(obj), nil
+}
+
+func wrapCellRenderer(obj *glib.Object) *CellRenderer {
+	return &CellRenderer{glib.InitiallyUnowned{obj}}
+}
+
+// SetAlignment is a wrapper around gtk_cell_renderer_set_alignment().
+func (v *CellRenderer) SetAlignment(xalign, yalign float32) {
+	C.gtk_cell_renderer_set_alignment(v.native(), C.gfloat(xalign), C.gfloat(yalign))
+}
+
+// GetAlignment is a wrapper around gtk_cell_renderer_get_alignment().
+func (v *CellRenderer) GetAlignment() (xalign, yalign float32) {
+	var xal, yal C.gfloat
+	C.gtk_cell_renderer_get_alignment(v.native(), &xal, &yal)
+	return float32(xal), float32(yal)
+}
+
+/*
+ * GtkCellRendererSpinner
+ */
+
+// CellRendererSpinner is a representation of GTK's GtkCellRendererSpinner.
+type CellRendererSpinner struct {
+	CellRenderer
+}
+
+// native returns a pointer to the underlying GtkCellRendererSpinner.
+func (v *CellRendererSpinner) native() *C.GtkCellRendererSpinner {
+	if v == nil {
+		return nil
+	}
+	ptr := unsafe.Pointer(v.Object.Native())
+	return C.toGtkCellRendererSpinner(ptr)
+}
+
+func marshalCellRendererSpinner(p uintptr) (interface{}, error) {
+	c := C.g_value_get_object(C.toGValue(unsafe.Pointer(p)))
+	obj := glib.Take(unsafe.Pointer(c))
+	return wrapCellRendererSpinner(obj), nil
+}
+
+func wrapCellRendererSpinner(obj *glib.Object) *CellRendererSpinner {
+	cellRenderer := wrapCellRenderer(obj)
+	return &CellRendererSpinner{*cellRenderer}
+}
+
+// CellRendererSpinnerNew is a wrapper around gtk_cell_renderer_text_new().
+func CellRendererSpinnerNew() (*CellRendererSpinner, error) {
+	c := C.gtk_cell_renderer_spinner_new()
+	if c == nil {
+		return nil, nilPtrErr
+	}
+	obj := glib.Take(unsafe.Pointer(c))
+	return wrapCellRendererSpinner(obj), nil
+}
+
+/*
+ * GtkCellRendererPixbuf
+ */
+
+// CellRendererPixbuf is a representation of GTK's GtkCellRendererPixbuf.
+type CellRendererPixbuf struct {
+	CellRenderer
+}
+
+// native returns a pointer to the underlying GtkCellRendererPixbuf.
+func (v *CellRendererPixbuf) native() *C.GtkCellRendererPixbuf {
+	if v == nil {
+		return nil
+	}
+	ptr := unsafe.Pointer(v.Object.Native())
+	return C.toGtkCellRendererPixbuf(ptr)
+}
+
+func marshalCellRendererPixbuf(p uintptr) (interface{}, error) {
+	c := C.g_value_get_object(C.toGValue(unsafe.Pointer(p)))
+	obj := glib.Take(unsafe.Pointer(c))
+	return wrapCellRendererPixbuf(obj), nil
+}
+
+func wrapCellRendererPixbuf(obj *glib.Object) *CellRendererPixbuf {
+	cellRenderer := wrapCellRenderer(obj)
+	return &CellRendererPixbuf{*cellRenderer}
+}
+
+// CellRendererPixbufNew is a wrapper around gtk_cell_renderer_pixbuf_new().
+func CellRendererPixbufNew() (*CellRendererPixbuf, error) {
+	c := C.gtk_cell_renderer_pixbuf_new()
+	if c == nil {
+		return nil, nilPtrErr
+	}
+	obj := glib.Take(unsafe.Pointer(c))
+	return wrapCellRendererPixbuf(obj), nil
+}
+
+/*
+ * GtkCellRendererText
+ */
+
+// CellRendererText is a representation of GTK's GtkCellRendererText.
+type CellRendererText struct {
+	CellRenderer
+}
+
+// native returns a pointer to the underlying GtkCellRendererText.
+func (v *CellRendererText) native() *C.GtkCellRendererText {
+	if v == nil {
+		return nil
+	}
+	ptr := unsafe.Pointer(v.Object.Native())
+	return C.toGtkCellRendererText(ptr)
+}
+
+func marshalCellRendererText(p uintptr) (interface{}, error) {
+	c := C.g_value_get_object(C.toGValue(unsafe.Pointer(p)))
+	obj := glib.Take(unsafe.Pointer(c))
+	return wrapCellRendererText(obj), nil
+}
+
+func wrapCellRendererText(obj *glib.Object) *CellRendererText {
+	cellRenderer := wrapCellRenderer(obj)
+	return &CellRendererText{*cellRenderer}
+}
+
+// CellRendererTextNew is a wrapper around gtk_cell_renderer_text_new().
+func CellRendererTextNew() (*CellRendererText, error) {
+	c := C.gtk_cell_renderer_text_new()
+	if c == nil {
+		return nil, nilPtrErr
+	}
+	obj := glib.Take(unsafe.Pointer(c))
+	return wrapCellRendererText(obj), nil
+}
+
+/*
+ * GtkCellRendererToggle
+ */
+
+// CellRendererToggle is a representation of GTK's GtkCellRendererToggle.
+type CellRendererToggle struct {
+	CellRenderer
+}
+
+// native returns a pointer to the underlying GtkCellRendererToggle.
+func (v *CellRendererToggle) native() *C.GtkCellRendererToggle {
+	if v == nil {
+		return nil
+	}
+	ptr := unsafe.Pointer(v.Object.Native())
+	return C.toGtkCellRendererToggle(ptr)
+}
+
+func (v *CellRendererToggle) toCellRenderer() *C.GtkCellRenderer {
+	if v == nil {
+		return nil
+	}
+	return v.CellRenderer.native()
+}
+
+func marshalCellRendererToggle(p uintptr) (interface{}, error) {
+	c := C.g_value_get_object(C.toGValue(unsafe.Pointer(p)))
+	obj := glib.Take(unsafe.Pointer(c))
+	return wrapCellRendererToggle(obj), nil
+}
+
+func wrapCellRendererToggle(obj *glib.Object) *CellRendererToggle {
+	cellRenderer := wrapCellRenderer(obj)
+	return &CellRendererToggle{*cellRenderer}
+}
+
+// CellRendererToggleNew is a wrapper around gtk_cell_renderer_toggle_new().
+func CellRendererToggleNew() (*CellRendererToggle, error) {
+	c := C.gtk_cell_renderer_toggle_new()
+	if c == nil {
+		return nil, nilPtrErr
+	}
+	obj := glib.Take(unsafe.Pointer(c))
+	return wrapCellRendererToggle(obj), nil
+}
+
+// SetRadio is a wrapper around gtk_cell_renderer_toggle_set_radio().
+func (v *CellRendererToggle) SetRadio(set bool) {
+	C.gtk_cell_renderer_toggle_set_radio(v.native(), gbool(set))
+}
+
+// GetRadio is a wrapper around gtk_cell_renderer_toggle_get_radio().
+func (v *CellRendererToggle) GetRadio() bool {
+	c := C.gtk_cell_renderer_toggle_get_radio(v.native())
+	return gobool(c)
+}
+
+// SetActive is a wrapper arround gtk_cell_renderer_toggle_set_active().
+func (v *CellRendererToggle) SetActive(active bool) {
+	C.gtk_cell_renderer_toggle_set_active(v.native(), gbool(active))
+}
+
+// GetActive is a wrapper around gtk_cell_renderer_toggle_get_active().
+func (v *CellRendererToggle) GetActive() bool {
+	c := C.gtk_cell_renderer_toggle_get_active(v.native())
+	return gobool(c)
+}
+
+// SetActivatable is a wrapper around gtk_cell_renderer_toggle_set_activatable().
+func (v *CellRendererToggle) SetActivatable(activatable bool) {
+	C.gtk_cell_renderer_toggle_set_activatable(v.native(),
+		gbool(activatable))
+}
+
+// GetActivatable is a wrapper around gtk_cell_renderer_toggle_get_activatable().
+func (v *CellRendererToggle) GetActivatable() bool {
+	c := C.gtk_cell_renderer_toggle_get_activatable(v.native())
+	return gobool(c)
+}
+
+/*
+ * GtkIconView
+ */
+
+// IconView is a representation of GTK's GtkIconView.
+type IconView struct {
+	Container
+}
+
+// native returns a pointer to the underlying GtkIconView.
+func (v *IconView) native() *C.GtkIconView {
+	if v == nil {
+		return nil
+	}
+	ptr := unsafe.Pointer(v.Object.Native())
+	return C.toGtkIconView(ptr)
+}
+
+func marshalIconView(p uintptr) (interface{}, error) {
+	c := C.g_value_get_object(C.toGValue(unsafe.Pointer(p)))
+	obj := glib.Take(unsafe.Pointer(c))
+	return wrapIconView(obj), nil
+}
+
+func wrapIconView(obj *glib.Object) *IconView {
+	container := wrapContainer(obj)
+	return &IconView{*container}
+}
+
+// IconViewNew is a wrapper around gtk_icon_view_new().
+func IconViewNew() (*IconView, error) {
+	c := C.gtk_icon_view_new()
+	if c == nil {
+		return nil, nilPtrErr
+	}
+
+	obj := glib.Take(unsafe.Pointer(c))
+	return wrapIconView(obj), nil
+}
+
+// IconViewNewWithModel is a wrapper around gtk_icon_view_new_with_model().
+func IconViewNewWithModel(model ITreeModel) (*IconView, error) {
+	c := C.gtk_icon_view_new_with_model(model.toTreeModel())
+	if c == nil {
+		return nil, nilPtrErr
+	}
+	obj := glib.Take(unsafe.Pointer(c))
+	return wrapIconView(obj), nil
+}
+
+// GetModel is a wrapper around gtk_icon_view_get_model().
+func (v *IconView) GetModel() (*TreeModel, error) {
+	c := C.gtk_icon_view_get_model(v.native())
+	if c == nil {
+		return nil, nilPtrErr
+	}
+	obj := glib.Take(unsafe.Pointer(c))
+	return wrapTreeModel(*glib.InterfaceFromObjectNew(obj)), nil
+}
+
+// SetModel is a wrapper around gtk_icon_view_set_model().
+func (v *IconView) SetModel(model ITreeModel) {
+	C.gtk_icon_view_set_model(v.native(), model.toTreeModel())
+}
+
+// SelectPath is a wrapper around gtk_icon_view_select_path().
+func (v *IconView) SelectPath(path *TreePath) {
+	C.gtk_icon_view_select_path(v.native(), path.native())
+}
+
+// ScrollToPath is a wrapper around gtk_icon_view_scroll_to_path().
+func (v *IconView) ScrollToPath(path *TreePath, useAlign bool, rowAlign, colAlign float32) {
+	C.gtk_icon_view_scroll_to_path(v.native(), path.native(), gbool(useAlign),
+		C.gfloat(rowAlign), C.gfloat(colAlign))
+}
+
+/*
+ * GtkListStore
+ */
+
+// ListStore is a representation of GTK's GtkListStore.
+type ListStore struct {
+	*glib.Object
+	// Interfaces
+	TreeModel
+}
+
+// native returns a pointer to the underlying GtkListStore.
+func (v *ListStore) native() *C.GtkListStore {
+	if v == nil {
+		return nil
+	}
+	ptr := unsafe.Pointer(v.Object.Native())
+	return C.toGtkListStore(ptr)
+}
+
+func marshalListStore(p uintptr) (interface{}, error) {
+	c := C.g_value_get_object(C.toGValue(unsafe.Pointer(p)))
+	obj := glib.Take(unsafe.Pointer(c))
+	return wrapListStore(obj), nil
+}
+
+func wrapListStore(obj *glib.Object) *ListStore {
+	tm := wrapTreeModel(*glib.InterfaceFromObjectNew(obj))
+	return &ListStore{obj, *tm}
+}
+
+func (v *ListStore) toTreeModel() *C.GtkTreeModel {
+	if v == nil {
+		return nil
+	}
+	return C.toGtkTreeModel(unsafe.Pointer(v.Native()))
+}
+
+// ListStoreNew is a wrapper around gtk_list_store_newv().
+func ListStoreNew(types ...glib.Type) (*ListStore, error) {
+	gtypes := C.alloc_types(C.int(len(types)))
+	for n, val := range types {
+		C.set_type(gtypes, C.int(n), C.GType(val))
+	}
+	defer C.g_free(C.gpointer(gtypes))
+	c := C.gtk_list_store_newv(C.gint(len(types)), gtypes)
+	if c == nil {
+		return nil, nilPtrErr
+	}
+
+	obj := glib.Take(unsafe.Pointer(c))
+	return wrapListStore(obj), nil
+}
+
+// Remove is a wrapper around gtk_list_store_remove().
+func (v *ListStore) Remove(iter *TreeIter) bool {
+	c := C.gtk_list_store_remove(v.native(), iter.native())
+	return gobool(c)
+}
+
+// TODO(jrick)
+/*
+func (v *ListStore) SetColumnTypes(types ...glib.Type) {
+}
+*/
+
+// Set() is a wrapper around gtk_list_store_set_value() but provides
+// a function similar to gtk_list_store_set() in that multiple columns
+// may be set by one call.  The length of columns and values slices must
+// match, or Set() will return a non-nil error.
+//
+// As an example, a call to:
+//  store.Set(iter, []int{0, 1}, []interface{}{"Foo", "Bar"})
+// is functionally equivalent to calling the native C GTK function:
+//  gtk_list_store_set(store, iter, 0, "Foo", 1, "Bar", -1);
+func (v *ListStore) Set(iter *TreeIter, columns []int, values []interface{}) error {
+	if len(columns) != len(values) {
+		return errors.New("columns and values lengths do not match")
+	}
+	for i, val := range values {
+		v.SetValue(iter, columns[i], val)
+	}
+	return nil
+}
+
+// SetValue is a wrapper around gtk_list_store_set_value().
+func (v *ListStore) SetValue(iter *TreeIter, column int, value interface{}) error {
+	switch value.(type) {
+	case *gdk.Pixbuf:
+		pix := value.(*gdk.Pixbuf)
+		C._gtk_list_store_set(v.native(), iter.native(), C.gint(column), unsafe.Pointer(pix.Native()))
+
+	default:
+		gv, err := glib.GValue(value)
+		if err != nil {
+			return err
+		}
+
+		C.gtk_list_store_set_value(v.native(), iter.native(),
+			C.gint(column),
+			C.toGValue(unsafe.Pointer(gv.Native())))
+	}
+
+	return nil
+}
+
+// func (v *ListStore) Model(model ITreeModel) {
+// 	obj := &glib.Object{glib.ToGObject(unsafe.Pointer(model.toTreeModel()))}
+//	v.TreeModel = *wrapTreeModel(obj)
+//}
+
+// SetSortColumnId() is a wrapper around gtk_tree_sortable_set_sort_column_id().
+func (v *ListStore) SetSortColumnId(column int, order SortType) {
+	sort := C.toGtkTreeSortable(unsafe.Pointer(v.Native()))
+	C.gtk_tree_sortable_set_sort_column_id(sort, C.gint(column), C.GtkSortType(order))
+}
+
+func (v *ListStore) SetCols(iter *TreeIter, cols Cols) error {
+	for key, value := range cols {
+		err := v.SetValue(iter, key, value)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+// Convenient map for Columns and values (See ListStore, TreeStore)
+type Cols map[int]interface{}
+
+// TODO(jrick)
+/*
+func (v *ListStore) InsertWithValues(iter *TreeIter, position int, columns []int, values []glib.Value) {
+		var ccolumns *C.gint
+		var cvalues *C.GValue
+
+		C.gtk_list_store_insert_with_values(v.native(), iter.native(),
+			C.gint(position), columns, values, C.gint(len(values)))
+}
+*/
+
+// InsertBefore() is a wrapper around gtk_list_store_insert_before().
+func (v *ListStore) InsertBefore(sibling *TreeIter) *TreeIter {
+	var ti C.GtkTreeIter
+	C.gtk_list_store_insert_before(v.native(), &ti, sibling.native())
+	iter := wrapTreeIter(&ti)
+	return iter
+}
+
+// InsertAfter() is a wrapper around gtk_list_store_insert_after().
+func (v *ListStore) InsertAfter(sibling *TreeIter) *TreeIter {
+	var ti C.GtkTreeIter
+	C.gtk_list_store_insert_after(v.native(), &ti, sibling.native())
+	iter := wrapTreeIter(&ti)
+	return iter
+}
+
+// Prepend() is a wrapper around gtk_list_store_prepend().
+func (v *ListStore) Prepend() *TreeIter {
+	var ti C.GtkTreeIter
+	C.gtk_list_store_prepend(v.native(), &ti)
+	iter := wrapTreeIter(&ti)
+	return iter
+}
+
+// Append() is a wrapper around gtk_list_store_append().
+func (v *ListStore) Append() *TreeIter {
+	var ti C.GtkTreeIter
+	C.gtk_list_store_append(v.native(), &ti)
+	iter := wrapTreeIter(&ti)
+	return iter
+}
+
+// Clear() is a wrapper around gtk_list_store_clear().
+func (v *ListStore) Clear() {
+	C.gtk_list_store_clear(v.native())
+}
+
+// IterIsValid() is a wrapper around gtk_list_store_iter_is_valid().
+func (v *ListStore) IterIsValid(iter *TreeIter) bool {
+	c := C.gtk_list_store_iter_is_valid(v.native(), iter.native())
+	return gobool(c)
+}
+
+// TODO(jrick)
+/*
+func (v *ListStore) Reorder(newOrder []int) {
+}
+*/
+
+// Swap() is a wrapper around gtk_list_store_swap().
+func (v *ListStore) Swap(a, b *TreeIter) {
+	C.gtk_list_store_swap(v.native(), a.native(), b.native())
+}
+
+// MoveBefore() is a wrapper around gtk_list_store_move_before().
+func (v *ListStore) MoveBefore(iter, position *TreeIter) {
+	C.gtk_list_store_move_before(v.native(), iter.native(),
+		position.native())
+}
+
+// MoveAfter() is a wrapper around gtk_list_store_move_after().
+func (v *ListStore) MoveAfter(iter, position *TreeIter) {
+	C.gtk_list_store_move_after(v.native(), iter.native(),
+		position.native())
+}
+
+/*
+ * GtkTreeViewColumn
+ */
+
+// TreeViewColumns is a representation of GTK's GtkTreeViewColumn.
+type TreeViewColumn struct {
+	glib.InitiallyUnowned
+}
+
+// native returns a pointer to the underlying GtkTreeViewColumn.
+func (v *TreeViewColumn) native() *C.GtkTreeViewColumn {
+	if v == nil {
+		return nil
+	}
+	ptr := unsafe.Pointer(v.Object.Native())
+	return C.toGtkTreeViewColumn(ptr)
+}
+
+func marshalTreeViewColumn(p uintptr) (interface{}, error) {
+	c := C.g_value_get_object((*C.GValue)(unsafe.Pointer(p)))
+	obj := glib.Take(unsafe.Pointer(c))
+	return wrapTreeViewColumn(obj), nil
+}
+
+func wrapTreeViewColumn(obj *glib.Object) *TreeViewColumn {
+	return &TreeViewColumn{glib.InitiallyUnowned{obj}}
+}
+
+// TreeViewColumnNew() is a wrapper around gtk_tree_view_column_new().
+func TreeViewColumnNew() (*TreeViewColumn, error) {
+	c := C.gtk_tree_view_column_new()
+	if c == nil {
+		return nil, nilPtrErr
+	}
+	obj := glib.Take(unsafe.Pointer(c))
+	return wrapTreeViewColumn(obj), nil
+}
+
+// TreeViewColumnNewWithAttribute() is a wrapper around
+// gtk_tree_view_column_new_with_attributes() that only sets one
+// attribute for one column.
+func TreeViewColumnNewWithAttribute(title string, renderer ICellRenderer, attribute string, column int) (*TreeViewColumn, error) {
+	t_cstr := C.CString(title)
+	defer C.free(unsafe.Pointer(t_cstr))
+	a_cstr := C.CString(attribute)
+	defer C.free(unsafe.Pointer(a_cstr))
+	c := C._gtk_tree_view_column_new_with_attributes_one((*C.gchar)(t_cstr),
+		renderer.toCellRenderer(), (*C.gchar)(a_cstr), C.gint(column))
+	if c == nil {
+		return nil, nilPtrErr
+	}
+	obj := glib.Take(unsafe.Pointer(c))
+	return wrapTreeViewColumn(obj), nil
+}
+
+// AddAttribute() is a wrapper around gtk_tree_view_column_add_attribute().
+func (v *TreeViewColumn) AddAttribute(renderer ICellRenderer, attribute string, column int) {
+	cstr := C.CString(attribute)
+	defer C.free(unsafe.Pointer(cstr))
+	C.gtk_tree_view_column_add_attribute(v.native(),
+		renderer.toCellRenderer(), (*C.gchar)(cstr), C.gint(column))
+}
+
+// SetExpand() is a wrapper around gtk_tree_view_column_set_expand().
+func (v *TreeViewColumn) SetExpand(expand bool) {
+	C.gtk_tree_view_column_set_expand(v.native(), gbool(expand))
+}
+
+// GetExpand() is a wrapper around gtk_tree_view_column_get_expand().
+func (v *TreeViewColumn) GetExpand() bool {
+	c := C.gtk_tree_view_column_get_expand(v.native())
+	return gobool(c)
+}
+
+// SetMinWidth() is a wrapper around gtk_tree_view_column_set_min_width().
+func (v *TreeViewColumn) SetMinWidth(minWidth int) {
+	C.gtk_tree_view_column_set_min_width(v.native(), C.gint(minWidth))
+}
+
+// GetMinWidth() is a wrapper around gtk_tree_view_column_get_min_width().
+func (v *TreeViewColumn) GetMinWidth() int {
+	c := C.gtk_tree_view_column_get_min_width(v.native())
+	return int(c)
+}
+
+// PackStart() is a wrapper around gtk_tree_view_column_pack_start().
+func (v *TreeViewColumn) PackStart(cell *CellRenderer, expand bool) {
+	C.gtk_tree_view_column_pack_start(v.native(), cell.native(), gbool(expand))
+}
+
+// PackEnd() is a wrapper around gtk_tree_view_column_pack_end().
+func (v *TreeViewColumn) PackEnd(cell *CellRenderer, expand bool) {
+	C.gtk_tree_view_column_pack_end(v.native(), cell.native(), gbool(expand))
+}
+
+// Clear() is a wrapper around gtk_tree_view_column_clear().
+func (v *TreeViewColumn) Clear() {
+	C.gtk_tree_view_column_clear(v.native())
+}
+
+// ClearAttributes() is a wrapper around gtk_tree_view_column_clear_attributes().
+func (v *TreeViewColumn) ClearAttributes(cell *CellRenderer) {
+	C.gtk_tree_view_column_clear_attributes(v.native(), cell.native())
+}
+
+// SetSpacing() is a wrapper around gtk_tree_view_column_set_spacing().
+func (v *TreeViewColumn) SetSpacing(spacing int) {
+	C.gtk_tree_view_column_set_spacing(v.native(), C.gint(spacing))
+}
+
+// GetSpacing() is a wrapper around gtk_tree_view_column_get_spacing().
+func (v *TreeViewColumn) GetSpacing() int {
+	return int(C.gtk_tree_view_column_get_spacing(v.native()))
+}
+
+// SetVisible() is a wrapper around gtk_tree_view_column_set_visible().
+func (v *TreeViewColumn) SetVisible(visible bool) {
+	C.gtk_tree_view_column_set_visible(v.native(), gbool(visible))
+}
+
+// GetVisible() is a wrapper around gtk_tree_view_column_get_visible().
+func (v *TreeViewColumn) GetVisible() bool {
+	return gobool(C.gtk_tree_view_column_get_visible(v.native()))
+}
+
+// SetResizable() is a wrapper around gtk_tree_view_column_set_resizable().
+func (v *TreeViewColumn) SetResizable(resizable bool) {
+	C.gtk_tree_view_column_set_resizable(v.native(), gbool(resizable))
+}
+
+// GetResizable() is a wrapper around gtk_tree_view_column_get_resizable().
+func (v *TreeViewColumn) GetResizable() bool {
+	return gobool(C.gtk_tree_view_column_get_resizable(v.native()))
+}
+
+// GetWidth() is a wrapper around gtk_tree_view_column_get_width().
+func (v *TreeViewColumn) GetWidth() int {
+	return int(C.gtk_tree_view_column_get_width(v.native()))
+}
+
+// SetFixedWidth() is a wrapper around gtk_tree_view_column_set_fixed_width().
+func (v *TreeViewColumn) SetFixedWidth(w int) {
+	C.gtk_tree_view_column_set_fixed_width(v.native(), C.gint(w))
+}
+
+// GetFixedWidth() is a wrapper around gtk_tree_view_column_get_fixed_width().
+func (v *TreeViewColumn) GetFixedWidth() int {
+	return int(C.gtk_tree_view_column_get_fixed_width(v.native()))
+}
+
+// SetMaxWidth() is a wrapper around gtk_tree_view_column_set_max_width().
+func (v *TreeViewColumn) SetMaxWidth(w int) {
+	C.gtk_tree_view_column_set_max_width(v.native(), C.gint(w))
+}
+
+// GetMaxWidth() is a wrapper around gtk_tree_view_column_get_max_width().
+func (v *TreeViewColumn) GetMaxWidth() int {
+	return int(C.gtk_tree_view_column_get_max_width(v.native()))
+}
+
+// Clicked() is a wrapper around gtk_tree_view_column_clicked().
+func (v *TreeViewColumn) Clicked() {
+	C.gtk_tree_view_column_clicked(v.native())
+}
+
+// SetTitle() is a wrapper around gtk_tree_view_column_set_title().
+func (v *TreeViewColumn) SetTitle(t string) {
+	cstr := C.CString(t)
+	defer C.free(unsafe.Pointer(cstr))
+	C.gtk_tree_view_column_set_title(v.native(), (*C.gchar)(cstr))
+}
+
+// GetTitle() is a wrapper around gtk_tree_view_column_get_title().
+func (v *TreeViewColumn) GetTitle() string {
+	return goString(C.gtk_tree_view_column_get_title(v.native()))
+}
+
+// SetClickable() is a wrapper around gtk_tree_view_column_set_clickable().
+func (v *TreeViewColumn) SetClickable(clickable bool) {
+	C.gtk_tree_view_column_set_clickable(v.native(), gbool(clickable))
+}
+
+// GetClickable() is a wrapper around gtk_tree_view_column_get_clickable().
+func (v *TreeViewColumn) GetClickable() bool {
+	return gobool(C.gtk_tree_view_column_get_clickable(v.native()))
+}
+
+// SetReorderable() is a wrapper around gtk_tree_view_column_set_reorderable().
+func (v *TreeViewColumn) SetReorderable(reorderable bool) {
+	C.gtk_tree_view_column_set_reorderable(v.native(), gbool(reorderable))
+}
+
+// GetReorderable() is a wrapper around gtk_tree_view_column_get_reorderable().
+func (v *TreeViewColumn) GetReorderable() bool {
+	return gobool(C.gtk_tree_view_column_get_reorderable(v.native()))
+}
+
+// SetSortIndicator() is a wrapper around gtk_tree_view_column_set_sort_indicator().
+func (v *TreeViewColumn) SetSortIndicator(reorderable bool) {
+	C.gtk_tree_view_column_set_sort_indicator(v.native(), gbool(reorderable))
+}
+
+// GetSortIndicator() is a wrapper around gtk_tree_view_column_get_sort_indicator().
+func (v *TreeViewColumn) GetSortIndicator() bool {
+	return gobool(C.gtk_tree_view_column_get_sort_indicator(v.native()))
+}
+
+// SetSortColumnID() is a wrapper around gtk_tree_view_column_set_sort_column_id().
+func (v *TreeViewColumn) SetSortColumnID(w int) {
+	C.gtk_tree_view_column_set_sort_column_id(v.native(), C.gint(w))
+}
+
+// GetSortColumnID() is a wrapper around gtk_tree_view_column_get_sort_column_id().
+func (v *TreeViewColumn) GetSortColumnID() int {
+	return int(C.gtk_tree_view_column_get_sort_column_id(v.native()))
+}
+
+// CellIsVisible() is a wrapper around gtk_tree_view_column_cell_is_visible().
+func (v *TreeViewColumn) CellIsVisible() bool {
+	return gobool(C.gtk_tree_view_column_cell_is_visible(v.native()))
+}
+
+// FocusCell() is a wrapper around gtk_tree_view_column_focus_cell().
+func (v *TreeViewColumn) FocusCell(cell *CellRenderer) {
+	C.gtk_tree_view_column_focus_cell(v.native(), cell.native())
+}
+
+// QueueResize() is a wrapper around gtk_tree_view_column_queue_resize().
+func (v *TreeViewColumn) QueueResize() {
+	C.gtk_tree_view_column_queue_resize(v.native())
+}
+
+// GetXOffset() is a wrapper around gtk_tree_view_column_get_x_offset().
+func (v *TreeViewColumn) GetXOffset() int {
+	return int(C.gtk_tree_view_column_get_x_offset(v.native()))
+}
+
+// GtkTreeViewColumn * 	gtk_tree_view_column_new_with_area ()
+// void 	gtk_tree_view_column_set_attributes ()
+// void 	gtk_tree_view_column_set_cell_data_func ()
+// void 	gtk_tree_view_column_set_sizing ()
+// GtkTreeViewColumnSizing 	gtk_tree_view_column_get_sizing ()
+// void 	gtk_tree_view_column_set_widget ()
+// GtkWidget * 	gtk_tree_view_column_get_widget ()
+// GtkWidget * 	gtk_tree_view_column_get_button ()
+// void 	gtk_tree_view_column_set_alignment ()
+// gfloat 	gtk_tree_view_column_get_alignment ()
+// void 	gtk_tree_view_column_set_sort_order ()
+// GtkSortType 	gtk_tree_view_column_get_sort_order ()
+// void 	gtk_tree_view_column_cell_set_cell_data ()
+// void 	gtk_tree_view_column_cell_get_size ()
+// gboolean 	gtk_tree_view_column_cell_get_position ()
+// GtkWidget * 	gtk_tree_view_column_get_tree_view ()
 
 /*
  * GtkTreeView
@@ -25,11 +1410,11 @@ type TreeView struct {
 
 // native returns a pointer to the underlying GtkTreeView.
 func (v *TreeView) native() *C.GtkTreeView {
-	if v == nil || v.GObject == nil {
+	if v == nil {
 		return nil
 	}
-	p := unsafe.Pointer(v.GObject)
-	return C.toGtkTreeView(p)
+	ptr := unsafe.Pointer(v.Object.Native())
+	return C.toGtkTreeView(ptr)
 }
 
 func marshalTreeView(p uintptr) (interface{}, error) {
@@ -66,7 +1451,8 @@ func (v *TreeView) GetModel() (*TreeModel, error) {
 	if c == nil {
 		return nil, nil
 	}
-	return wrapTreeModel(glib.Take(unsafe.Pointer(c))), nil
+	obj := glib.Take(unsafe.Pointer(c))
+	return wrapTreeModel(*glib.InterfaceFromObjectNew(obj)), nil
 }
 
 // SetModel is a wrapper around gtk_tree_view_set_model().
@@ -84,7 +1470,8 @@ func (v *TreeView) GetSelection() (*TreeSelection, error) {
 	if c == nil {
 		return nil, nilPtrErr
 	}
-	return wrapTreeSelection(glib.Take(unsafe.Pointer(c))), nil
+	obj := glib.Take(unsafe.Pointer(c))
+	return wrapTreeSelection(obj), nil
 }
 
 // AppendColumn is a wrapper around gtk_tree_view_append_column().
@@ -94,10 +1481,11 @@ func (v *TreeView) AppendColumn(column *TreeViewColumn) int {
 }
 
 // GetPathAtPos is a wrapper around gtk_tree_view_get_path_at_pos().
-func (v *TreeView) GetPathAtPos(x, y int, path *TreePath, column *TreeViewColumn, cellX, cellY *int) bool {
+func (v *TreeView) GetPathAtPos(x, y int, path *TreePath, column *TreeViewColumn, cellX, cellY *int) error {
 	var ctp **C.GtkTreePath
 	if path != nil {
-		ctp = (**C.GtkTreePath)(unsafe.Pointer(&path.GtkTreePath))
+		tp := path.native()
+		ctp = &tp
 	} else {
 		ctp = nil
 	}
@@ -110,7 +1498,7 @@ func (v *TreeView) GetPathAtPos(x, y int, path *TreePath, column *TreeViewColumn
 		pctvcol = nil
 	}
 
-	return 0 != C.gtk_tree_view_get_path_at_pos(
+	c := C.gtk_tree_view_get_path_at_pos(
 		v.native(),
 		(C.gint)(x),
 		(C.gint)(y),
@@ -118,6 +1506,10 @@ func (v *TreeView) GetPathAtPos(x, y int, path *TreePath, column *TreeViewColumn
 		pctvcol,
 		(*C.gint)(unsafe.Pointer(cellX)),
 		(*C.gint)(unsafe.Pointer(cellY)))
+	if !gobool(c) {
+		return errors.New("Unable to set path at position")
+	}
+	return nil
 }
 
 // GetLevelIndentation is a wrapper around gtk_tree_view_get_level_indentation().
@@ -196,7 +1588,8 @@ func (v *TreeView) GetColumn(n int) *TreeViewColumn {
 	if c == nil {
 		return nil
 	}
-	return wrapTreeViewColumn(glib.Take(unsafe.Pointer(c)))
+	obj := glib.Take(unsafe.Pointer(c))
+	return wrapTreeViewColumn(obj)
 }
 
 // MoveColumnAfter is a wrapper around gtk_tree_view_move_column_after().
@@ -215,7 +1608,8 @@ func (v *TreeView) GetExpanderColumn() *TreeViewColumn {
 	if c == nil {
 		return nil
 	}
-	return wrapTreeViewColumn(glib.Take(unsafe.Pointer(c)))
+	obj := glib.Take(unsafe.Pointer(c))
+	return wrapTreeViewColumn(obj)
 }
 
 // ScrollToPoint is a wrapper around gtk_tree_view_scroll_to_point().
@@ -241,7 +1635,7 @@ func (v *TreeView) GetCursor() (p *TreePath, c *TreeViewColumn) {
 	C.gtk_tree_view_get_cursor(v.native(), &path, &col)
 
 	if path != nil {
-		p = &TreePath{path}
+		p = wrapTreePath(path)
 		runtime.SetFinalizer(p, (*TreePath).free)
 	}
 
@@ -334,7 +1728,8 @@ func (v *TreeView) GetSearchEntry() *Entry {
 	if c == nil {
 		return nil
 	}
-	return wrapEntry(glib.Take(unsafe.Pointer(c)))
+	obj := glib.Take(unsafe.Pointer(c))
+	return wrapEntry(obj)
 }
 
 // SetSearchEntry is a wrapper around gtk_tree_view_set_search_entry().

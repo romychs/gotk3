@@ -29,7 +29,7 @@ import "C"
 import (
 	"unsafe"
 
-	"github.com/gotk3/gotk3/glib"
+	"github.com/d2r2/gotk3/glib"
 )
 
 /*
@@ -42,7 +42,8 @@ func (v *Dialog) GetActionArea() (*Widget, error) {
 	if c == nil {
 		return nil, nilPtrErr
 	}
-	return wrapWidget(glib.Take(unsafe.Pointer(c))), nil
+	obj := glib.Take(unsafe.Pointer(c))
+	return wrapWidget(obj), nil
 }
 
 /*
@@ -55,7 +56,8 @@ func (v *MessageDialog) GetImage() (*Widget, error) {
 	if c == nil {
 		return nil, nilPtrErr
 	}
-	return wrapWidget(glib.Take(unsafe.Pointer(c))), nil
+	obj := glib.Take(unsafe.Pointer(c))
+	return wrapWidget(obj), nil
 }
 
 // SetImage is a wrapper around gtk_message_dialog_set_image().

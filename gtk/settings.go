@@ -6,7 +6,7 @@ import "C"
 import (
 	"unsafe"
 
-	"github.com/gotk3/gotk3/glib"
+	"github.com/d2r2/gotk3/glib"
 )
 
 func init() {
@@ -25,17 +25,17 @@ type Settings struct {
 }
 
 func (v *Settings) native() *C.GtkSettings {
-	if v == nil || v.GObject == nil {
+	if v == nil {
 		return nil
 	}
-
-	p := unsafe.Pointer(v.GObject)
-	return C.toGtkSettings(p)
+	ptr := unsafe.Pointer(v.Object.Native())
+	return C.toGtkSettings(ptr)
 }
 
 func marshalSettings(p uintptr) (interface{}, error) {
 	c := C.g_value_get_object((*C.GValue)(unsafe.Pointer(p)))
-	return wrapSettings(glib.Take(unsafe.Pointer(c))), nil
+	obj := glib.Take(unsafe.Pointer(c))
+	return wrapSettings(obj), nil
 }
 
 func wrapSettings(obj *glib.Object) *Settings {
@@ -49,5 +49,6 @@ func SettingsGetDefault() (*Settings, error) {
 		return nil, nilPtrErr
 	}
 
-	return wrapSettings(glib.Take(unsafe.Pointer(c))), nil
+	obj := glib.Take(unsafe.Pointer(c))
+	return wrapSettings(obj), nil
 }

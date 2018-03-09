@@ -10,14 +10,14 @@ import "unsafe"
 // SList is a representation of Glib's GSList. A SList must be manually freed
 // by either calling Free() or FreeFull()
 type SList struct {
-	list *C.struct__GSList
+	list *C.GSList
 }
 
 func WrapSList(obj uintptr) *SList {
-	return wrapSList((*C.struct__GSList)(unsafe.Pointer(obj)))
+	return wrapSList((*C.GSList)(unsafe.Pointer(obj)))
 }
 
-func wrapSList(obj *C.struct__GSList) *SList {
+func wrapSList(obj *C.GSList) *SList {
 	if obj == nil {
 		return nil
 	}
@@ -29,11 +29,11 @@ func wrapSList(obj *C.struct__GSList) *SList {
 }
 
 func (v *SList) Native() uintptr {
-	return uintptr(unsafe.Pointer(v.list))
+	return uintptr(unsafe.Pointer(v.native()))
 }
 
-func (v *SList) native() *C.struct__GSList {
-	if v == nil || v.list == nil {
+func (v *SList) native() *C.GSList {
+	if v == nil {
 		return nil
 	}
 	return v.list

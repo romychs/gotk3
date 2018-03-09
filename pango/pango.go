@@ -46,6 +46,10 @@ func gobool(b C.gboolean) bool {
 	return false
 }
 
+func goString(cstr *C.char) string {
+	return C.GoString(cstr)
+}
+
 /*
  * Constantes
  */

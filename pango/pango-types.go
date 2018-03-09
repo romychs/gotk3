@@ -38,7 +38,10 @@ func (v *LogAttr) Native() uintptr {
 }
 
 func (v *LogAttr) native() *C.PangoLogAttr {
-	return (*C.PangoLogAttr)(unsafe.Pointer(v.pangoLogAttr))
+	if v == nil {
+		return nil
+	}
+	return v.pangoLogAttr
 }
 
 // EngineLang is a representation of PangoEngineLang.
@@ -52,7 +55,10 @@ func (v *EngineLang) Native() uintptr {
 }
 
 func (v *EngineLang) native() *C.PangoEngineLang {
-	return (*C.PangoEngineLang)(unsafe.Pointer(v.pangoEngineLang))
+	if v == nil {
+		return nil
+	}
+	return v.pangoEngineLang
 }
 
 // EngineShape is a representation of PangoEngineShape.
@@ -66,7 +72,10 @@ func (v *EngineShape) Native() uintptr {
 }
 
 func (v *EngineShape) native() *C.PangoEngineShape {
-	return (*C.PangoEngineShape)(unsafe.Pointer(v.pangoEngineShape))
+	if v == nil {
+		return nil
+	}
+	return v.pangoEngineShape
 }
 
 // Font is a representation of PangoFont.
@@ -80,7 +89,10 @@ func (v *Font) Native() uintptr {
 }
 
 func (v *Font) native() *C.PangoFont {
-	return (*C.PangoFont)(unsafe.Pointer(v.pangoFont))
+	if v == nil {
+		return nil
+	}
+	return v.pangoFont
 }
 
 // FontMap is a representation of PangoFontMap.
@@ -94,7 +106,10 @@ func (v *FontMap) Native() uintptr {
 }
 
 func (v *FontMap) native() *C.PangoFontMap {
-	return (*C.PangoFontMap)(unsafe.Pointer(v.pangoFontMap))
+	if v == nil {
+		return nil
+	}
+	return v.pangoFontMap
 }
 
 func wrapFontMap(fontMap *C.PangoFontMap) *FontMap {
@@ -117,7 +132,10 @@ func (v *Rectangle) Native() uintptr {
 }
 
 func (v *Rectangle) native() *C.PangoRectangle {
-	return (*C.PangoRectangle)(unsafe.Pointer(v.pangoRectangle))
+	if v == nil {
+		return nil
+	}
+	return v.pangoRectangle
 }
 
 // Glyph is a representation of PangoGlyph

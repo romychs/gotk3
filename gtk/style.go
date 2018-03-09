@@ -9,8 +9,8 @@ import "C"
 import (
 	"unsafe"
 
-	"github.com/gotk3/gotk3/gdk"
-	"github.com/gotk3/gotk3/glib"
+	"github.com/d2r2/gotk3/gdk"
+	"github.com/d2r2/gotk3/glib"
 )
 
 type StyleProviderPriority int
@@ -34,11 +34,11 @@ type StyleContext struct {
 
 // native returns a pointer to the underlying GtkStyleContext.
 func (v *StyleContext) native() *C.GtkStyleContext {
-	if v == nil || v.Object == nil {
+	if v == nil {
 		return nil
 	}
-	p := unsafe.Pointer(v.GObject)
-	return C.toGtkStyleContext(p)
+	ptr := unsafe.Pointer(v.Object.Native())
+	return C.toGtkStyleContext(ptr)
 }
 
 func wrapStyleContext(obj *glib.Object) *StyleContext {
@@ -59,43 +59,34 @@ func (v *StyleContext) RemoveClass(class_name string) {
 	C.gtk_style_context_remove_class(v.native(), (*C.gchar)(cstr))
 }
 
-func fromNativeStyleContext(c *C.GtkStyleContext) (*StyleContext, error) {
+// GetParent is a wrapper around gtk_style_context_get_parent().
+func (v *StyleContext) GetParent() (*StyleContext, error) {
+	c := C.gtk_style_context_get_parent(v.native())
 	if c == nil {
 		return nil, nilPtrErr
 	}
-
 	obj := glib.Take(unsafe.Pointer(c))
 	return wrapStyleContext(obj), nil
 }
 
-// GetStyleContext is a wrapper around gtk_widget_get_style_context().
-func (v *Widget) GetStyleContext() (*StyleContext, error) {
-	return fromNativeStyleContext(C.gtk_widget_get_style_context(v.native()))
-}
-
-// GetParent is a wrapper around gtk_style_context_get_parent().
-func (v *StyleContext) GetParent() (*StyleContext, error) {
-	return fromNativeStyleContext(C.gtk_style_context_get_parent(v.native()))
-}
-
 // GetProperty is a wrapper around gtk_style_context_get_property().
 func (v *StyleContext) GetProperty(property string, state StateFlags) (interface{}, error) {
-	cstr := (*C.gchar)(C.CString(property))
+	cstr := C.CString(property)
 	defer C.free(unsafe.Pointer(cstr))
 
 	var gval C.GValue
-	C.gtk_style_context_get_property(v.native(), cstr, C.GtkStateFlags(state), &gval)
+	C.gtk_style_context_get_property(v.native(), (*C.gchar)(cstr), C.GtkStateFlags(state), &gval)
 	val := glib.ValueFromNative(unsafe.Pointer(&gval))
 	return val.GoValue()
 }
 
 // GetStyleProperty is a wrapper around gtk_style_context_get_style_property().
 func (v *StyleContext) GetStyleProperty(property string) (interface{}, error) {
-	cstr := (*C.gchar)(C.CString(property))
+	cstr := C.CString(property)
 	defer C.free(unsafe.Pointer(cstr))
 
 	var gval C.GValue
-	C.gtk_style_context_get_style_property(v.native(), cstr, &gval)
+	C.gtk_style_context_get_style_property(v.native(), (*C.gchar)(cstr), &gval)
 	val := glib.ValueFromNative(unsafe.Pointer(&gval))
 	return val.GoValue()
 }
@@ -119,16 +110,18 @@ func (v *StyleContext) GetState() StateFlags {
 // GetColor is a wrapper around gtk_style_context_get_color().
 func (v *StyleContext) GetColor(state StateFlags) *gdk.RGBA {
 	gdkColor := gdk.NewRGBA()
-	C.gtk_style_context_get_color(v.native(), C.GtkStateFlags(state), (*C.GdkRGBA)(unsafe.Pointer(gdkColor.Native())))
+	C.gtk_style_context_get_color(v.native(), C.GtkStateFlags(state),
+		(*C.GdkRGBA)(unsafe.Pointer(gdkColor.Native())))
 	return gdkColor
 }
 
 // LookupColor is a wrapper around gtk_style_context_lookup_color().
 func (v *StyleContext) LookupColor(colorName string) (*gdk.RGBA, bool) {
-	cstr := (*C.gchar)(C.CString(colorName))
+	cstr := C.CString(colorName)
 	defer C.free(unsafe.Pointer(cstr))
 	gdkColor := gdk.NewRGBA()
-	ret := C.gtk_style_context_lookup_color(v.native(), cstr, (*C.GdkRGBA)(unsafe.Pointer(gdkColor.Native())))
+	ret := C.gtk_style_context_lookup_color(v.native(), (*C.gchar)(cstr),
+		(*C.GdkRGBA)(unsafe.Pointer(gdkColor.Native())))
 	return gdkColor, gobool(ret)
 }
 

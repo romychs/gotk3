@@ -11,7 +11,7 @@ import "C"
 import (
 	"unsafe"
 
-	"github.com/gotk3/gotk3/glib"
+	"github.com/d2r2/gotk3/glib"
 )
 
 func init() {
@@ -83,11 +83,11 @@ type StackSidebar struct {
 
 // native returns a pointer to the underlying GtkStack.
 func (v *StackSidebar) native() *C.GtkStackSidebar {
-	if v == nil || v.GObject == nil {
+	if v == nil {
 		return nil
 	}
-	p := unsafe.Pointer(v.GObject)
-	return C.toGtkStackSidebar(p)
+	ptr := unsafe.Pointer(v.Object.Native())
+	return C.toGtkStackSidebar(ptr)
 }
 
 func marshalStackSidebar(p uintptr) (interface{}, error) {
@@ -106,7 +106,8 @@ func StackSidebarNew() (*StackSidebar, error) {
 	if c == nil {
 		return nil, nilPtrErr
 	}
-	return wrapStackSidebar(glib.Take(unsafe.Pointer(c))), nil
+	obj := glib.Take(unsafe.Pointer(c))
+	return wrapStackSidebar(obj), nil
 }
 
 func (v *StackSidebar) SetStack(stack *Stack) {
@@ -118,5 +119,6 @@ func (v *StackSidebar) GetStack() *Stack {
 	if c == nil {
 		return nil
 	}
-	return wrapStack(glib.Take(unsafe.Pointer(c)))
+	obj := glib.Take(unsafe.Pointer(c))
+	return wrapStack(obj)
 }

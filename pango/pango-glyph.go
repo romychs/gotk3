@@ -40,12 +40,15 @@ func (v *GlyphGeometry) Native() uintptr {
 }
 
 func (v *GlyphGeometry) native() *C.PangoGlyphGeometry {
-	return (*C.PangoGlyphGeometry)(unsafe.Pointer(v.pangoGlyphGeometry))
+	if v == nil {
+		return nil
+	}
+	return v.pangoGlyphGeometry
 }
 
 // GlyphVisAttr is a representation of PangoGlyphVisAttr.
 type GlyphVisAttr struct {
-	pangoGlyphVisAttr *C.PangoGlyphGeometry
+	pangoGlyphVisAttr *C.PangoGlyphVisAttr
 }
 
 // Native returns a pointer to the underlying PangoGlyphVisAttr.
@@ -54,7 +57,10 @@ func (v *GlyphVisAttr) Native() uintptr {
 }
 
 func (v *GlyphVisAttr) native() *C.PangoGlyphVisAttr {
-	return (*C.PangoGlyphVisAttr)(unsafe.Pointer(v.pangoGlyphVisAttr))
+	if v == nil {
+		return nil
+	}
+	return v.pangoGlyphVisAttr
 }
 
 // GlyphInfo is a representation of PangoGlyphInfo.
@@ -68,7 +74,10 @@ func (v *GlyphInfo) Native() uintptr {
 }
 
 func (v *GlyphInfo) native() *C.PangoGlyphInfo {
-	return (*C.PangoGlyphInfo)(unsafe.Pointer(v.pangoGlyphInfo))
+	if v == nil {
+		return nil
+	}
+	return v.pangoGlyphInfo
 }
 
 // GlyphGeometry is a representation of PangoGlyphString.
@@ -82,5 +91,8 @@ func (v *GlyphString) Native() uintptr {
 }
 
 func (v *GlyphString) native() *C.PangoGlyphString {
-	return (*C.PangoGlyphString)(unsafe.Pointer(v.pangoGlyphString))
+	if v == nil {
+		return nil
+	}
+	return v.pangoGlyphString
 }

@@ -6,7 +6,7 @@ import "C"
 import (
 	"unsafe"
 
-	"github.com/gotk3/gotk3/glib"
+	"github.com/d2r2/gotk3/glib"
 )
 
 type PixbufFormat struct {
@@ -18,7 +18,6 @@ func (v *PixbufFormat) native() *C.GdkPixbufFormat {
 	if v == nil {
 		return nil
 	}
-
 	return v.format
 }
 
@@ -27,23 +26,26 @@ func (v *PixbufFormat) Native() uintptr {
 	return uintptr(unsafe.Pointer(v.native()))
 }
 
-func (f *PixbufFormat) GetName() (string, error) {
+func (f *PixbufFormat) GetName() string {
 	c := C.gdk_pixbuf_format_get_name(f.native())
-	return C.GoString((*C.char)(c)), nil
+	defer C.g_free(C.gpointer(c))
+	return goString(c)
 }
 
-func (f *PixbufFormat) GetDescription() (string, error) {
+func (f *PixbufFormat) GetDescription() string {
 	c := C.gdk_pixbuf_format_get_description(f.native())
-	return C.GoString((*C.char)(c)), nil
+	defer C.g_free(C.gpointer(c))
+	return goString(c)
 }
 
-func (f *PixbufFormat) GetLicense() (string, error) {
+func (f *PixbufFormat) GetLicense() string {
 	c := C.gdk_pixbuf_format_get_license(f.native())
-	return C.GoString((*C.char)(c)), nil
+	defer C.g_free(C.gpointer(c))
+	return goString(c)
 }
 
 func PixbufGetFormats() []*PixbufFormat {
-	l := (*C.struct__GSList)(C.gdk_pixbuf_get_formats())
+	l := (*C.GSList)(C.gdk_pixbuf_get_formats())
 	formats := glib.WrapSList(uintptr(unsafe.Pointer(l)))
 	if formats == nil {
 		return nil // no error. A nil list is considered to be empty.

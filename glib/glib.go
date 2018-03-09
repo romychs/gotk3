@@ -52,6 +52,21 @@ func gobool(b C.gboolean) bool {
 	return false
 }
 
+func goString(cstr *C.gchar) string {
+	return C.GoString((*C.char)(cstr))
+}
+
+func goStringArray(c **C.gchar) []string {
+	var strs []string
+
+	for *c != nil {
+		strs = append(strs, goString(*c))
+		c = C.next_gcharptr(c)
+	}
+
+	return strs
+}
+
 /*
  * Unexported vars
  */
@@ -108,7 +123,8 @@ const (
 
 // Name is a wrapper around g_type_name().
 func (t Type) Name() string {
-	return C.GoString((*C.char)(C.g_type_name(C.GType(t))))
+	c := C.g_type_name(C.GType(t))
+	return goString(c)
 }
 
 // Depth is a wrapper around g_type_depth().
@@ -284,7 +300,7 @@ func TimeoutAdd(timeout uint, f interface{}, args ...interface{}) (SourceHandle,
 }
 
 // sourceAttach attaches a source to the default main loop context.
-func sourceAttach(src *C.struct__GSource, rf reflect.Value, args ...interface{}) (SourceHandle, error) {
+func sourceAttach(src *C.GSource, rf reflect.Value, args ...interface{}) (SourceHandle, error) {
 	if src == nil {
 		return 0, errNilPtr
 	}
@@ -339,31 +355,31 @@ func sourceAttach(src *C.struct__GSource, rf reflect.Value, args ...interface{})
 // GetHomeDir is a wrapper around g_get_home_dir().
 func GetHomeDir() string {
 	c := C.g_get_home_dir()
-	return C.GoString((*C.char)(c))
+	return goString(c)
 }
 
 // GetUserCacheDir is a wrapper around g_get_user_cache_dir().
 func GetUserCacheDir() string {
 	c := C.g_get_user_cache_dir()
-	return C.GoString((*C.char)(c))
+	return goString(c)
 }
 
 // GetUserDataDir is a wrapper around g_get_user_data_dir().
 func GetUserDataDir() string {
 	c := C.g_get_user_data_dir()
-	return C.GoString((*C.char)(c))
+	return goString(c)
 }
 
 // GetUserConfigDir is a wrapper around g_get_user_config_dir().
 func GetUserConfigDir() string {
 	c := C.g_get_user_config_dir()
-	return C.GoString((*C.char)(c))
+	return goString(c)
 }
 
 // GetUserRuntimeDir is a wrapper around g_get_user_runtime_dir().
 func GetUserRuntimeDir() string {
 	c := C.g_get_user_runtime_dir()
-	return C.GoString((*C.char)(c))
+	return goString(c)
 }
 
 // GetUserSpecialDir is a wrapper around g_get_user_special_dir().  A
@@ -374,435 +390,7 @@ func GetUserSpecialDir(directory UserDirectory) (string, error) {
 	if c == nil {
 		return "", errNilPtr
 	}
-	return C.GoString((*C.char)(c)), nil
-}
-
-/*
- * GObject
- */
-
-// IObject is an interface type implemented by Object and all types which embed
-// an Object.  It is meant to be used as a type for function arguments which
-// require GObjects or any subclasses thereof.
-type IObject interface {
-	toGObject() *C.GObject
-	toObject() *Object
-}
-
-// Object is a representation of GLib's GObject.
-type Object struct {
-	GObject *C.GObject
-}
-
-func (v *Object) toGObject() *C.GObject {
-	if v == nil {
-		return nil
-	}
-	return v.native()
-}
-
-func (v *Object) toObject() *Object {
-	return v
-}
-
-// newObject creates a new Object from a GObject pointer.
-func newObject(p *C.GObject) *Object {
-	return &Object{GObject: p}
-}
-
-// native returns a pointer to the underlying GObject.
-func (v *Object) native() *C.GObject {
-	if v == nil || v.GObject == nil {
-		return nil
-	}
-	p := unsafe.Pointer(v.GObject)
-	return C.toGObject(p)
-}
-
-// Take wraps a unsafe.Pointer as a glib.Object, taking ownership of it.
-// This function is exported for visibility in other gotk3 packages and
-// is not meant to be used by applications.
-func Take(ptr unsafe.Pointer) *Object {
-	obj := newObject(ToGObject(ptr))
-
-	if obj.IsFloating() {
-		obj.RefSink()
-	} else {
-		obj.Ref()
-	}
-
-	runtime.SetFinalizer(obj, (*Object).Unref)
-	return obj
-}
-
-// Native returns a pointer to the underlying GObject.
-func (v *Object) Native() uintptr {
-	return uintptr(unsafe.Pointer(v.native()))
-}
-
-// IsA is a wrapper around g_type_is_a().
-func (v *Object) IsA(typ Type) bool {
-	return gobool(C.g_type_is_a(C.GType(v.TypeFromInstance()), C.GType(typ)))
-}
-
-// TypeFromInstance is a wrapper around g_type_from_instance().
-func (v *Object) TypeFromInstance() Type {
-	c := C._g_type_from_instance(C.gpointer(unsafe.Pointer(v.native())))
-	return Type(c)
-}
-
-// ToGObject type converts an unsafe.Pointer as a native C GObject.
-// This function is exported for visibility in other gotk3 packages and
-// is not meant to be used by applications.
-func ToGObject(p unsafe.Pointer) *C.GObject {
-	return C.toGObject(p)
-}
-
-// Ref is a wrapper around g_object_ref().
-func (v *Object) Ref() {
-	C.g_object_ref(C.gpointer(v.GObject))
-}
-
-// Unref is a wrapper around g_object_unref().
-func (v *Object) Unref() {
-	C.g_object_unref(C.gpointer(v.GObject))
-}
-
-// RefSink is a wrapper around g_object_ref_sink().
-func (v *Object) RefSink() {
-	C.g_object_ref_sink(C.gpointer(v.GObject))
-}
-
-// IsFloating is a wrapper around g_object_is_floating().
-func (v *Object) IsFloating() bool {
-	c := C.g_object_is_floating(C.gpointer(v.GObject))
-	return gobool(c)
-}
-
-// ForceFloating is a wrapper around g_object_force_floating().
-func (v *Object) ForceFloating() {
-	C.g_object_force_floating(v.GObject)
-}
-
-// StopEmission is a wrapper around g_signal_stop_emission_by_name().
-func (v *Object) StopEmission(s string) {
-	cstr := C.CString(s)
-	defer C.free(unsafe.Pointer(cstr))
-	C.g_signal_stop_emission_by_name((C.gpointer)(v.GObject),
-		(*C.gchar)(cstr))
-}
-
-// Set is a wrapper around g_object_set().  However, unlike
-// g_object_set(), this function only sets one name value pair.  Make
-// multiple calls to this function to set multiple properties.
-func (v *Object) Set(name string, value interface{}) error {
-	return v.SetProperty(name, value)
-	/*
-		cstr := C.CString(name)
-		defer C.free(unsafe.Pointer(cstr))
-
-		if _, ok := value.(Object); ok {
-			value = value.(Object).GObject
-		}
-
-		// Can't call g_object_set() as it uses a variable arg list, use a
-		// wrapper instead
-		var p unsafe.Pointer
-		switch v := value.(type) {
-		case bool:
-			c := gbool(v)
-			p = unsafe.Pointer(&c)
-
-		case int8:
-			c := C.gint8(v)
-			p = unsafe.Pointer(&c)
-
-		case int16:
-			c := C.gint16(v)
-			p = unsafe.Pointer(&c)
-
-		case int32:
-			c := C.gint32(v)
-			p = unsafe.Pointer(&c)
-
-		case int64:
-			c := C.gint64(v)
-			p = unsafe.Pointer(&c)
-
-		case int:
-			c := C.gint(v)
-			p = unsafe.Pointer(&c)
-
-		case uint8:
-			c := C.guchar(v)
-			p = unsafe.Pointer(&c)
-
-		case uint16:
-			c := C.guint16(v)
-			p = unsafe.Pointer(&c)
-
-		case uint32:
-			c := C.guint32(v)
-			p = unsafe.Pointer(&c)
-
-		case uint64:
-			c := C.guint64(v)
-			p = unsafe.Pointer(&c)
-
-		case uint:
-			c := C.guint(v)
-			p = unsafe.Pointer(&c)
-
-		case uintptr:
-			p = unsafe.Pointer(C.gpointer(v))
-
-		case float32:
-			c := C.gfloat(v)
-			p = unsafe.Pointer(&c)
-
-		case float64:
-			c := C.gdouble(v)
-			p = unsafe.Pointer(&c)
-
-		case string:
-			cstr := C.CString(v)
-			defer C.g_free(C.gpointer(unsafe.Pointer(cstr)))
-			p = unsafe.Pointer(&cstr)
-
-		default:
-			if pv, ok := value.(unsafe.Pointer); ok {
-				p = pv
-			} else {
-				val := reflect.ValueOf(value)
-				switch val.Kind() {
-				case reflect.Int, reflect.Int8, reflect.Int16,
-					reflect.Int32, reflect.Int64:
-					c := C.int(val.Int())
-					p = unsafe.Pointer(&c)
-
-				case reflect.Uintptr, reflect.Ptr, reflect.UnsafePointer:
-					p = unsafe.Pointer(C.gpointer(val.Pointer()))
-				}
-			}
-		}
-		if p == nil {
-			return errors.New("Unable to perform type conversion")
-		}
-		C._g_object_set_one(C.gpointer(v.GObject), (*C.gchar)(cstr), p)
-		return nil*/
-}
-
-// GetPropertyType returns the Type of a property of the underlying GObject.
-// If the property is missing it will return TYPE_INVALID and an error.
-func (v *Object) GetPropertyType(name string) (Type, error) {
-	cstr := C.CString(name)
-	defer C.free(unsafe.Pointer(cstr))
-
-	paramSpec := C.g_object_class_find_property(C._g_object_get_class(v.native()), (*C.gchar)(cstr))
-	if paramSpec == nil {
-		return TYPE_INVALID, errors.New("couldn't find Property")
-	}
-	return Type(paramSpec.value_type), nil
-}
-
-// GetProperty is a wrapper around g_object_get_property().
-func (v *Object) GetProperty(name string) (interface{}, error) {
-	cstr := C.CString(name)
-	defer C.free(unsafe.Pointer(cstr))
-
-	t, err := v.GetPropertyType(name)
-	if err != nil {
-		return nil, err
-	}
-
-	p, err := ValueInit(t)
-	if err != nil {
-		return nil, errors.New("unable to allocate value")
-	}
-	C.g_object_get_property(v.GObject, (*C.gchar)(cstr), p.native())
-	return p.GoValue()
-}
-
-// SetProperty is a wrapper around g_object_set_property().
-func (v *Object) SetProperty(name string, value interface{}) error {
-	cstr := C.CString(name)
-	defer C.free(unsafe.Pointer(cstr))
-
-	if _, ok := value.(Object); ok {
-		value = value.(Object).GObject
-	}
-
-	p, err := GValue(value)
-	if err != nil {
-		return errors.New("Unable to perform type conversion")
-	}
-	C.g_object_set_property(v.GObject, (*C.gchar)(cstr), p.native())
-	return nil
-}
-
-// pointerVal attempts to return an unsafe.Pointer for value.
-// Not all types are understood, in which case a nil Pointer
-// is returned.
-/*func pointerVal(value interface{}) unsafe.Pointer {
-	var p unsafe.Pointer
-	switch v := value.(type) {
-	case bool:
-		c := gbool(v)
-		p = unsafe.Pointer(&c)
-
-	case int8:
-		c := C.gint8(v)
-		p = unsafe.Pointer(&c)
-
-	case int16:
-		c := C.gint16(v)
-		p = unsafe.Pointer(&c)
-
-	case int32:
-		c := C.gint32(v)
-		p = unsafe.Pointer(&c)
-
-	case int64:
-		c := C.gint64(v)
-		p = unsafe.Pointer(&c)
-
-	case int:
-		c := C.gint(v)
-		p = unsafe.Pointer(&c)
-
-	case uint8:
-		c := C.guchar(v)
-		p = unsafe.Pointer(&c)
-
-	case uint16:
-		c := C.guint16(v)
-		p = unsafe.Pointer(&c)
-
-	case uint32:
-		c := C.guint32(v)
-		p = unsafe.Pointer(&c)
-
-	case uint64:
-		c := C.guint64(v)
-		p = unsafe.Pointer(&c)
-
-	case uint:
-		c := C.guint(v)
-		p = unsafe.Pointer(&c)
-
-	case uintptr:
-		p = unsafe.Pointer(C.gpointer(v))
-
-	case float32:
-		c := C.gfloat(v)
-		p = unsafe.Pointer(&c)
-
-	case float64:
-		c := C.gdouble(v)
-		p = unsafe.Pointer(&c)
-
-	case string:
-		cstr := C.CString(v)
-		defer C.free(unsafe.Pointer(cstr))
-		p = unsafe.Pointer(cstr)
-
-	default:
-		if pv, ok := value.(unsafe.Pointer); ok {
-			p = pv
-		} else {
-			val := reflect.ValueOf(value)
-			switch val.Kind() {
-			case reflect.Int, reflect.Int8, reflect.Int16,
-				reflect.Int32, reflect.Int64:
-				c := C.int(val.Int())
-				p = unsafe.Pointer(&c)
-
-			case reflect.Uintptr, reflect.Ptr, reflect.UnsafePointer:
-				p = unsafe.Pointer(C.gpointer(val.Pointer()))
-			}
-		}
-	}
-
-	return p
-}*/
-
-/*
- * GObject Signals
- */
-
-// Emit is a wrapper around g_signal_emitv() and emits the signal
-// specified by the string s to an Object.  Arguments to callback
-// functions connected to this signal must be specified in args.  Emit()
-// returns an interface{} which must be type asserted as the Go
-// equivalent type to the return value for native C callback.
-//
-// Note that this code is unsafe in that the types of values in args are
-// not checked against whether they are suitable for the callback.
-func (v *Object) Emit(s string, args ...interface{}) (interface{}, error) {
-	cstr := C.CString(s)
-	defer C.free(unsafe.Pointer(cstr))
-
-	// Create array of this instance and arguments
-	valv := C.alloc_gvalue_list(C.int(len(args)) + 1)
-	defer C.free(unsafe.Pointer(valv))
-
-	// Add args and valv
-	val, err := GValue(v)
-	if err != nil {
-		return nil, errors.New("Error converting Object to GValue: " + err.Error())
-	}
-	C.val_list_insert(valv, C.int(0), val.native())
-	for i := range args {
-		val, err := GValue(args[i])
-		if err != nil {
-			return nil, fmt.Errorf("Error converting arg %d to GValue: %s", i, err.Error())
-		}
-		C.val_list_insert(valv, C.int(i+1), val.native())
-	}
-
-	t := v.TypeFromInstance()
-	// TODO: use just the signal name
-	id := C.g_signal_lookup((*C.gchar)(cstr), C.GType(t))
-
-	ret, err := ValueAlloc()
-	if err != nil {
-		return nil, errors.New("Error creating Value for return value")
-	}
-	C.g_signal_emitv(valv, id, C.GQuark(0), ret.native())
-
-	return ret.GoValue()
-}
-
-// HandlerBlock is a wrapper around g_signal_handler_block().
-func (v *Object) HandlerBlock(handle SignalHandle) {
-	C.g_signal_handler_block(C.gpointer(v.GObject), C.gulong(handle))
-}
-
-// HandlerUnblock is a wrapper around g_signal_handler_unblock().
-func (v *Object) HandlerUnblock(handle SignalHandle) {
-	C.g_signal_handler_unblock(C.gpointer(v.GObject), C.gulong(handle))
-}
-
-// HandlerDisconnect is a wrapper around g_signal_handler_disconnect().
-func (v *Object) HandlerDisconnect(handle SignalHandle) {
-	C.g_signal_handler_disconnect(C.gpointer(v.GObject), C.gulong(handle))
-	C.g_closure_invalidate(signals[handle])
-	delete(closures.m, signals[handle])
-	delete(signals, handle)
-}
-
-// Wrapper function for new objects with reference management.
-func wrapObject(ptr unsafe.Pointer) *Object {
-	obj := &Object{ToGObject(ptr)}
-
-	if obj.IsFloating() {
-		obj.RefSink()
-	} else {
-		obj.Ref()
-	}
-
-	runtime.SetFinalizer(obj, (*Object).Unref)
-	return obj
+	return goString(c), nil
 }
 
 /*
@@ -817,16 +405,6 @@ type InitiallyUnowned struct {
 	*Object
 }
 
-// Native returns a pointer to the underlying GObject.  This is implemented
-// here rather than calling Native on the embedded Object to prevent a nil
-// pointer dereference.
-func (v *InitiallyUnowned) Native() uintptr {
-	if v == nil || v.Object == nil {
-		return uintptr(unsafe.Pointer(nil))
-	}
-	return v.Object.Native()
-}
-
 /*
  * GValue
  */
@@ -838,12 +416,12 @@ func (v *InitiallyUnowned) Native() uintptr {
 // which will set the runtime finalizer to unset the Value after it has
 // left scope.
 type Value struct {
-	GValue *C.GValue
+	gvalue *C.GValue
 }
 
 // native returns a pointer to the underlying GValue.
 func (v *Value) native() *C.GValue {
-	return v.GValue
+	return v.gvalue
 }
 
 // Native returns a pointer to the underlying GValue.
@@ -868,7 +446,6 @@ func ValueAlloc() (*Value, error) {
 	runtime.SetFinalizer(v, func(f *Value) {
 		if t, _, err := f.Type(); err != nil || t == TYPE_INVALID || t == TYPE_NONE {
 			C.g_free(C.gpointer(f.native()))
-			return
 		}
 
 		f.unset()
@@ -1013,7 +590,7 @@ func GValue(v interface{}) (gvalue *Value, err error) {
 		if err != nil {
 			return nil, err
 		}
-		val.SetInstance(uintptr(unsafe.Pointer(e.GObject)))
+		val.SetInstance(e.Native())
 		return val, nil
 
 	default:
@@ -1209,7 +786,7 @@ func marshalDouble(p uintptr) (interface{}, error) {
 
 func marshalString(p uintptr) (interface{}, error) {
 	c := C.g_value_get_string((*C.GValue)(unsafe.Pointer(p)))
-	return C.GoString((*C.char)(c)), nil
+	return goString(c), nil
 }
 
 func marshalBoxed(p uintptr) (interface{}, error) {
@@ -1228,7 +805,9 @@ func marshalObject(p uintptr) (interface{}, error) {
 }
 
 func marshalVariant(p uintptr) (interface{}, error) {
-	return nil, errors.New("variant conversion not yet implemented")
+	c := C.g_value_get_variant((*C.GValue)(unsafe.Pointer(p)))
+	return newVariant((*C.GVariant)(c)), nil
+	//	return nil, errors.New("variant conversion not yet implemented")
 }
 
 // GoValue converts a Value to comparable Go type.  GoValue()
@@ -1325,7 +904,7 @@ func (v *Value) GetString() (string, error) {
 	if c == nil {
 		return "", errNilPtr
 	}
-	return C.GoString((*C.char)(c)), nil
+	return goString(c), nil
 }
 
 type Signal struct {
@@ -1359,15 +938,15 @@ type Quark uint32
 func GetApplicationName() string {
 	c := C.g_get_application_name()
 
-	return C.GoString((*C.char)(c))
+	return goString(c)
 }
 
 // SetApplicationName is a wrapper around g_set_application_name().
 func SetApplicationName(name string) {
-	cstr := (*C.gchar)(C.CString(name))
+	cstr := C.CString(name)
 	defer C.free(unsafe.Pointer(cstr))
 
-	C.g_set_application_name(cstr)
+	C.g_set_application_name((*C.gchar)(cstr))
 }
 
 // InitI18n initializes the i18n subsystem.
@@ -1386,5 +965,6 @@ func Local(input string) string {
 	cstr := C.CString(input)
 	defer C.free(unsafe.Pointer(cstr))
 
-	return C.GoString(C.localize(cstr))
+	c := C.localize(cstr)
+	return goString((*C.gchar)(c))
 }

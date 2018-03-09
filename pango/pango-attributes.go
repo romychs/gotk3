@@ -25,7 +25,7 @@ import "C"
 import (
 	"unsafe"
 
-	"github.com/gotk3/gotk3/glib"
+	"github.com/d2r2/gotk3/glib"
 )
 
 func init() {
@@ -50,7 +50,10 @@ func (v *Color) Native() uintptr {
 }
 
 func (v *Color) native() *C.PangoColor {
-	return (*C.PangoColor)(unsafe.Pointer(v.pangoColor))
+	if v == nil {
+		return nil
+	}
+	return v.pangoColor
 }
 
 func (v *Color) Set(red, green, blue uint16) {
@@ -80,14 +83,14 @@ func (v *Color) Free() {
 func (v *Color) Parse(spec string) bool {
 	cstr := C.CString(spec)
 	defer C.free(unsafe.Pointer(cstr))
-	c := C.pango_color_parse(v.native(), (*C.char)(cstr))
+	c := C.pango_color_parse(v.native(), cstr)
 	return gobool(c)
 }
 
 //gchar      *pango_color_to_string(const PangoColor *color);
 func (v *Color) ToString() string {
 	c := C.pango_color_to_string(v.native())
-	return C.GoString((*C.char)(c))
+	return goString((*C.char)(c))
 }
 
 /* ---  ---  --- Attributes ---  ---  ---  */
@@ -103,7 +106,10 @@ func (v *AttrList) Native() uintptr {
 }
 
 func (v *AttrList) native() *C.PangoAttrList {
-	return (*C.PangoAttrList)(unsafe.Pointer(v.pangoAttrList))
+	if v == nil {
+		return nil
+	}
+	return v.pangoAttrList
 }
 
 // AttrType is a representation of Pango's PangoAttrType.
@@ -174,7 +180,10 @@ func (v *Attribute) Native() uintptr {
 }
 
 func (v *Attribute) native() *C.PangoAttribute {
-	return (*C.PangoAttribute)(unsafe.Pointer(v.pangoAttribute))
+	if v == nil {
+		return nil
+	}
+	return v.pangoAttribute
 }
 
 /*

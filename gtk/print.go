@@ -9,9 +9,9 @@ import (
 	"sync"
 	"unsafe"
 
-	"github.com/gotk3/gotk3/cairo"
-	"github.com/gotk3/gotk3/glib"
-	"github.com/gotk3/gotk3/pango"
+	"github.com/d2r2/gotk3/cairo"
+	"github.com/d2r2/gotk3/glib"
+	"github.com/d2r2/gotk3/pango"
 )
 
 func init() {
@@ -233,12 +233,12 @@ type PageSetup struct {
 	*glib.Object
 }
 
-func (ps *PageSetup) native() *C.GtkPageSetup {
-	if ps == nil || ps.GObject == nil {
+func (v *PageSetup) native() *C.GtkPageSetup {
+	if v == nil {
 		return nil
 	}
-	p := unsafe.Pointer(ps.GObject)
-	return C.toGtkPageSetup(p)
+	ptr := unsafe.Pointer(v.Object.Native())
+	return C.toGtkPageSetup(ptr)
 }
 
 func marshalPageSetup(p uintptr) (interface{}, error) {
@@ -262,8 +262,8 @@ func PageSetupNew() (*PageSetup, error) {
 }
 
 // Copy() is a wrapper around gtk_page_setup_copy().
-func (ps *PageSetup) Copy() (*PageSetup, error) {
-	c := C.gtk_page_setup_copy(ps.native())
+func (v *PageSetup) Copy() (*PageSetup, error) {
+	c := C.gtk_page_setup_copy(v.native())
 	if c == nil {
 		return nil, nilPtrErr
 	}
@@ -272,99 +272,99 @@ func (ps *PageSetup) Copy() (*PageSetup, error) {
 }
 
 // GetOrientation() is a wrapper around gtk_page_setup_get_orientation().
-func (ps *PageSetup) GetOrientation() PageOrientation {
-	c := C.gtk_page_setup_get_orientation(ps.native())
+func (v *PageSetup) GetOrientation() PageOrientation {
+	c := C.gtk_page_setup_get_orientation(v.native())
 	return PageOrientation(c)
 }
 
 // SetOrientation() is a wrapper around gtk_page_setup_set_orientation().
-func (ps *PageSetup) SetOrientation(orientation PageOrientation) {
-	C.gtk_page_setup_set_orientation(ps.native(), C.GtkPageOrientation(orientation))
+func (v *PageSetup) SetOrientation(orientation PageOrientation) {
+	C.gtk_page_setup_set_orientation(v.native(), C.GtkPageOrientation(orientation))
 }
 
 // GetPaperSize() is a wrapper around gtk_page_setup_get_paper_size().
-func (ps *PageSetup) GetPaperSize() *PaperSize {
-	c := C.gtk_page_setup_get_paper_size(ps.native())
-	p := &PaperSize{c}
+func (v *PageSetup) GetPaperSize() *PaperSize {
+	c := C.gtk_page_setup_get_paper_size(v.native())
+	p := wrapPaperSize(c)
 	runtime.SetFinalizer(p, (*PaperSize).free)
 	return p
 }
 
 // SetPaperSize() is a wrapper around gtk_page_setup_set_paper_size().
-func (ps *PageSetup) SetPaperSize(size *PaperSize) {
-	C.gtk_page_setup_set_paper_size(ps.native(), size.native())
+func (v *PageSetup) SetPaperSize(size *PaperSize) {
+	C.gtk_page_setup_set_paper_size(v.native(), size.native())
 }
 
 // GetTopMargin() is a wrapper around gtk_page_setup_get_top_margin().
-func (ps *PageSetup) GetTopMargin(unit Unit) float64 {
-	c := C.gtk_page_setup_get_top_margin(ps.native(), C.GtkUnit(unit))
+func (v *PageSetup) GetTopMargin(unit Unit) float64 {
+	c := C.gtk_page_setup_get_top_margin(v.native(), C.GtkUnit(unit))
 	return float64(c)
 }
 
 // SetTopMargin() is a wrapper around gtk_page_setup_set_top_margin().
-func (ps *PageSetup) SetTopMargin(margin float64, unit Unit) {
-	C.gtk_page_setup_set_top_margin(ps.native(), C.gdouble(margin), C.GtkUnit(unit))
+func (v *PageSetup) SetTopMargin(margin float64, unit Unit) {
+	C.gtk_page_setup_set_top_margin(v.native(), C.gdouble(margin), C.GtkUnit(unit))
 }
 
 // GetBottomMargin() is a wrapper around gtk_page_setup_get_bottom_margin().
-func (ps *PageSetup) GetBottomMargin(unit Unit) float64 {
-	c := C.gtk_page_setup_get_bottom_margin(ps.native(), C.GtkUnit(unit))
+func (v *PageSetup) GetBottomMargin(unit Unit) float64 {
+	c := C.gtk_page_setup_get_bottom_margin(v.native(), C.GtkUnit(unit))
 	return float64(c)
 }
 
 // SetBottomMargin() is a wrapper around gtk_page_setup_set_bottom_margin().
-func (ps *PageSetup) SetBottomMargin(margin float64, unit Unit) {
-	C.gtk_page_setup_set_bottom_margin(ps.native(), C.gdouble(margin), C.GtkUnit(unit))
+func (v *PageSetup) SetBottomMargin(margin float64, unit Unit) {
+	C.gtk_page_setup_set_bottom_margin(v.native(), C.gdouble(margin), C.GtkUnit(unit))
 }
 
 // GetLeftMargin() is a wrapper around gtk_page_setup_get_left_margin().
-func (ps *PageSetup) GetLeftMargin(unit Unit) float64 {
-	c := C.gtk_page_setup_get_left_margin(ps.native(), C.GtkUnit(unit))
+func (v *PageSetup) GetLeftMargin(unit Unit) float64 {
+	c := C.gtk_page_setup_get_left_margin(v.native(), C.GtkUnit(unit))
 	return float64(c)
 }
 
 // SetLeftMargin() is a wrapper around gtk_page_setup_set_left_margin().
-func (ps *PageSetup) SetLeftMargin(margin float64, unit Unit) {
-	C.gtk_page_setup_set_left_margin(ps.native(), C.gdouble(margin), C.GtkUnit(unit))
+func (v *PageSetup) SetLeftMargin(margin float64, unit Unit) {
+	C.gtk_page_setup_set_left_margin(v.native(), C.gdouble(margin), C.GtkUnit(unit))
 }
 
 // GetRightMargin() is a wrapper around gtk_page_setup_get_right_margin().
-func (ps *PageSetup) GetRightMargin(unit Unit) float64 {
-	c := C.gtk_page_setup_get_right_margin(ps.native(), C.GtkUnit(unit))
+func (v *PageSetup) GetRightMargin(unit Unit) float64 {
+	c := C.gtk_page_setup_get_right_margin(v.native(), C.GtkUnit(unit))
 	return float64(c)
 }
 
 // SetRightMargin() is a wrapper around gtk_page_setup_set_right_margin().
-func (ps *PageSetup) SetRightMargin(margin float64, unit Unit) {
-	C.gtk_page_setup_set_right_margin(ps.native(), C.gdouble(margin), C.GtkUnit(unit))
+func (v *PageSetup) SetRightMargin(margin float64, unit Unit) {
+	C.gtk_page_setup_set_right_margin(v.native(), C.gdouble(margin), C.GtkUnit(unit))
 }
 
 // SetPaperSizeAndDefaultMargins() is a wrapper around gtk_page_setup_set_paper_size_and_default_margins().
-func (ps *PageSetup) SetPaperSizeAndDefaultMargins(size *PaperSize) {
-	C.gtk_page_setup_set_paper_size_and_default_margins(ps.native(), size.native())
+func (v *PageSetup) SetPaperSizeAndDefaultMargins(size *PaperSize) {
+	C.gtk_page_setup_set_paper_size_and_default_margins(v.native(), size.native())
 }
 
 // GetPaperWidth() is a wrapper around gtk_page_setup_get_paper_width().
-func (ps *PageSetup) GetPaperWidth(unit Unit) float64 {
-	c := C.gtk_page_setup_get_paper_width(ps.native(), C.GtkUnit(unit))
+func (v *PageSetup) GetPaperWidth(unit Unit) float64 {
+	c := C.gtk_page_setup_get_paper_width(v.native(), C.GtkUnit(unit))
 	return float64(c)
 }
 
 // GetPaperHeight() is a wrapper around gtk_page_setup_get_paper_height().
-func (ps *PageSetup) GetPaperHeight(unit Unit) float64 {
-	c := C.gtk_page_setup_get_paper_height(ps.native(), C.GtkUnit(unit))
+func (v *PageSetup) GetPaperHeight(unit Unit) float64 {
+	c := C.gtk_page_setup_get_paper_height(v.native(), C.GtkUnit(unit))
 	return float64(c)
 }
 
 // GetPageWidth() is a wrapper around gtk_page_setup_get_page_width().
-func (ps *PageSetup) GetPageWidth(unit Unit) float64 {
-	c := C.gtk_page_setup_get_page_width(ps.native(), C.GtkUnit(unit))
+func (v *PageSetup) GetPageWidth(unit Unit) float64 {
+	c := C.gtk_page_setup_get_page_width(v.native(), C.GtkUnit(unit))
 	return float64(c)
 }
 
 // GetPageHeight() is a wrapper around gtk_page_setup_get_page_height().
-func (ps *PageSetup) GetPageHeight(unit Unit) float64 {
-	c := C.gtk_page_setup_get_page_height(ps.native(), C.GtkUnit(unit))
+func (v *PageSetup) GetPageHeight(unit Unit) float64 {
+	c := C.gtk_page_setup_get_page_height(v.native(), C.GtkUnit(unit))
 	return float64(c)
 }
 
@@ -376,7 +376,7 @@ func PageSetupNewFromFile(fileName string) (*PageSetup, error) {
 	c := C.gtk_page_setup_new_from_file((*C.gchar)(cstr), &err)
 	if c == nil {
 		defer C.g_error_free(err)
-		return nil, errors.New(C.GoString((*C.char)(err.message)))
+		return nil, errors.New(goString(err.message))
 	}
 	obj := glib.Take(unsafe.Pointer(c))
 	return &PageSetup{obj}, nil
@@ -386,14 +386,14 @@ func PageSetupNewFromFile(fileName string) (*PageSetup, error) {
 // PageSetupNewFromKeyFile() is a wrapper around gtk_page_setup_new_from_key_file().
 
 // PageSetupLoadFile() is a wrapper around gtk_page_setup_load_file().
-func (ps *PageSetup) PageSetupLoadFile(name string) error {
+func (v *PageSetup) PageSetupLoadFile(name string) error {
 	cstr := C.CString(name)
 	defer C.free(unsafe.Pointer(cstr))
 	var err *C.GError = nil
-	res := C.gtk_page_setup_load_file(ps.native(), cstr, &err)
+	res := C.gtk_page_setup_load_file(v.native(), cstr, &err)
 	if !gobool(res) {
 		defer C.g_error_free(err)
-		return errors.New(C.GoString((*C.char)(err.message)))
+		return errors.New(goString(err.message))
 	}
 	return nil
 }
@@ -401,14 +401,14 @@ func (ps *PageSetup) PageSetupLoadFile(name string) error {
 // PageSetupLoadKeyFile() is a wrapper around gtk_page_setup_load_key_file().
 
 // PageSetupToFile() is a wrapper around gtk_page_setup_to_file().
-func (ps *PageSetup) PageSetupToFile(name string) error {
+func (v *PageSetup) PageSetupToFile(name string) error {
 	cstr := C.CString(name)
 	defer C.free(unsafe.Pointer(cstr))
 	var err *C.GError = nil
-	res := C.gtk_page_setup_to_file(ps.native(), cstr, &err)
+	res := C.gtk_page_setup_to_file(v.native(), cstr, &err)
 	if !gobool(res) {
 		defer C.g_error_free(err)
-		return errors.New(C.GoString((*C.char)(err.message)))
+		return errors.New(goString(err.message))
 	}
 	return nil
 }
@@ -421,20 +421,25 @@ func (ps *PageSetup) PageSetupToFile(name string) error {
 
 // PaperSize is a representation of GTK's GtkPaperSize
 type PaperSize struct {
-	GtkPaperSize *C.GtkPaperSize
+	gtkPaperSize *C.GtkPaperSize
 }
 
 // native returns a pointer to the underlying GtkPaperSize.
-func (ps *PaperSize) native() *C.GtkPaperSize {
-	if ps == nil {
+func (v *PaperSize) native() *C.GtkPaperSize {
+	if v == nil {
 		return nil
 	}
-	return ps.GtkPaperSize
+	return v.gtkPaperSize
 }
 
 func marshalPaperSize(p uintptr) (interface{}, error) {
-	c := C.g_value_get_boxed((*C.GValue)(unsafe.Pointer(p)))
-	return &PaperSize{(*C.GtkPaperSize)(unsafe.Pointer(c))}, nil
+	c := C.g_value_get_boxed(C.toGValue(unsafe.Pointer(p)))
+	c2 := (*C.GtkPaperSize)(unsafe.Pointer(c))
+	return wrapPaperSize(c2), nil
+}
+
+func wrapPaperSize(obj *C.GtkPaperSize) *PaperSize {
+	return &PaperSize{obj}
 }
 
 const (
@@ -450,24 +455,21 @@ const (
 
 // PaperSizeNew() is a wrapper around gtk_paper_size_new().
 func PaperSizeNew(name string) (*PaperSize, error) {
-	cstr := C.CString(name)
-	defer C.free(unsafe.Pointer(cstr))
-	var gName *C.gchar
+	var cstr *C.char
 
-	if name == "" {
-		gName = nil
-	} else {
-		gName = (*C.gchar)(cstr)
+	if name != "" {
+		cstr := C.CString(name)
+		defer C.free(unsafe.Pointer(cstr))
 	}
 
-	c := C.gtk_paper_size_new(gName)
+	c := C.gtk_paper_size_new((*C.gchar)(cstr))
 	if c == nil {
 		return nil, nilPtrErr
 	}
 
-	t := &PaperSize{c}
-	runtime.SetFinalizer(t, (*PaperSize).free)
-	return t, nil
+	ps := wrapPaperSize(c)
+	runtime.SetFinalizer(ps, (*PaperSize).free)
+	return ps, nil
 }
 
 // PaperSizeNewFromPPD() is a wrapper around gtk_paper_size_new_from_ppd().
@@ -481,9 +483,10 @@ func PaperSizeNewFromPPD(name, displayName string, width, height float64) (*Pape
 	if c == nil {
 		return nil, nilPtrErr
 	}
-	t := &PaperSize{c}
-	runtime.SetFinalizer(t, (*PaperSize).free)
-	return t, nil
+
+	ps := wrapPaperSize(c)
+	runtime.SetFinalizer(ps, (*PaperSize).free)
+	return ps, nil
 }
 
 // PaperSizeNewCustom() is a wrapper around gtk_paper_size_new_custom().
@@ -497,30 +500,32 @@ func PaperSizeNewCustom(name, displayName string, width, height float64, unit Un
 	if c == nil {
 		return nil, nilPtrErr
 	}
-	t := &PaperSize{c}
-	runtime.SetFinalizer(t, (*PaperSize).free)
-	return t, nil
+
+	ps := wrapPaperSize(c)
+	runtime.SetFinalizer(ps, (*PaperSize).free)
+	return ps, nil
 }
 
 // Copy() is a wrapper around gtk_paper_size_copy().
-func (ps *PaperSize) Copy() (*PaperSize, error) {
-	c := C.gtk_paper_size_copy(ps.native())
+func (v *PaperSize) Copy() (*PaperSize, error) {
+	c := C.gtk_paper_size_copy(v.native())
 	if c == nil {
 		return nil, nilPtrErr
 	}
-	t := &PaperSize{c}
-	runtime.SetFinalizer(t, (*PaperSize).free)
-	return t, nil
+
+	p := wrapPaperSize(c)
+	runtime.SetFinalizer(p, (*PaperSize).free)
+	return p, nil
 }
 
 // free() is a wrapper around gtk_paper_size_free().
-func (ps *PaperSize) free() {
-	C.gtk_paper_size_free(ps.native())
+func (v *PaperSize) free() {
+	C.gtk_paper_size_free(v.native())
 }
 
 // IsEqual() is a wrapper around gtk_paper_size_is_equal().
-func (ps *PaperSize) IsEqual(other *PaperSize) bool {
-	c := C.gtk_paper_size_is_equal(ps.native(), other.native())
+func (v *PaperSize) IsEqual(other *PaperSize) bool {
+	c := C.gtk_paper_size_is_equal(v.native(), other.native())
 	return gobool(c)
 }
 
@@ -533,13 +538,14 @@ func PaperSizeGetPaperSizes(includeCustom bool) *glib.List {
 
 	glist := glib.WrapList(uintptr(unsafe.Pointer(clist)))
 	glist.DataWrapper(func(ptr unsafe.Pointer) interface{} {
-		return &PaperSize{(*C.GtkPaperSize)(ptr)}
+		ps := wrapPaperSize((*C.GtkPaperSize)(ptr))
+		return ps
 	})
 
 	runtime.SetFinalizer(glist, func(glist *glib.List) {
 		glist.FreeFull(func(item interface{}) {
 			ps := item.(*PaperSize)
-			C.gtk_paper_size_free(ps.GtkPaperSize)
+			C.gtk_paper_size_free(ps.native())
 		})
 	})
 
@@ -547,77 +553,77 @@ func PaperSizeGetPaperSizes(includeCustom bool) *glib.List {
 }
 
 // GetName() is a wrapper around gtk_paper_size_get_name().
-func (ps *PaperSize) GetName() string {
-	c := C.gtk_paper_size_get_name(ps.native())
-	return C.GoString((*C.char)(c))
+func (v *PaperSize) GetName() string {
+	c := C.gtk_paper_size_get_name(v.native())
+	return goString(c)
 }
 
 // GetDisplayName() is a wrapper around gtk_paper_size_get_display_name().
-func (ps *PaperSize) GetDisplayName() string {
-	c := C.gtk_paper_size_get_display_name(ps.native())
-	return C.GoString((*C.char)(c))
+func (v *PaperSize) GetDisplayName() string {
+	c := C.gtk_paper_size_get_display_name(v.native())
+	return goString(c)
 }
 
 // GetPPDName() is a wrapper around gtk_paper_size_get_ppd_name().
-func (ps *PaperSize) GetPPDName() (string, error) {
-	c := C.gtk_paper_size_get_ppd_name(ps.native())
+func (v *PaperSize) GetPPDName() (string, error) {
+	c := C.gtk_paper_size_get_ppd_name(v.native())
 	if c == nil {
 		return "", nilPtrErr
 	}
-	return C.GoString((*C.char)(c)), nil
+	return goString(c), nil
 }
 
 // GetWidth() is a wrapper around gtk_paper_size_get_width().
-func (ps *PaperSize) GetWidth(unit Unit) float64 {
-	c := C.gtk_paper_size_get_width(ps.native(), C.GtkUnit(unit))
+func (v *PaperSize) GetWidth(unit Unit) float64 {
+	c := C.gtk_paper_size_get_width(v.native(), C.GtkUnit(unit))
 	return float64(c)
 }
 
 // GetHeight() is a wrapper around gtk_paper_size_get_height().
-func (ps *PaperSize) GetHeight(unit Unit) float64 {
-	c := C.gtk_paper_size_get_width(ps.native(), C.GtkUnit(unit))
+func (v *PaperSize) GetHeight(unit Unit) float64 {
+	c := C.gtk_paper_size_get_width(v.native(), C.GtkUnit(unit))
 	return float64(c)
 }
 
 // IsCustom() is a wrapper around gtk_paper_size_is_custom().
-func (ps *PaperSize) IsCustom() bool {
-	c := C.gtk_paper_size_is_custom(ps.native())
+func (v *PaperSize) IsCustom() bool {
+	c := C.gtk_paper_size_is_custom(v.native())
 	return gobool(c)
 }
 
 // SetSize() is a wrapper around gtk_paper_size_set_size().
-func (ps *PaperSize) SetSize(width, height float64, unit Unit) {
-	C.gtk_paper_size_set_size(ps.native(), C.gdouble(width), C.gdouble(height), C.GtkUnit(unit))
+func (v *PaperSize) SetSize(width, height float64, unit Unit) {
+	C.gtk_paper_size_set_size(v.native(), C.gdouble(width), C.gdouble(height), C.GtkUnit(unit))
 }
 
 // GetDefaultTopMargin() is a wrapper around gtk_paper_size_get_default_top_margin().
-func (ps *PaperSize) GetDefaultTopMargin(unit Unit) float64 {
-	c := C.gtk_paper_size_get_default_top_margin(ps.native(), C.GtkUnit(unit))
+func (v *PaperSize) GetDefaultTopMargin(unit Unit) float64 {
+	c := C.gtk_paper_size_get_default_top_margin(v.native(), C.GtkUnit(unit))
 	return float64(c)
 }
 
 // GetDefaultBottomMargin() is a wrapper around gtk_paper_size_get_default_bottom_margin().
-func (ps *PaperSize) GetDefaultBottomMargin(unit Unit) float64 {
-	c := C.gtk_paper_size_get_default_bottom_margin(ps.native(), C.GtkUnit(unit))
+func (v *PaperSize) GetDefaultBottomMargin(unit Unit) float64 {
+	c := C.gtk_paper_size_get_default_bottom_margin(v.native(), C.GtkUnit(unit))
 	return float64(c)
 }
 
 // GetDefaultLeftMargin() is a wrapper around gtk_paper_size_get_default_left_margin().
-func (ps *PaperSize) GetDefaultLeftMargin(unit Unit) float64 {
-	c := C.gtk_paper_size_get_default_left_margin(ps.native(), C.GtkUnit(unit))
+func (v *PaperSize) GetDefaultLeftMargin(unit Unit) float64 {
+	c := C.gtk_paper_size_get_default_left_margin(v.native(), C.GtkUnit(unit))
 	return float64(c)
 }
 
 // GetDefaultRightMargin() is a wrapper around gtk_paper_size_get_default_right_margin().
-func (ps *PaperSize) GetDefaultRightMargin(unit Unit) float64 {
-	c := C.gtk_paper_size_get_default_right_margin(ps.native(), C.GtkUnit(unit))
+func (v *PaperSize) GetDefaultRightMargin(unit Unit) float64 {
+	c := C.gtk_paper_size_get_default_right_margin(v.native(), C.GtkUnit(unit))
 	return float64(c)
 }
 
 // PaperSizeGetDefault() is a wrapper around gtk_paper_size_get_default().
 func PaperSizeGetDefaultRightMargin(unit Unit) string {
 	c := C.gtk_paper_size_get_default()
-	return C.GoString((*C.char)(c))
+	return goString(c)
 }
 
 // PaperSizeNewFromKeyFile() is a wrapper around gtk_paper_size_new_from_key_file().
@@ -633,12 +639,12 @@ type PrintContext struct {
 }
 
 // native() returns a pointer to the underlying GtkPrintContext.
-func (pc *PrintContext) native() *C.GtkPrintContext {
-	if pc == nil || pc.GObject == nil {
+func (v *PrintContext) native() *C.GtkPrintContext {
+	if v == nil {
 		return nil
 	}
-	p := unsafe.Pointer(pc.GObject)
-	return C.toGtkPrintContext(p)
+	ptr := unsafe.Pointer(v.Object.Native())
+	return C.toGtkPrintContext(ptr)
 }
 
 func marshalPrintContext(p uintptr) (interface{}, error) {
@@ -652,71 +658,71 @@ func wrapPrintContext(obj *glib.Object) *PrintContext {
 }
 
 // GetCairoContext() is a wrapper around gtk_print_context_get_cairo_context().
-func (pc *PrintContext) GetCairoContext() *cairo.Context {
-	c := C.gtk_print_context_get_cairo_context(pc.native())
+func (v *PrintContext) GetCairoContext() *cairo.Context {
+	c := C.gtk_print_context_get_cairo_context(v.native())
 	return cairo.WrapContext(uintptr(unsafe.Pointer(c)))
 }
 
 // SetCairoContext() is a wrapper around gtk_print_context_set_cairo_context().
-func (pc *PrintContext) SetCairoContext(cr *cairo.Context, dpiX, dpiY float64) {
-	C.gtk_print_context_set_cairo_context(pc.native(),
+func (v *PrintContext) SetCairoContext(cr *cairo.Context, dpiX, dpiY float64) {
+	C.gtk_print_context_set_cairo_context(v.native(),
 		(*C.cairo_t)(unsafe.Pointer(cr.Native())),
 		C.double(dpiX), C.double(dpiY))
 }
 
 // GetPageSetup() is a wrapper around gtk_print_context_get_page_setup().
-func (pc *PrintContext) GetPageSetup() *PageSetup {
-	c := C.gtk_print_context_get_page_setup(pc.native())
+func (v *PrintContext) GetPageSetup() *PageSetup {
+	c := C.gtk_print_context_get_page_setup(v.native())
 	obj := glib.Take(unsafe.Pointer(c))
 	return wrapPageSetup(obj)
 }
 
 // GetWidth() is a wrapper around gtk_print_context_get_width().
-func (pc *PrintContext) GetWidth() float64 {
-	c := C.gtk_print_context_get_width(pc.native())
+func (v *PrintContext) GetWidth() float64 {
+	c := C.gtk_print_context_get_width(v.native())
 	return float64(c)
 }
 
 // GetHeight() is a wrapper around gtk_print_context_get_height().
-func (pc *PrintContext) GetHeight() float64 {
-	c := C.gtk_print_context_get_height(pc.native())
+func (v *PrintContext) GetHeight() float64 {
+	c := C.gtk_print_context_get_height(v.native())
 	return float64(c)
 }
 
 // GetDpiX() is a wrapper around gtk_print_context_get_dpi_x().
-func (pc *PrintContext) GetDpiX() float64 {
-	c := C.gtk_print_context_get_dpi_x(pc.native())
+func (v *PrintContext) GetDpiX() float64 {
+	c := C.gtk_print_context_get_dpi_x(v.native())
 	return float64(c)
 }
 
 // GetDpiY() is a wrapper around gtk_print_context_get_dpi_y().
-func (pc *PrintContext) GetDpiY() float64 {
-	c := C.gtk_print_context_get_dpi_y(pc.native())
+func (v *PrintContext) GetDpiY() float64 {
+	c := C.gtk_print_context_get_dpi_y(v.native())
 	return float64(c)
 }
 
 // GetPangoFontMap() is a wrapper around gtk_print_context_get_pango_fontmap().
-func (pc *PrintContext) GetPangoFontMap() *pango.FontMap {
-	c := C.gtk_print_context_get_pango_fontmap(pc.native())
+func (v *PrintContext) GetPangoFontMap() *pango.FontMap {
+	c := C.gtk_print_context_get_pango_fontmap(v.native())
 	return pango.WrapFontMap(uintptr(unsafe.Pointer(c)))
 }
 
 // CreatePangoContext() is a wrapper around gtk_print_context_create_pango_context().
-func (pc *PrintContext) CreatePangoContext() *pango.Context {
-	c := C.gtk_print_context_create_pango_context(pc.native())
+func (v *PrintContext) CreatePangoContext() *pango.Context {
+	c := C.gtk_print_context_create_pango_context(v.native())
 	return pango.WrapContext(uintptr(unsafe.Pointer(c)))
 }
 
 // CreatePangoLayout() is a wrapper around gtk_print_context_create_pango_layout().
-func (pc *PrintContext) CreatePangoLayout() *pango.Layout {
-	c := C.gtk_print_context_create_pango_layout(pc.native())
+func (v *PrintContext) CreatePangoLayout() *pango.Layout {
+	c := C.gtk_print_context_create_pango_layout(v.native())
 	return pango.WrapLayout(uintptr(unsafe.Pointer(c)))
 }
 
 // GetHardMargins() is a wrapper around gtk_print_context_get_hard_margins().
-func (pc *PrintContext) GetHardMargins() (float64, float64, float64, float64, error) {
+func (v *PrintContext) GetHardMargins() (float64, float64, float64, float64, error) {
 	var top, bottom, left, right C.gdouble
-	c := C.gtk_print_context_get_hard_margins(pc.native(), &top, &bottom, &left, &right)
+	c := C.gtk_print_context_get_hard_margins(v.native(), &top, &bottom, &left, &right)
 	if gobool(c) == false {
 		return 0.0, 0.0, 0.0, 0.0, errors.New("unable to retrieve hard margins")
 	}
@@ -728,24 +734,23 @@ func (pc *PrintContext) GetHardMargins() (float64, float64, float64, float64, er
  */
 type PrintOperation struct {
 	*glib.Object
-
 	// Interfaces
 	PrintOperationPreview
 }
 
-func (po *PrintOperation) native() *C.GtkPrintOperation {
-	if po == nil || po.GObject == nil {
+func (v *PrintOperation) native() *C.GtkPrintOperation {
+	if v == nil {
 		return nil
 	}
-	p := unsafe.Pointer(po.GObject)
-	return C.toGtkPrintOperation(p)
+	ptr := unsafe.Pointer(v.Object.Native())
+	return C.toGtkPrintOperation(ptr)
 }
 
 func (v *PrintOperation) toPrintOperationPreview() *C.GtkPrintOperationPreview {
 	if v == nil {
 		return nil
 	}
-	return C.toGtkPrintOperationPreview(unsafe.Pointer(v.GObject))
+	return C.toGtkPrintOperationPreview(unsafe.Pointer(v.Native()))
 }
 
 func marshalPrintOperation(p uintptr) (interface{}, error) {
@@ -755,7 +760,7 @@ func marshalPrintOperation(p uintptr) (interface{}, error) {
 }
 
 func wrapPrintOperation(obj *glib.Object) *PrintOperation {
-	pop := wrapPrintOperationPreview(obj)
+	pop := wrapPrintOperationPreview(*glib.InterfaceFromObjectNew(obj))
 	return &PrintOperation{obj, *pop}
 }
 
@@ -770,26 +775,26 @@ func PrintOperationNew() (*PrintOperation, error) {
 }
 
 // SetAllowAsync() is a wrapper around gtk_print_operation_set_allow_async().
-func (po *PrintOperation) PrintOperationSetAllowAsync(allowSync bool) {
-	C.gtk_print_operation_set_allow_async(po.native(), gbool(allowSync))
+func (v *PrintOperation) PrintOperationSetAllowAsync(allowSync bool) {
+	C.gtk_print_operation_set_allow_async(v.native(), gbool(allowSync))
 }
 
 // GetError() is a wrapper around gtk_print_operation_get_error().
-func (po *PrintOperation) PrintOperationGetError() error {
+func (v *PrintOperation) PrintOperationGetError() error {
 	var err *C.GError = nil
-	C.gtk_print_operation_get_error(po.native(), &err)
+	C.gtk_print_operation_get_error(v.native(), &err)
 	defer C.g_error_free(err)
-	return errors.New(C.GoString((*C.char)(err.message)))
+	return errors.New(goString(err.message))
 }
 
 // SetDefaultPageSetup() is a wrapper around gtk_print_operation_set_default_page_setup().
-func (po *PrintOperation) SetDefaultPageSetup(ps *PageSetup) {
-	C.gtk_print_operation_set_default_page_setup(po.native(), ps.native())
+func (v *PrintOperation) SetDefaultPageSetup(ps *PageSetup) {
+	C.gtk_print_operation_set_default_page_setup(v.native(), ps.native())
 }
 
 // GetDefaultPageSetup() is a wrapper around gtk_print_operation_get_default_page_setup().
-func (po *PrintOperation) GetDefaultPageSetup() (*PageSetup, error) {
-	c := C.gtk_print_operation_get_default_page_setup(po.native())
+func (v *PrintOperation) GetDefaultPageSetup() (*PageSetup, error) {
+	c := C.gtk_print_operation_get_default_page_setup(v.native())
 	if c == nil {
 		return nil, nilPtrErr
 	}
@@ -798,13 +803,13 @@ func (po *PrintOperation) GetDefaultPageSetup() (*PageSetup, error) {
 }
 
 // SetPrintSettings() is a wrapper around gtk_print_operation_set_print_settings().
-func (po *PrintOperation) SetPrintSettings(ps *PrintSettings) {
-	C.gtk_print_operation_set_print_settings(po.native(), ps.native())
+func (v *PrintOperation) SetPrintSettings(ps *PrintSettings) {
+	C.gtk_print_operation_set_print_settings(v.native(), ps.native())
 }
 
 // GetPrintSettings() is a wrapper around gtk_print_operation_get_print_settings().
-func (po *PrintOperation) GetPrintSettings(ps *PageSetup) (*PrintSettings, error) {
-	c := C.gtk_print_operation_get_print_settings(po.native())
+func (v *PrintOperation) GetPrintSettings() (*PrintSettings, error) {
+	c := C.gtk_print_operation_get_print_settings(v.native())
 	if c == nil {
 		return nil, nilPtrErr
 	}
@@ -813,137 +818,137 @@ func (po *PrintOperation) GetPrintSettings(ps *PageSetup) (*PrintSettings, error
 }
 
 // SetJobName() is a wrapper around gtk_print_operation_set_job_name().
-func (po *PrintOperation) SetJobName(name string) {
+func (v *PrintOperation) SetJobName(name string) {
 	cstr := C.CString(name)
 	defer C.free(unsafe.Pointer(cstr))
-	C.gtk_print_operation_set_job_name(po.native(), (*C.gchar)(cstr))
+	C.gtk_print_operation_set_job_name(v.native(), (*C.gchar)(cstr))
 }
 
 // SetNPages() is a wrapper around gtk_print_operation_set_n_pages().
-func (po *PrintOperation) SetNPages(pages int) {
-	C.gtk_print_operation_set_n_pages(po.native(), C.gint(pages))
+func (v *PrintOperation) SetNPages(pages int) {
+	C.gtk_print_operation_set_n_pages(v.native(), C.gint(pages))
 }
 
 // GetNPagesToPrint() is a wrapper around gtk_print_operation_get_n_pages_to_print().
-func (po *PrintOperation) GetNPagesToPrint() int {
-	c := C.gtk_print_operation_get_n_pages_to_print(po.native())
+func (v *PrintOperation) GetNPagesToPrint() int {
+	c := C.gtk_print_operation_get_n_pages_to_print(v.native())
 	return int(c)
 }
 
 // SetCurrentPage() is a wrapper around gtk_print_operation_set_current_page().
-func (po *PrintOperation) SetCurrentPage(page int) {
-	C.gtk_print_operation_set_current_page(po.native(), C.gint(page))
+func (v *PrintOperation) SetCurrentPage(page int) {
+	C.gtk_print_operation_set_current_page(v.native(), C.gint(page))
 }
 
 // SetUseFullPage() is a wrapper around gtk_print_operation_set_use_full_page().
-func (po *PrintOperation) SetUseFullPage(full bool) {
-	C.gtk_print_operation_set_use_full_page(po.native(), gbool(full))
+func (v *PrintOperation) SetUseFullPage(full bool) {
+	C.gtk_print_operation_set_use_full_page(v.native(), gbool(full))
 }
 
 // SetUnit() is a wrapper around gtk_print_operation_set_unit().
-func (po *PrintOperation) SetUnit(unit Unit) {
-	C.gtk_print_operation_set_unit(po.native(), C.GtkUnit(unit))
+func (v *PrintOperation) SetUnit(unit Unit) {
+	C.gtk_print_operation_set_unit(v.native(), C.GtkUnit(unit))
 }
 
 // SetExportFilename() is a wrapper around gtk_print_operation_set_export_filename().
-func (po *PrintOperation) SetExportFilename(name string) {
+func (v *PrintOperation) SetExportFilename(name string) {
 	cstr := C.CString(name)
 	defer C.free(unsafe.Pointer(cstr))
-	C.gtk_print_operation_set_export_filename(po.native(), (*C.gchar)(cstr))
+	C.gtk_print_operation_set_export_filename(v.native(), (*C.gchar)(cstr))
 }
 
 // SetShowProgress() is a wrapper around gtk_print_operation_set_show_progress().
-func (po *PrintOperation) SetShowProgress(show bool) {
-	C.gtk_print_operation_set_show_progress(po.native(), gbool(show))
+func (v *PrintOperation) SetShowProgress(show bool) {
+	C.gtk_print_operation_set_show_progress(v.native(), gbool(show))
 }
 
 // SetTrackPrintStatus() is a wrapper around gtk_print_operation_set_track_print_status().
-func (po *PrintOperation) SetTrackPrintStatus(progress bool) {
-	C.gtk_print_operation_set_track_print_status(po.native(), gbool(progress))
+func (v *PrintOperation) SetTrackPrintStatus(progress bool) {
+	C.gtk_print_operation_set_track_print_status(v.native(), gbool(progress))
 }
 
 // SetCustomTabLabel() is a wrapper around gtk_print_operation_set_custom_tab_label().
-func (po *PrintOperation) SetCustomTabLabel(label string) {
+func (v *PrintOperation) SetCustomTabLabel(label string) {
 	cstr := C.CString(label)
 	defer C.free(unsafe.Pointer(cstr))
-	C.gtk_print_operation_set_custom_tab_label(po.native(), (*C.gchar)(cstr))
+	C.gtk_print_operation_set_custom_tab_label(v.native(), (*C.gchar)(cstr))
 }
 
 // Run() is a wrapper around gtk_print_operation_run().
-func (po *PrintOperation) Run(action PrintOperationAction, parent *Window) (PrintOperationResult, error) {
+func (v *PrintOperation) Run(action PrintOperationAction, parent *Window) (PrintOperationResult, error) {
 	var err *C.GError = nil
-	c := C.gtk_print_operation_run(po.native(), C.GtkPrintOperationAction(action), parent.native(), &err)
+	c := C.gtk_print_operation_run(v.native(), C.GtkPrintOperationAction(action), parent.native(), &err)
 	res := PrintOperationResult(c)
 	if res == PRINT_OPERATION_RESULT_ERROR {
 		defer C.g_error_free(err)
-		return res, errors.New(C.GoString((*C.char)(err.message)))
+		return res, errors.New(goString(err.message))
 	}
 	return res, nil
 }
 
 // Cancel() is a wrapper around gtk_print_operation_cancel().
-func (po *PrintOperation) Cancel() {
-	C.gtk_print_operation_cancel(po.native())
+func (v *PrintOperation) Cancel() {
+	C.gtk_print_operation_cancel(v.native())
 }
 
 // DrawPageFinish() is a wrapper around gtk_print_operation_draw_page_finish().
-func (po *PrintOperation) DrawPageFinish() {
-	C.gtk_print_operation_draw_page_finish(po.native())
+func (v *PrintOperation) DrawPageFinish() {
+	C.gtk_print_operation_draw_page_finish(v.native())
 }
 
 // SetDeferDrawing() is a wrapper around gtk_print_operation_set_defer_drawing().
-func (po *PrintOperation) SetDeferDrawing() {
-	C.gtk_print_operation_set_defer_drawing(po.native())
+func (v *PrintOperation) SetDeferDrawing() {
+	C.gtk_print_operation_set_defer_drawing(v.native())
 }
 
 // GetStatus() is a wrapper around gtk_print_operation_get_status().
-func (po *PrintOperation) GetStatus() PrintStatus {
-	c := C.gtk_print_operation_get_status(po.native())
+func (v *PrintOperation) GetStatus() PrintStatus {
+	c := C.gtk_print_operation_get_status(v.native())
 	return PrintStatus(c)
 }
 
 // GetStatusString() is a wrapper around gtk_print_operation_get_status_string().
-func (po *PrintOperation) GetStatusString() string {
-	c := C.gtk_print_operation_get_status_string(po.native())
-	return C.GoString((*C.char)(c))
+func (v *PrintOperation) GetStatusString() string {
+	c := C.gtk_print_operation_get_status_string(v.native())
+	return goString(c)
 }
 
 // IsFinished() is a wrapper around gtk_print_operation_is_finished().
-func (po *PrintOperation) IsFinished() bool {
-	c := C.gtk_print_operation_is_finished(po.native())
+func (v *PrintOperation) IsFinished() bool {
+	c := C.gtk_print_operation_is_finished(v.native())
 	return gobool(c)
 }
 
 // SetSupportSelection() is a wrapper around gtk_print_operation_set_support_selection().
-func (po *PrintOperation) SetSupportSelection(selection bool) {
-	C.gtk_print_operation_set_support_selection(po.native(), gbool(selection))
+func (v *PrintOperation) SetSupportSelection(selection bool) {
+	C.gtk_print_operation_set_support_selection(v.native(), gbool(selection))
 }
 
 // GetSupportSelection() is a wrapper around gtk_print_operation_get_support_selection().
-func (po *PrintOperation) GetSupportSelection() bool {
-	c := C.gtk_print_operation_get_support_selection(po.native())
+func (v *PrintOperation) GetSupportSelection() bool {
+	c := C.gtk_print_operation_get_support_selection(v.native())
 	return gobool(c)
 }
 
 // SetHasSelection() is a wrapper around gtk_print_operation_set_has_selection().
-func (po *PrintOperation) SetHasSelection(selection bool) {
-	C.gtk_print_operation_set_has_selection(po.native(), gbool(selection))
+func (v *PrintOperation) SetHasSelection(selection bool) {
+	C.gtk_print_operation_set_has_selection(v.native(), gbool(selection))
 }
 
 // GetHasSelection() is a wrapper around gtk_print_operation_get_has_selection().
-func (po *PrintOperation) GetHasSelection() bool {
-	c := C.gtk_print_operation_get_has_selection(po.native())
+func (v *PrintOperation) GetHasSelection() bool {
+	c := C.gtk_print_operation_get_has_selection(v.native())
 	return gobool(c)
 }
 
 // SetEmbedPageSetup() is a wrapper around gtk_print_operation_set_embed_page_setup().
-func (po *PrintOperation) SetEmbedPageSetup(embed bool) {
-	C.gtk_print_operation_set_embed_page_setup(po.native(), gbool(embed))
+func (v *PrintOperation) SetEmbedPageSetup(embed bool) {
+	C.gtk_print_operation_set_embed_page_setup(v.native(), gbool(embed))
 }
 
 // GetEmbedPageSetup() is a wrapper around gtk_print_operation_get_embed_page_setup().
-func (po *PrintOperation) GetEmbedPageSetup() bool {
-	c := C.gtk_print_operation_get_embed_page_setup(po.native())
+func (v *PrintOperation) GetEmbedPageSetup() bool {
+	c := C.gtk_print_operation_get_embed_page_setup(v.native())
 	return gobool(c)
 }
 
@@ -993,7 +998,7 @@ func PrintRunPageSetupDialogAsync(parent *Window, setup *PageSetup,
 
 // PrintOperationPreview is a representation of GTK's GtkPrintOperationPreview GInterface.
 type PrintOperationPreview struct {
-	*glib.Object
+	glib.Interface
 }
 
 // IPrintOperationPreview is an interface type implemented by all structs
@@ -1006,21 +1011,17 @@ type IPrintOperationPreview interface {
 
 // native() returns a pointer to the underlying GObject as a GtkPrintOperationPreview.
 func (v *PrintOperationPreview) native() *C.GtkPrintOperationPreview {
-	if v == nil || v.GObject == nil {
-		return nil
-	}
-	p := unsafe.Pointer(v.GObject)
-	return C.toGtkPrintOperationPreview(p)
+	return C.toGtkPrintOperationPreview(unsafe.Pointer(v.Native()))
 }
 
 func marshalPrintOperationPreview(p uintptr) (interface{}, error) {
 	c := C.g_value_get_object((*C.GValue)(unsafe.Pointer(p)))
 	obj := glib.Take(unsafe.Pointer(c))
-	return wrapPrintOperationPreview(obj), nil
+	return wrapPrintOperationPreview(*glib.InterfaceFromObjectNew(obj)), nil
 }
 
-func wrapPrintOperationPreview(obj *glib.Object) *PrintOperationPreview {
-	return &PrintOperationPreview{obj}
+func wrapPrintOperationPreview(intf glib.Interface) *PrintOperationPreview {
+	return &PrintOperationPreview{intf}
 }
 
 func (v *PrintOperationPreview) toPrintOperationPreview() *C.GtkPrintOperationPreview {
@@ -1031,18 +1032,18 @@ func (v *PrintOperationPreview) toPrintOperationPreview() *C.GtkPrintOperationPr
 }
 
 // RenderPage()() is a wrapper around gtk_print_operation_preview_render_page().
-func (pop *PrintOperationPreview) RenderPage(page int) {
-	C.gtk_print_operation_preview_render_page(pop.native(), C.gint(page))
+func (v *PrintOperationPreview) RenderPage(page int) {
+	C.gtk_print_operation_preview_render_page(v.native(), C.gint(page))
 }
 
 // EndPreview()() is a wrapper around gtk_print_operation_preview_end_preview().
-func (pop *PrintOperationPreview) EndPreview() {
-	C.gtk_print_operation_preview_end_preview(pop.native())
+func (v *PrintOperationPreview) EndPreview() {
+	C.gtk_print_operation_preview_end_preview(v.native())
 }
 
 // IsSelected()() is a wrapper around gtk_print_operation_preview_is_selected().
-func (pop *PrintOperationPreview) IsSelected(page int) bool {
-	c := C.gtk_print_operation_preview_is_selected(pop.native(), C.gint(page))
+func (v *PrintOperationPreview) IsSelected(page int) bool {
+	c := C.gtk_print_operation_preview_is_selected(v.native(), C.gint(page))
 	return gobool(c)
 }
 
@@ -1054,18 +1055,18 @@ type PrintSettings struct {
 	*glib.Object
 }
 
-func (ps *PrintSettings) native() *C.GtkPrintSettings {
-	if ps == nil || ps.GObject == nil {
+func (v *PrintSettings) native() *C.GtkPrintSettings {
+	if v == nil {
 		return nil
 	}
-
-	p := unsafe.Pointer(ps.GObject)
-	return C.toGtkPrintSettings(p)
+	ptr := unsafe.Pointer(v.Object.Native())
+	return C.toGtkPrintSettings(ptr)
 }
 
 func marshalPrintSettings(p uintptr) (interface{}, error) {
 	c := C.g_value_get_object((*C.GValue)(unsafe.Pointer(p)))
-	return wrapPrintSettings(glib.Take(unsafe.Pointer(c))), nil
+	obj := glib.Take(unsafe.Pointer(c))
+	return wrapPrintSettings(obj), nil
 }
 
 func wrapPrintSettings(obj *glib.Object) *PrintSettings {
@@ -1118,8 +1119,8 @@ func PrintSettingsNew() (*PrintSettings, error) {
 }
 
 // Copy() is a wrapper around gtk_print_settings_copy().
-func (ps *PrintSettings) Copy() (*PrintSettings, error) {
-	c := C.gtk_print_settings_copy(ps.native())
+func (v *PrintSettings) Copy() (*PrintSettings, error) {
+	c := C.gtk_print_settings_copy(v.native())
 	if c == nil {
 		return nil, nilPtrErr
 	}
@@ -1128,36 +1129,36 @@ func (ps *PrintSettings) Copy() (*PrintSettings, error) {
 }
 
 // HasKey() is a wrapper around gtk_print_settings_has_key().
-func (ps *PrintSettings) HasKey(key string) bool {
+func (v *PrintSettings) HasKey(key string) bool {
 	cstr := C.CString(key)
 	defer C.free(unsafe.Pointer(cstr))
-	c := C.gtk_print_settings_has_key(ps.native(), (*C.gchar)(cstr))
+	c := C.gtk_print_settings_has_key(v.native(), (*C.gchar)(cstr))
 	return gobool(c)
 }
 
 // Get() is a wrapper around gtk_print_settings_get().
-func (ps *PrintSettings) Get(key string) string {
+func (v *PrintSettings) Get(key string) string {
 	cstr := C.CString(key)
 	defer C.free(unsafe.Pointer(cstr))
-	c := C.gtk_print_settings_get(ps.native(), (*C.gchar)(cstr))
-	return C.GoString((*C.char)(c))
+	c := C.gtk_print_settings_get(v.native(), (*C.gchar)(cstr))
+	return goString(c)
 }
 
 // Set() is a wrapper around gtk_print_settings_set().
 // TODO: Since value can't be nil, we can't unset values here.
-func (ps *PrintSettings) Set(key, value string) {
+func (v *PrintSettings) Set(key, value string) {
 	cKey := C.CString(key)
 	defer C.free(unsafe.Pointer(cKey))
 	cValue := C.CString(value)
 	defer C.free(unsafe.Pointer(cValue))
-	C.gtk_print_settings_set(ps.native(), (*C.gchar)(cKey), (*C.gchar)(cValue))
+	C.gtk_print_settings_set(v.native(), (*C.gchar)(cKey), (*C.gchar)(cValue))
 }
 
 // Unset() is a wrapper around gtk_print_settings_unset().
-func (ps *PrintSettings) Unset(key string) {
+func (v *PrintSettings) Unset(key string) {
 	cstr := C.CString(key)
 	defer C.free(unsafe.Pointer(cstr))
-	C.gtk_print_settings_unset(ps.native(), (*C.gchar)(cstr))
+	C.gtk_print_settings_unset(v.native(), (*C.gchar)(cstr))
 }
 
 type PrintSettingsCallback func(key, value string, userData uintptr)
@@ -1179,7 +1180,7 @@ var (
 )
 
 // Foreach() is a wrapper around gtk_print_settings_foreach().
-func (ps *PrintSettings) ForEach(cb PrintSettingsCallback, userData uintptr) {
+func (v *PrintSettings) ForEach(cb PrintSettingsCallback, userData uintptr) {
 	printSettingsCallbackRegistry.Lock()
 	id := printSettingsCallbackRegistry.next
 	printSettingsCallbackRegistry.next++
@@ -1187,371 +1188,371 @@ func (ps *PrintSettings) ForEach(cb PrintSettingsCallback, userData uintptr) {
 		printSettingsCallbackData{fn: cb, userData: userData}
 	printSettingsCallbackRegistry.Unlock()
 
-	C._gtk_print_settings_foreach(ps.native(), C.gpointer(uintptr(id)))
+	C._gtk_print_settings_foreach(v.native(), C.gpointer(uintptr(id)))
 }
 
 // GetBool() is a wrapper around gtk_print_settings_get_bool().
-func (ps *PrintSettings) GetBool(key string) bool {
+func (v *PrintSettings) GetBool(key string) bool {
 	cstr := C.CString(key)
 	defer C.free(unsafe.Pointer(cstr))
-	c := C.gtk_print_settings_get_bool(ps.native(), (*C.gchar)(cstr))
+	c := C.gtk_print_settings_get_bool(v.native(), (*C.gchar)(cstr))
 	return gobool(c)
 }
 
 // SetBool() is a wrapper around gtk_print_settings_set_bool().
-func (ps *PrintSettings) SetBool(key string, value bool) {
+func (v *PrintSettings) SetBool(key string, value bool) {
 	cstr := C.CString(key)
 	defer C.free(unsafe.Pointer(cstr))
-	C.gtk_print_settings_set_bool(ps.native(), (*C.gchar)(cstr), gbool(value))
+	C.gtk_print_settings_set_bool(v.native(), (*C.gchar)(cstr), gbool(value))
 }
 
 // GetDouble() is a wrapper around gtk_print_settings_get_double().
-func (ps *PrintSettings) GetDouble(key string) float64 {
+func (v *PrintSettings) GetDouble(key string) float64 {
 	cstr := C.CString(key)
 	defer C.free(unsafe.Pointer(cstr))
-	c := C.gtk_print_settings_get_double(ps.native(), (*C.gchar)(cstr))
+	c := C.gtk_print_settings_get_double(v.native(), (*C.gchar)(cstr))
 	return float64(c)
 }
 
 // GetDoubleWithDefault() is a wrapper around gtk_print_settings_get_double_with_default().
-func (ps *PrintSettings) GetDoubleWithDefault(key string, def float64) float64 {
+func (v *PrintSettings) GetDoubleWithDefault(key string, def float64) float64 {
 	cstr := C.CString(key)
 	defer C.free(unsafe.Pointer(cstr))
-	c := C.gtk_print_settings_get_double_with_default(ps.native(),
+	c := C.gtk_print_settings_get_double_with_default(v.native(),
 		(*C.gchar)(cstr), C.gdouble(def))
 	return float64(c)
 }
 
 // SetDouble() is a wrapper around gtk_print_settings_set_double().
-func (ps *PrintSettings) SetDouble(key string, value float64) {
+func (v *PrintSettings) SetDouble(key string, value float64) {
 	cstr := C.CString(key)
 	defer C.free(unsafe.Pointer(cstr))
-	C.gtk_print_settings_set_double(ps.native(), (*C.gchar)(cstr), C.gdouble(value))
+	C.gtk_print_settings_set_double(v.native(), (*C.gchar)(cstr), C.gdouble(value))
 }
 
 // GetLength() is a wrapper around gtk_print_settings_get_length().
-func (ps *PrintSettings) GetLength(key string, unit Unit) float64 {
+func (v *PrintSettings) GetLength(key string, unit Unit) float64 {
 	cstr := C.CString(key)
 	defer C.free(unsafe.Pointer(cstr))
-	c := C.gtk_print_settings_get_length(ps.native(), (*C.gchar)(cstr), C.GtkUnit(unit))
+	c := C.gtk_print_settings_get_length(v.native(), (*C.gchar)(cstr), C.GtkUnit(unit))
 	return float64(c)
 }
 
 // SetLength() is a wrapper around gtk_print_settings_set_length().
-func (ps *PrintSettings) SetLength(key string, value float64, unit Unit) {
+func (v *PrintSettings) SetLength(key string, value float64, unit Unit) {
 	cstr := C.CString(key)
 	defer C.free(unsafe.Pointer(cstr))
-	C.gtk_print_settings_set_length(ps.native(), (*C.gchar)(cstr), C.gdouble(value), C.GtkUnit(unit))
+	C.gtk_print_settings_set_length(v.native(), (*C.gchar)(cstr), C.gdouble(value), C.GtkUnit(unit))
 }
 
 // GetInt() is a wrapper around gtk_print_settings_get_int().
-func (ps *PrintSettings) GetInt(key string) int {
+func (v *PrintSettings) GetInt(key string) int {
 	cstr := C.CString(key)
 	defer C.free(unsafe.Pointer(cstr))
-	c := C.gtk_print_settings_get_int(ps.native(), (*C.gchar)(cstr))
+	c := C.gtk_print_settings_get_int(v.native(), (*C.gchar)(cstr))
 	return int(c)
 }
 
 // GetIntWithDefault() is a wrapper around gtk_print_settings_get_int_with_default().
-func (ps *PrintSettings) GetIntWithDefault(key string, def int) int {
+func (v *PrintSettings) GetIntWithDefault(key string, def int) int {
 	cstr := C.CString(key)
 	defer C.free(unsafe.Pointer(cstr))
-	c := C.gtk_print_settings_get_int_with_default(ps.native(), (*C.gchar)(cstr), C.gint(def))
+	c := C.gtk_print_settings_get_int_with_default(v.native(), (*C.gchar)(cstr), C.gint(def))
 	return int(c)
 }
 
 // SetInt() is a wrapper around gtk_print_settings_set_int().
-func (ps *PrintSettings) SetInt(key string, value int) {
+func (v *PrintSettings) SetInt(key string, value int) {
 	cstr := C.CString(key)
 	defer C.free(unsafe.Pointer(cstr))
-	C.gtk_print_settings_set_int(ps.native(), (*C.gchar)(cstr), C.gint(value))
+	C.gtk_print_settings_set_int(v.native(), (*C.gchar)(cstr), C.gint(value))
 }
 
 // GetPrinter() is a wrapper around gtk_print_settings_get_printer().
-func (ps *PrintSettings) GetPrinter() string {
-	c := C.gtk_print_settings_get_printer(ps.native())
-	return C.GoString((*C.char)(c))
+func (v *PrintSettings) GetPrinter() string {
+	c := C.gtk_print_settings_get_printer(v.native())
+	return goString(c)
 }
 
 // SetPrinter() is a wrapper around gtk_print_settings_set_printer().
-func (ps *PrintSettings) SetPrinter(printer string) {
+func (v *PrintSettings) SetPrinter(printer string) {
 	cstr := C.CString(printer)
 	defer C.free(unsafe.Pointer(cstr))
-	C.gtk_print_settings_set_printer(ps.native(), (*C.gchar)(cstr))
+	C.gtk_print_settings_set_printer(v.native(), (*C.gchar)(cstr))
 }
 
 // GetOrientation() is a wrapper around gtk_print_settings_get_orientation().
-func (ps *PrintSettings) GetOrientation() PageOrientation {
-	c := C.gtk_print_settings_get_orientation(ps.native())
+func (v *PrintSettings) GetOrientation() PageOrientation {
+	c := C.gtk_print_settings_get_orientation(v.native())
 	return PageOrientation(c)
 }
 
 // SetOrientation() is a wrapper around gtk_print_settings_set_orientation().
-func (ps *PrintSettings) SetOrientation(orientation PageOrientation) {
-	C.gtk_print_settings_set_orientation(ps.native(), C.GtkPageOrientation(orientation))
+func (v *PrintSettings) SetOrientation(orientation PageOrientation) {
+	C.gtk_print_settings_set_orientation(v.native(), C.GtkPageOrientation(orientation))
 }
 
 // GetPaperSize() is a wrapper around gtk_print_settings_get_paper_size().
-func (ps *PrintSettings) GetPaperSize() (*PaperSize, error) {
-	c := C.gtk_print_settings_get_paper_size(ps.native())
+func (v *PrintSettings) GetPaperSize() (*PaperSize, error) {
+	c := C.gtk_print_settings_get_paper_size(v.native())
 	if c == nil {
 		return nil, nilPtrErr
 	}
-	p := &PaperSize{c}
+	p := wrapPaperSize(c)
 	runtime.SetFinalizer(p, (*PaperSize).free)
 	return p, nil
 }
 
 // SetPaperSize() is a wrapper around gtk_print_settings_set_paper_size().
-func (ps *PrintSettings) SetPaperSize(size *PaperSize) {
-	C.gtk_print_settings_set_paper_size(ps.native(), size.native())
+func (v *PrintSettings) SetPaperSize(size *PaperSize) {
+	C.gtk_print_settings_set_paper_size(v.native(), size.native())
 }
 
 // GetPaperWidth() is a wrapper around gtk_print_settings_get_paper_width().
-func (ps *PrintSettings) GetPaperWidth(unit Unit) float64 {
-	c := C.gtk_print_settings_get_paper_width(ps.native(), C.GtkUnit(unit))
+func (v *PrintSettings) GetPaperWidth(unit Unit) float64 {
+	c := C.gtk_print_settings_get_paper_width(v.native(), C.GtkUnit(unit))
 	return float64(c)
 }
 
 // SetPaperWidth() is a wrapper around gtk_print_settings_set_paper_width().
-func (ps *PrintSettings) SetPaperWidth(width float64, unit Unit) {
-	C.gtk_print_settings_set_paper_width(ps.native(), C.gdouble(width), C.GtkUnit(unit))
+func (v *PrintSettings) SetPaperWidth(width float64, unit Unit) {
+	C.gtk_print_settings_set_paper_width(v.native(), C.gdouble(width), C.GtkUnit(unit))
 }
 
 // GetPaperHeight() is a wrapper around gtk_print_settings_get_paper_height().
-func (ps *PrintSettings) GetPaperHeight(unit Unit) float64 {
-	c := C.gtk_print_settings_get_paper_height(ps.native(), C.GtkUnit(unit))
+func (v *PrintSettings) GetPaperHeight(unit Unit) float64 {
+	c := C.gtk_print_settings_get_paper_height(v.native(), C.GtkUnit(unit))
 	return float64(c)
 }
 
 // SetPaperHeight() is a wrapper around gtk_print_settings_set_paper_height().
-func (ps *PrintSettings) SetPaperHeight(width float64, unit Unit) {
-	C.gtk_print_settings_set_paper_height(ps.native(), C.gdouble(width), C.GtkUnit(unit))
+func (v *PrintSettings) SetPaperHeight(width float64, unit Unit) {
+	C.gtk_print_settings_set_paper_height(v.native(), C.gdouble(width), C.GtkUnit(unit))
 }
 
 // GetUseColor() is a wrapper around gtk_print_settings_get_use_color().
-func (ps *PrintSettings) GetUseColor() bool {
-	c := C.gtk_print_settings_get_use_color(ps.native())
+func (v *PrintSettings) GetUseColor() bool {
+	c := C.gtk_print_settings_get_use_color(v.native())
 	return gobool(c)
 }
 
 // SetUseColor() is a wrapper around gtk_print_settings_set_use_color().
-func (ps *PrintSettings) SetUseColor(color bool) {
-	C.gtk_print_settings_set_use_color(ps.native(), gbool(color))
+func (v *PrintSettings) SetUseColor(color bool) {
+	C.gtk_print_settings_set_use_color(v.native(), gbool(color))
 }
 
 // GetCollate() is a wrapper around gtk_print_settings_get_collate().
-func (ps *PrintSettings) GetCollate() bool {
-	c := C.gtk_print_settings_get_collate(ps.native())
+func (v *PrintSettings) GetCollate() bool {
+	c := C.gtk_print_settings_get_collate(v.native())
 	return gobool(c)
 }
 
 // SetCollate() is a wrapper around gtk_print_settings_set_collate().
-func (ps *PrintSettings) SetCollate(collate bool) {
-	C.gtk_print_settings_set_collate(ps.native(), gbool(collate))
+func (v *PrintSettings) SetCollate(collate bool) {
+	C.gtk_print_settings_set_collate(v.native(), gbool(collate))
 }
 
 // GetReverse() is a wrapper around gtk_print_settings_get_reverse().
-func (ps *PrintSettings) GetReverse() bool {
-	c := C.gtk_print_settings_get_reverse(ps.native())
+func (v *PrintSettings) GetReverse() bool {
+	c := C.gtk_print_settings_get_reverse(v.native())
 	return gobool(c)
 }
 
 // SetReverse() is a wrapper around gtk_print_settings_set_reverse().
-func (ps *PrintSettings) SetReverse(reverse bool) {
-	C.gtk_print_settings_set_reverse(ps.native(), gbool(reverse))
+func (v *PrintSettings) SetReverse(reverse bool) {
+	C.gtk_print_settings_set_reverse(v.native(), gbool(reverse))
 }
 
 // GetDuplex() is a wrapper around gtk_print_settings_get_duplex().
-func (ps *PrintSettings) GetDuplex() PrintDuplex {
-	c := C.gtk_print_settings_get_duplex(ps.native())
+func (v *PrintSettings) GetDuplex() PrintDuplex {
+	c := C.gtk_print_settings_get_duplex(v.native())
 	return PrintDuplex(c)
 }
 
 // SetDuplex() is a wrapper around gtk_print_settings_set_duplex().
-func (ps *PrintSettings) SetDuplex(duplex PrintDuplex) {
-	C.gtk_print_settings_set_duplex(ps.native(), C.GtkPrintDuplex(duplex))
+func (v *PrintSettings) SetDuplex(duplex PrintDuplex) {
+	C.gtk_print_settings_set_duplex(v.native(), C.GtkPrintDuplex(duplex))
 }
 
 // GetQuality() is a wrapper around gtk_print_settings_get_quality().
-func (ps *PrintSettings) GetQuality() PrintQuality {
-	c := C.gtk_print_settings_get_quality(ps.native())
+func (v *PrintSettings) GetQuality() PrintQuality {
+	c := C.gtk_print_settings_get_quality(v.native())
 	return PrintQuality(c)
 }
 
 // SetQuality() is a wrapper around gtk_print_settings_set_quality().
-func (ps *PrintSettings) SetQuality(quality PrintQuality) {
-	C.gtk_print_settings_set_quality(ps.native(), C.GtkPrintQuality(quality))
+func (v *PrintSettings) SetQuality(quality PrintQuality) {
+	C.gtk_print_settings_set_quality(v.native(), C.GtkPrintQuality(quality))
 }
 
 // GetNCopies() is a wrapper around gtk_print_settings_get_n_copies().
-func (ps *PrintSettings) GetNCopies() int {
-	c := C.gtk_print_settings_get_n_copies(ps.native())
+func (v *PrintSettings) GetNCopies() int {
+	c := C.gtk_print_settings_get_n_copies(v.native())
 	return int(c)
 }
 
 // SetNCopies() is a wrapper around gtk_print_settings_set_n_copies().
-func (ps *PrintSettings) SetNCopies(copies int) {
-	C.gtk_print_settings_set_n_copies(ps.native(), C.gint(copies))
+func (v *PrintSettings) SetNCopies(copies int) {
+	C.gtk_print_settings_set_n_copies(v.native(), C.gint(copies))
 }
 
 // GetNmberUp() is a wrapper around gtk_print_settings_get_number_up().
-func (ps *PrintSettings) GetNmberUp() int {
-	c := C.gtk_print_settings_get_number_up(ps.native())
+func (v *PrintSettings) GetNmberUp() int {
+	c := C.gtk_print_settings_get_number_up(v.native())
 	return int(c)
 }
 
 // SetNumberUp() is a wrapper around gtk_print_settings_set_number_up().
-func (ps *PrintSettings) SetNumberUp(numberUp int) {
-	C.gtk_print_settings_set_number_up(ps.native(), C.gint(numberUp))
+func (v *PrintSettings) SetNumberUp(numberUp int) {
+	C.gtk_print_settings_set_number_up(v.native(), C.gint(numberUp))
 }
 
 // GetNumberUpLayout() is a wrapper around gtk_print_settings_get_number_up_layout().
-func (ps *PrintSettings) GetNumberUpLayout() NumberUpLayout {
-	c := C.gtk_print_settings_get_number_up_layout(ps.native())
+func (v *PrintSettings) GetNumberUpLayout() NumberUpLayout {
+	c := C.gtk_print_settings_get_number_up_layout(v.native())
 	return NumberUpLayout(c)
 }
 
 // SetNumberUpLayout() is a wrapper around gtk_print_settings_set_number_up_layout().
-func (ps *PrintSettings) SetNumberUpLayout(numberUpLayout NumberUpLayout) {
-	C.gtk_print_settings_set_number_up_layout(ps.native(), C.GtkNumberUpLayout(numberUpLayout))
+func (v *PrintSettings) SetNumberUpLayout(numberUpLayout NumberUpLayout) {
+	C.gtk_print_settings_set_number_up_layout(v.native(), C.GtkNumberUpLayout(numberUpLayout))
 }
 
 // GetResolution() is a wrapper around gtk_print_settings_get_resolution().
-func (ps *PrintSettings) GetResolution() int {
-	c := C.gtk_print_settings_get_resolution(ps.native())
+func (v *PrintSettings) GetResolution() int {
+	c := C.gtk_print_settings_get_resolution(v.native())
 	return int(c)
 }
 
 // SetResolution() is a wrapper around gtk_print_settings_set_resolution().
-func (ps *PrintSettings) SetResolution(resolution int) {
-	C.gtk_print_settings_set_resolution(ps.native(), C.gint(resolution))
+func (v *PrintSettings) SetResolution(resolution int) {
+	C.gtk_print_settings_set_resolution(v.native(), C.gint(resolution))
 }
 
 // SetResolutionXY() is a wrapper around gtk_print_settings_set_resolution_xy().
-func (ps *PrintSettings) SetResolutionXY(resolutionX, resolutionY int) {
-	C.gtk_print_settings_set_resolution_xy(ps.native(), C.gint(resolutionX), C.gint(resolutionY))
+func (v *PrintSettings) SetResolutionXY(resolutionX, resolutionY int) {
+	C.gtk_print_settings_set_resolution_xy(v.native(), C.gint(resolutionX), C.gint(resolutionY))
 }
 
 // GetResolutionX() is a wrapper around gtk_print_settings_get_resolution_x().
-func (ps *PrintSettings) GetResolutionX() int {
-	c := C.gtk_print_settings_get_resolution_x(ps.native())
+func (v *PrintSettings) GetResolutionX() int {
+	c := C.gtk_print_settings_get_resolution_x(v.native())
 	return int(c)
 }
 
 // GetResolutionY() is a wrapper around gtk_print_settings_get_resolution_y().
-func (ps *PrintSettings) GetResolutionY() int {
-	c := C.gtk_print_settings_get_resolution_y(ps.native())
+func (v *PrintSettings) GetResolutionY() int {
+	c := C.gtk_print_settings_get_resolution_y(v.native())
 	return int(c)
 }
 
 // GetPrinterLpi() is a wrapper around gtk_print_settings_get_printer_lpi().
-func (ps *PrintSettings) GetPrinterLpi() float64 {
-	c := C.gtk_print_settings_get_printer_lpi(ps.native())
+func (v *PrintSettings) GetPrinterLpi() float64 {
+	c := C.gtk_print_settings_get_printer_lpi(v.native())
 	return float64(c)
 }
 
 // SetPrinterLpi() is a wrapper around gtk_print_settings_set_printer_lpi().
-func (ps *PrintSettings) SetPrinterLpi(lpi float64) {
-	C.gtk_print_settings_set_printer_lpi(ps.native(), C.gdouble(lpi))
+func (v *PrintSettings) SetPrinterLpi(lpi float64) {
+	C.gtk_print_settings_set_printer_lpi(v.native(), C.gdouble(lpi))
 }
 
 // GetScale() is a wrapper around gtk_print_settings_get_scale().
-func (ps *PrintSettings) GetScale() float64 {
-	c := C.gtk_print_settings_get_scale(ps.native())
+func (v *PrintSettings) GetScale() float64 {
+	c := C.gtk_print_settings_get_scale(v.native())
 	return float64(c)
 }
 
 // SetScale() is a wrapper around gtk_print_settings_set_scale().
-func (ps *PrintSettings) SetScale(scale float64) {
-	C.gtk_print_settings_set_scale(ps.native(), C.gdouble(scale))
+func (v *PrintSettings) SetScale(scale float64) {
+	C.gtk_print_settings_set_scale(v.native(), C.gdouble(scale))
 }
 
 // GetPrintPages() is a wrapper around gtk_print_settings_get_print_pages().
-func (ps *PrintSettings) GetPrintPages() PrintPages {
-	c := C.gtk_print_settings_get_print_pages(ps.native())
+func (v *PrintSettings) GetPrintPages() PrintPages {
+	c := C.gtk_print_settings_get_print_pages(v.native())
 	return PrintPages(c)
 }
 
 // SetPrintPages() is a wrapper around gtk_print_settings_set_print_pages().
-func (ps *PrintSettings) SetPrintPages(pages PrintPages) {
-	C.gtk_print_settings_set_print_pages(ps.native(), C.GtkPrintPages(pages))
+func (v *PrintSettings) SetPrintPages(pages PrintPages) {
+	C.gtk_print_settings_set_print_pages(v.native(), C.GtkPrintPages(pages))
 }
 
 // GetPageSet() is a wrapper around gtk_print_settings_get_page_set().
-func (ps *PrintSettings) GetPageSet(pages PrintPages) PageSet {
-	c := C.gtk_print_settings_get_page_set(ps.native())
+func (v *PrintSettings) GetPageSet(pages PrintPages) PageSet {
+	c := C.gtk_print_settings_get_page_set(v.native())
 	return PageSet(c)
 }
 
 // SetPageSet() is a wrapper around gtk_print_settings_set_page_set().
-func (ps *PrintSettings) SetPageSet(pageSet PageSet) {
-	C.gtk_print_settings_set_page_set(ps.native(), C.GtkPageSet(pageSet))
+func (v *PrintSettings) SetPageSet(pageSet PageSet) {
+	C.gtk_print_settings_set_page_set(v.native(), C.GtkPageSet(pageSet))
 }
 
 // GetDefaultSource() is a wrapper around gtk_print_settings_get_default_source().
-func (ps *PrintSettings) GetDefaultSource() string {
-	c := C.gtk_print_settings_get_default_source(ps.native())
-	return C.GoString((*C.char)(c))
+func (v *PrintSettings) GetDefaultSource() string {
+	c := C.gtk_print_settings_get_default_source(v.native())
+	return goString(c)
 }
 
 // SetSefaultSource() is a wrapper around gtk_print_settings_set_default_source().
-func (ps *PrintSettings) SetSefaultSource(defaultSource string) {
+func (v *PrintSettings) SetSefaultSource(defaultSource string) {
 	cstr := C.CString(defaultSource)
 	defer C.free(unsafe.Pointer(cstr))
-	C.gtk_print_settings_set_default_source(ps.native(), (*C.gchar)(cstr))
+	C.gtk_print_settings_set_default_source(v.native(), (*C.gchar)(cstr))
 }
 
 // GetMediaType() is a wrapper around gtk_print_settings_get_media_type().
-func (ps *PrintSettings) GetMediaType() string {
-	c := C.gtk_print_settings_get_media_type(ps.native())
-	return C.GoString((*C.char)(c))
+func (v *PrintSettings) GetMediaType() string {
+	c := C.gtk_print_settings_get_media_type(v.native())
+	return goString(c)
 }
 
 // SetMediaType() is a wrapper around gtk_print_settings_set_media_type().
-func (ps *PrintSettings) SetMediaType(mediaType string) {
+func (v *PrintSettings) SetMediaType(mediaType string) {
 	cstr := C.CString(mediaType)
 	defer C.free(unsafe.Pointer(cstr))
-	C.gtk_print_settings_set_media_type(ps.native(), (*C.gchar)(cstr))
+	C.gtk_print_settings_set_media_type(v.native(), (*C.gchar)(cstr))
 }
 
 // GetDither() is a wrapper around gtk_print_settings_get_dither().
-func (ps *PrintSettings) GetDither() string {
-	c := C.gtk_print_settings_get_dither(ps.native())
-	return C.GoString((*C.char)(c))
+func (v *PrintSettings) GetDither() string {
+	c := C.gtk_print_settings_get_dither(v.native())
+	return goString(c)
 }
 
 // SetDither() is a wrapper around gtk_print_settings_set_dither().
-func (ps *PrintSettings) SetDither(dither string) {
+func (v *PrintSettings) SetDither(dither string) {
 	cstr := C.CString(dither)
 	defer C.free(unsafe.Pointer(cstr))
-	C.gtk_print_settings_set_dither(ps.native(), (*C.gchar)(cstr))
+	C.gtk_print_settings_set_dither(v.native(), (*C.gchar)(cstr))
 }
 
 // GetFinishings() is a wrapper around gtk_print_settings_get_finishings().
-func (ps *PrintSettings) GetFinishings() string {
-	c := C.gtk_print_settings_get_finishings(ps.native())
-	return C.GoString((*C.char)(c))
+func (v *PrintSettings) GetFinishings() string {
+	c := C.gtk_print_settings_get_finishings(v.native())
+	return goString(c)
 }
 
 // SetFinishings() is a wrapper around gtk_print_settings_set_finishings().
-func (ps *PrintSettings) SetFinishings(dither string) {
+func (v *PrintSettings) SetFinishings(dither string) {
 	cstr := C.CString(dither)
 	defer C.free(unsafe.Pointer(cstr))
-	C.gtk_print_settings_set_finishings(ps.native(), (*C.gchar)(cstr))
+	C.gtk_print_settings_set_finishings(v.native(), (*C.gchar)(cstr))
 }
 
 // GetOutputBin() is a wrapper around gtk_print_settings_get_output_bin().
-func (ps *PrintSettings) GetOutputBin() string {
-	c := C.gtk_print_settings_get_output_bin(ps.native())
-	return C.GoString((*C.char)(c))
+func (v *PrintSettings) GetOutputBin() string {
+	c := C.gtk_print_settings_get_output_bin(v.native())
+	return goString(c)
 }
 
 // SetOutputBin() is a wrapper around gtk_print_settings_set_output_bin().
-func (ps *PrintSettings) SetOutputBin(bin string) {
+func (v *PrintSettings) SetOutputBin(bin string) {
 	cstr := C.CString(bin)
 	defer C.free(unsafe.Pointer(cstr))
-	C.gtk_print_settings_set_output_bin(ps.native(), (*C.gchar)(cstr))
+	C.gtk_print_settings_set_output_bin(v.native(), (*C.gchar)(cstr))
 }
 
 // PrintSettingsNewFromFile() is a wrapper around gtk_print_settings_new_from_file().
@@ -1562,7 +1563,7 @@ func PrintSettingsNewFromFile(name string) (*PrintSettings, error) {
 	c := C.gtk_print_settings_new_from_file((*C.gchar)(cstr), &err)
 	if c == nil {
 		defer C.g_error_free(err)
-		return nil, errors.New(C.GoString((*C.char)(err.message)))
+		return nil, errors.New(goString(err.message))
 	}
 	obj := glib.Take(unsafe.Pointer(c))
 	return wrapPrintSettings(obj), nil
@@ -1571,14 +1572,14 @@ func PrintSettingsNewFromFile(name string) (*PrintSettings, error) {
 // PrintSettingsNewFromKeyFile() is a wrapper around gtk_print_settings_new_from_key_file().
 
 // LoadFile() is a wrapper around gtk_print_settings_load_file().
-func (ps *PrintSettings) LoadFile(name string) error {
+func (v *PrintSettings) LoadFile(name string) error {
 	cstr := C.CString(name)
 	defer C.free(unsafe.Pointer(cstr))
 	var err *C.GError = nil
-	c := C.gtk_print_settings_load_file(ps.native(), (*C.gchar)(cstr), &err)
+	c := C.gtk_print_settings_load_file(v.native(), (*C.gchar)(cstr), &err)
 	if gobool(c) == false {
 		defer C.g_error_free(err)
-		return errors.New(C.GoString((*C.char)(err.message)))
+		return errors.New(goString(err.message))
 	}
 	return nil
 }
@@ -1586,13 +1587,13 @@ func (ps *PrintSettings) LoadFile(name string) error {
 // LoadKeyFile() is a wrapper around gtk_print_settings_load_key_file().
 
 // ToFile() is a wrapper around gtk_print_settings_to_file().
-func (ps *PrintSettings) ToFile(name string) error {
+func (v *PrintSettings) ToFile(name string) error {
 	cstr := C.CString(name)
 	defer C.free(unsafe.Pointer(cstr))
 	var err *C.GError = nil
-	c := C.gtk_print_settings_to_file(ps.native(), (*C.gchar)(cstr), &err)
+	c := C.gtk_print_settings_to_file(v.native(), (*C.gchar)(cstr), &err)
 	if gobool(c) == false {
-		return errors.New(C.GoString((*C.char)(err.message)))
+		return errors.New(goString(err.message))
 	}
 	return nil
 }

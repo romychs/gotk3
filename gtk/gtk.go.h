@@ -16,7 +16,9 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#pragma once
+
+#ifndef __GTK_GO_H__
+#define __GTK_GO_H__
 
 #include <stdint.h>
 #include <stdlib.h>
@@ -27,6 +29,13 @@ toGtkAboutDialog(void *p)
 {
 	return (GTK_ABOUT_DIALOG(p));
 }
+
+static GtkActionable *
+toGtkActionable(void *p)
+{
+	return (GTK_ACTIONABLE(p));
+}
+
 
 static GtkAppChooser *
 toGtkAppChooser(void *p)
@@ -104,6 +113,12 @@ static GtkGrid *
 toGtkGrid(void *p)
 {
 	return (GTK_GRID(p));
+}
+
+static GtkIconTheme *
+toGtkIconTheme(void *p)
+{
+	return (GTK_ICON_THEME(p));
 }
 
 static GtkWidget *
@@ -268,6 +283,12 @@ toGtkButton(void *p)
 	return (GTK_BUTTON(p));
 }
 
+static GtkButtonBox *
+toGtkButtonBox(void *p)
+{
+	return (GTK_BUTTON_BOX(p));
+}
+
 static GtkScaleButton *
 toGtkScaleButton(void *p)
 {
@@ -400,6 +421,18 @@ toGtkTextBuffer(void *p)
 	return (GTK_TEXT_BUFFER(p));
 }
 
+static GtkTreeIter *
+toGtkTreeIter(void *p)
+{
+	return (GtkTreeIter *)(p);
+}
+
+static GtkTreePath *
+toGtkTreePath(void *p)
+{
+	return (GtkTreePath *)(p);
+}
+
 static GtkTreeModel *
 toGtkTreeModel(void *p)
 {
@@ -446,6 +479,12 @@ static GtkOrientable *
 toGtkOrientable(void *p)
 {
 	return (GTK_ORIENTABLE(p));
+}
+
+static GtkPaperSize *
+toGtkPaperSize(void *p)
+{
+	return (GtkPaperSize *)(p);
 }
 
 static GtkTreeStore *
@@ -560,6 +599,12 @@ static GtkSearchEntry *
 toGtkSearchEntry(void *p)
 {
 	return (GTK_SEARCH_ENTRY(p));
+}
+
+static GtkSelectionData *
+toGtkSelectionData(void *p)
+{
+	return ((GtkSelectionData *)(p));
 }
 
 static GtkOffscreenWindow *
@@ -712,6 +757,36 @@ toGtkInfoBar(void *p)
 	return (GTK_INFO_BAR(p));
 }
 
+static GObject *
+toGObject(void *p)
+{
+	return (GObject *)(p);
+}
+
+static GValue *
+toGValue(void *p)
+{
+	return (GValue *)(p);
+}
+
+static GMenuModel *
+toGMenuModel(void *p)
+{
+	return (G_MENU_MODEL(p));
+}
+
+static GFile *
+toGFile(void *p)
+{
+	return (G_FILE(p));
+}
+
+static GVariant *
+toGVariant(void *p)
+{
+	return ((GVariant *)(p));
+}
+
 static GType *
 alloc_types(int n) {
 	return ((GType *)g_new0(GType, n));
@@ -753,6 +828,18 @@ extern gboolean substring_match_equal_func(GtkTreeModel *model,
                                           gchar *key,
                                           GtkTreeIter *iter,
                                           gpointer data);
+
+static GtkWidget *
+_gtk_dialog_new_with_buttons(char *title, GtkWindow *parent, GtkDialogFlags flags,
+    char *button_text, GtkResponseType button_response)
+{
+	GtkWidget		*w;
+
+	w = gtk_dialog_new_with_buttons(title, parent, flags, button_text, button_response);
+	return (w);
+}
+
+
 
 static GtkWidget *
 _gtk_message_dialog_new(GtkWindow *parent, GtkDialogFlags flags,
@@ -873,3 +960,5 @@ static inline void _gtk_print_run_page_setup_dialog_async(GtkWindow *parent, Gtk
 	gtk_print_run_page_setup_dialog_async(parent, setup, settings,
 		(GtkPageSetupDoneFunc)(goPageSetupDone), data);
 }
+
+#endif

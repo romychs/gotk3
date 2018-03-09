@@ -10,7 +10,7 @@ import "C"
 import (
 	"unsafe"
 
-	"github.com/gotk3/gotk3/glib"
+	"github.com/d2r2/gotk3/glib"
 )
 
 func init() {
@@ -176,11 +176,11 @@ func (v *Widget) GetDoubleBuffered() bool {
  */
 // native returns a pointer to the underlying GtkButton.
 func (v *Arrow) native() *C.GtkArrow {
-	if v == nil || v.GObject == nil {
+	if v == nil {
 		return nil
 	}
-	p := unsafe.Pointer(v.GObject)
-	return C.toGtkArrow(p)
+	ptr := unsafe.Pointer(v.Object.Native())
+	return C.toGtkArrow(ptr)
 }
 
 func marshalArrow(p uintptr) (interface{}, error) {
@@ -204,11 +204,11 @@ type Alignment struct {
 
 // native returns a pointer to the underlying GtkAlignment.
 func (v *Alignment) native() *C.GtkAlignment {
-	if v == nil || v.GObject == nil {
+	if v == nil {
 		return nil
 	}
-	p := unsafe.Pointer(v.GObject)
-	return C.toGtkAlignment(p)
+	ptr := unsafe.Pointer(v.Object.Native())
+	return C.toGtkAlignment(ptr)
 }
 
 func marshalAlignment(p uintptr) (interface{}, error) {
@@ -242,11 +242,11 @@ func wrapStatusIcon(obj *glib.Object) *StatusIcon {
 }
 
 func (v *StatusIcon) native() *C.GtkStatusIcon {
-	if v == nil || v.GObject == nil {
+	if v == nil {
 		return nil
 	}
-	p := unsafe.Pointer(v.GObject)
-	return C.toGtkStatusIcon(p)
+	ptr := unsafe.Pointer(v.Object.Native())
+	return C.toGtkStatusIcon(ptr)
 }
 
 // StatusIconNew is a wrapper around gtk_status_icon_new()
@@ -255,7 +255,8 @@ func StatusIconNew() (*StatusIcon, error) {
 	if c == nil {
 		return nil, nilPtrErr
 	}
-	return wrapStatusIcon(glib.Take(unsafe.Pointer(c))), nil
+	obj := glib.Take(unsafe.Pointer(c))
+	return wrapStatusIcon(obj), nil
 }
 
 // StatusIconNewFromFile is a wrapper around gtk_status_icon_new_from_file()
@@ -266,7 +267,8 @@ func StatusIconNewFromFile(filename string) (*StatusIcon, error) {
 	if c == nil {
 		return nil, nilPtrErr
 	}
-	return wrapStatusIcon(glib.Take(unsafe.Pointer(c))), nil
+	obj := glib.Take(unsafe.Pointer(c))
+	return wrapStatusIcon(obj), nil
 }
 
 // StatusIconNewFromIconName is a wrapper around gtk_status_icon_new_from_name()
@@ -277,7 +279,8 @@ func StatusIconNewFromIconName(iconName string) (*StatusIcon, error) {
 	if c == nil {
 		return nil, nilPtrErr
 	}
-	return wrapStatusIcon(glib.Take(unsafe.Pointer(c))), nil
+	obj := glib.Take(unsafe.Pointer(c))
+	return wrapStatusIcon(obj), nil
 }
 
 // SetFromFile is a wrapper around gtk_status_icon_set_from_file()
@@ -308,23 +311,23 @@ func (v *StatusIcon) SetTooltipText(text string) {
 
 // GetTooltipText is a wrapper around gtk_status_icon_get_tooltip_text()
 func (v *StatusIcon) GetTooltipText() string {
-	cstr := (*C.char)(C.gtk_status_icon_get_tooltip_text(v.native()))
-	defer C.free(unsafe.Pointer(cstr))
-	return C.GoString(cstr)
+	c := C.gtk_status_icon_get_tooltip_text(v.native())
+	defer C.g_free(C.gpointer(c))
+	return goString(cstr)
 }
 
 // SetTooltipMarkup is a wrapper around gtk_status_icon_set_tooltip_markup()
 func (v *StatusIcon) SetTooltipMarkup(markup string) {
-	cstr := (*C.gchar)(C.CString(markup))
+	cstr := C.CString(markup)
 	defer C.free(unsafe.Pointer(cstr))
-	C.gtk_status_icon_set_tooltip_markup(v.native(), cstr)
+	C.gtk_status_icon_set_tooltip_markup(v.native(), (*C.gchar)(cstr))
 }
 
 // GetTooltipMarkup is a wrapper around gtk_status_icon_get_tooltip_markup()
 func (v *StatusIcon) GetTooltipMarkup() string {
-	cstr := (*C.char)(C.gtk_status_icon_get_tooltip_markup(v.native()))
-	defer C.free(unsafe.Pointer(cstr))
-	return C.GoString(cstr)
+	c := C.gtk_status_icon_get_tooltip_markup(v.native())
+	defer C.g_free(C.gpointer(c))
+	return goString(c)
 }
 
 // SetHasTooltip is a wrapper around gtk_status_icon_set_has_tooltip()
@@ -334,16 +337,16 @@ func (v *StatusIcon) SetHasTooltip(hasTooltip bool) {
 
 // GetTitle is a wrapper around gtk_status_icon_get_title()
 func (v *StatusIcon) GetTitle() string {
-	cstr := (*C.char)(C.gtk_status_icon_get_title(v.native()))
-	defer C.free(unsafe.Pointer(cstr))
-	return C.GoString(cstr)
+	c := C.gtk_status_icon_get_title(v.native())
+	defer C.g_free(C.gpointer(c))
+	return goString(c)
 }
 
 // SetName is a wrapper around gtk_status_icon_set_name()
 func (v *StatusIcon) SetName(name string) {
-	cstr := (*C.gchar)(C.CString(name))
+	cstr := C.CString(name)
 	defer C.free(unsafe.Pointer(cstr))
-	C.gtk_status_icon_set_name(v.native(), cstr)
+	C.gtk_status_icon_set_name(v.native(), (*C.gchar)(cstr))
 }
 
 // SetVisible is a wrapper around gtk_status_icon_set_visible()
@@ -373,16 +376,16 @@ func (v *StatusIcon) GetHasTooltip() bool {
 
 // SetTitle is a wrapper around gtk_status_icon_set_title()
 func (v *StatusIcon) SetTitle(title string) {
-	cstr := (*C.gchar)(C.CString(title))
+	cstr := C.CString(title)
 	defer C.free(unsafe.Pointer(cstr))
-	C.gtk_status_icon_set_title(v.native(), cstr)
+	C.gtk_status_icon_set_title(v.native(), (*C.gchar)(cstr))
 }
 
 // GetIconName is a wrapper around gtk_status_icon_get_icon_name()
 func (v *StatusIcon) GetIconName() string {
-	cstr := (*C.char)(C.gtk_status_icon_get_icon_name(v.native()))
-	defer C.free(unsafe.Pointer(cstr))
-	return C.GoString(cstr)
+	cstr := C.gtk_status_icon_get_icon_name(v.native())
+	defer C.g_free(C.gpointer(c))
+	return goString(cstr)
 }
 
 // GetSize is a wrapper around gtk_status_icon_get_size()
@@ -401,11 +404,11 @@ type Misc struct {
 
 // native returns a pointer to the underlying GtkMisc.
 func (v *Misc) native() *C.GtkMisc {
-	if v == nil || v.GObject == nil {
+	if v == nil {
 		return nil
 	}
-	p := unsafe.Pointer(v.GObject)
-	return C.toGtkMisc(p)
+	ptr := unsafe.Pointer(v.Object.Native())
+	return C.toGtkMisc(ptr)
 }
 
 func marshalMisc(p uintptr) (interface{}, error) {

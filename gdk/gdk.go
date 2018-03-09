@@ -20,7 +20,9 @@ package gdk
 // #cgo pkg-config: gdk-3.0
 // #include <gdk/gdk.h>
 // #include "gdk.go.h"
+// #include "gdk_atom.go.h"
 import "C"
+
 import (
 	"errors"
 	"reflect"
@@ -28,7 +30,7 @@ import (
 	"strconv"
 	"unsafe"
 
-	"github.com/gotk3/gotk3/glib"
+	"github.com/d2r2/gotk3/glib"
 )
 
 func init() {
@@ -75,6 +77,10 @@ func gobool(b C.gboolean) bool {
 		return true
 	}
 	return false
+}
+
+func goString(cstr *C.gchar) string {
+	return C.GoString((*C.char)(cstr))
 }
 
 /*
@@ -184,23 +190,24 @@ func marshalPixbufAlphaMode(p uintptr) (interface{}, error) {
 }
 
 // Selections
-const (
-	SELECTION_PRIMARY       Atom = 1
-	SELECTION_SECONDARY     Atom = 2
-	SELECTION_CLIPBOARD     Atom = 69
-	TARGET_BITMAP           Atom = 5
-	TARGET_COLORMAP         Atom = 7
-	TARGET_DRAWABLE         Atom = 17
-	TARGET_PIXMAP           Atom = 20
-	TARGET_STRING           Atom = 31
-	SELECTION_TYPE_ATOM     Atom = 4
-	SELECTION_TYPE_BITMAP   Atom = 5
-	SELECTION_TYPE_COLORMAP Atom = 7
-	SELECTION_TYPE_DRAWABLE Atom = 17
-	SELECTION_TYPE_INTEGER  Atom = 19
-	SELECTION_TYPE_PIXMAP   Atom = 20
-	SELECTION_TYPE_WINDOW   Atom = 33
-	SELECTION_TYPE_STRING   Atom = 31
+
+var (
+	SELECTION_PRIMARY       = Atom{C._GDK_SELECTION_PRIMARY}
+	SELECTION_SECONDARY     = Atom{C._GDK_SELECTION_SECONDARY}
+	SELECTION_CLIPBOARD     = Atom{C._GDK_SELECTION_CLIPBOARD}
+	TARGET_BITMAP           = Atom{C._GDK_TARGET_BITMAP}
+	TARGET_COLORMAP         = Atom{C._GDK_TARGET_COLORMAP}
+	TARGET_DRAWABLE         = Atom{C._GDK_TARGET_DRAWABLE}
+	TARGET_PIXMAP           = Atom{C._GDK_TARGET_PIXMAP}
+	TARGET_STRING           = Atom{C._GDK_TARGET_STRING}
+	SELECTION_TYPE_ATOM     = Atom{C._GDK_SELECTION_TYPE_ATOM}
+	SELECTION_TYPE_BITMAP   = Atom{C._GDK_SELECTION_TYPE_BITMAP}
+	SELECTION_TYPE_COLORMAP = Atom{C._GDK_SELECTION_TYPE_COLORMAP}
+	SELECTION_TYPE_DRAWABLE = Atom{C._GDK_SELECTION_TYPE_DRAWABLE}
+	SELECTION_TYPE_INTEGER  = Atom{C._GDK_SELECTION_TYPE_INTEGER}
+	SELECTION_TYPE_PIXMAP   = Atom{C._GDK_SELECTION_TYPE_PIXMAP}
+	SELECTION_TYPE_WINDOW   = Atom{C._GDK_SELECTION_TYPE_WINDOW}
+	SELECTION_TYPE_STRING   = Atom{C._GDK_SELECTION_TYPE_STRING}
 )
 
 // added by terrak
@@ -337,25 +344,31 @@ const (
  */
 
 // Atom is a representation of GDK's GdkAtom.
-type Atom uintptr
+type Atom struct {
+	gdkAtom C.GdkAtom
+}
 
 // native returns the underlying GdkAtom.
 func (v Atom) native() C.GdkAtom {
-	return C.toGdkAtom(unsafe.Pointer(uintptr(v)))
+	return v.gdkAtom
+}
+
+func (v Atom) Native() uintptr {
+	return uintptr(unsafe.Pointer(v.native()))
 }
 
 func (v Atom) Name() string {
 	c := C.gdk_atom_name(v.native())
 	defer C.g_free(C.gpointer(c))
-	return C.GoString((*C.char)(c))
+	return goString(c)
 }
 
 // GdkAtomIntern is a wrapper around gdk_atom_intern
-func GdkAtomIntern(atomName string, onlyIfExists bool) Atom {
+func GdkAtomIntern(atomName string, onlyIfExists bool) *Atom {
 	cstr := C.CString(atomName)
 	defer C.free(unsafe.Pointer(cstr))
 	c := C.gdk_atom_intern((*C.gchar)(cstr), gbool(onlyIfExists))
-	return Atom(uintptr(unsafe.Pointer(c)))
+	return &Atom{c}
 }
 
 /*
@@ -369,21 +382,16 @@ type Device struct {
 
 // native returns a pointer to the underlying GdkDevice.
 func (v *Device) native() *C.GdkDevice {
-	if v == nil || v.GObject == nil {
+	if v == nil {
 		return nil
 	}
-	p := unsafe.Pointer(v.GObject)
-	return C.toGdkDevice(p)
-}
-
-// Native returns a pointer to the underlying GdkDevice.
-func (v *Device) Native() uintptr {
-	return uintptr(unsafe.Pointer(v.native()))
+	ptr := unsafe.Pointer(v.Object.Native())
+	return C.toGdkDevice(ptr)
 }
 
 func marshalDevice(p uintptr) (interface{}, error) {
 	c := C.g_value_get_object((*C.GValue)(unsafe.Pointer(p)))
-	obj := &glib.Object{glib.ToGObject(unsafe.Pointer(c))}
+	obj := glib.ToObject(unsafe.Pointer(c))
 	return &Device{obj}, nil
 }
 
@@ -410,21 +418,16 @@ func CursorNewFromName(display *Display, name string) (*Cursor, error) {
 
 // native returns a pointer to the underlying GdkCursor.
 func (v *Cursor) native() *C.GdkCursor {
-	if v == nil || v.GObject == nil {
+	if v == nil {
 		return nil
 	}
-	p := unsafe.Pointer(v.GObject)
-	return C.toGdkCursor(p)
-}
-
-// Native returns a pointer to the underlying GdkCursor.
-func (v *Cursor) Native() uintptr {
-	return uintptr(unsafe.Pointer(v.native()))
+	ptr := unsafe.Pointer(v.Object.Native())
+	return C.toGdkCursor(ptr)
 }
 
 func marshalCursor(p uintptr) (interface{}, error) {
 	c := C.g_value_get_object((*C.GValue)(unsafe.Pointer(p)))
-	obj := &glib.Object{glib.ToGObject(unsafe.Pointer(c))}
+	obj := glib.ToObject(unsafe.Pointer(c))
 	return &Cursor{obj}, nil
 }
 
@@ -439,21 +442,16 @@ type DeviceManager struct {
 
 // native returns a pointer to the underlying GdkDeviceManager.
 func (v *DeviceManager) native() *C.GdkDeviceManager {
-	if v == nil || v.GObject == nil {
+	if v == nil {
 		return nil
 	}
-	p := unsafe.Pointer(v.GObject)
-	return C.toGdkDeviceManager(p)
-}
-
-// Native returns a pointer to the underlying GdkDeviceManager.
-func (v *DeviceManager) Native() uintptr {
-	return uintptr(unsafe.Pointer(v.native()))
+	ptr := unsafe.Pointer(v.Object.Native())
+	return C.toGdkDeviceManager(ptr)
 }
 
 func marshalDeviceManager(p uintptr) (interface{}, error) {
 	c := C.g_value_get_object((*C.GValue)(unsafe.Pointer(p)))
-	obj := &glib.Object{glib.ToGObject(unsafe.Pointer(c))}
+	obj := glib.ToObject(unsafe.Pointer(c))
 	return &DeviceManager{obj}, nil
 }
 
@@ -478,21 +476,16 @@ type Display struct {
 
 // native returns a pointer to the underlying GdkDisplay.
 func (v *Display) native() *C.GdkDisplay {
-	if v == nil || v.GObject == nil {
+	if v == nil {
 		return nil
 	}
-	p := unsafe.Pointer(v.GObject)
-	return C.toGdkDisplay(p)
-}
-
-// Native returns a pointer to the underlying GdkDisplay.
-func (v *Display) Native() uintptr {
-	return uintptr(unsafe.Pointer(v.native()))
+	ptr := unsafe.Pointer(v.Object.Native())
+	return C.toGdkDisplay(ptr)
 }
 
 func marshalDisplay(p uintptr) (interface{}, error) {
 	c := C.g_value_get_object((*C.GValue)(unsafe.Pointer(p)))
-	obj := &glib.Object{glib.ToGObject(unsafe.Pointer(c))}
+	obj := glib.ToObject(unsafe.Pointer(c))
 	return &Display{obj}, nil
 }
 
@@ -500,7 +493,7 @@ func toDisplay(s *C.GdkDisplay) (*Display, error) {
 	if s == nil {
 		return nil, nilPtrErr
 	}
-	obj := &glib.Object{glib.ToGObject(unsafe.Pointer(s))}
+	obj := glib.ToObject(unsafe.Pointer(s))
 	return &Display{obj}, nil
 }
 
@@ -532,7 +525,7 @@ func (v *Display) GetName() (string, error) {
 	if c == nil {
 		return "", nilPtrErr
 	}
-	return C.GoString((*C.char)(c)), nil
+	return goString(c), nil
 }
 
 // GetDefaultScreen() is a wrapper around gdk_display_get_default_screen().
@@ -771,9 +764,9 @@ const (
 
 // KeyvalFromName() is a wrapper around gdk_keyval_from_name().
 func KeyvalFromName(keyvalName string) uint {
-	str := (*C.gchar)(C.CString(keyvalName))
-	defer C.free(unsafe.Pointer(str))
-	return uint(C.gdk_keyval_from_name(str))
+	cstr := C.CString(keyvalName)
+	defer C.free(unsafe.Pointer(cstr))
+	return uint(C.gdk_keyval_from_name((*C.gchar)(cstr)))
 }
 
 func KeyvalConvertCase(v uint) (lower, upper uint) {
@@ -819,21 +812,16 @@ type DragContext struct {
 
 // native returns a pointer to the underlying GdkDragContext.
 func (v *DragContext) native() *C.GdkDragContext {
-	if v == nil || v.GObject == nil {
+	if v == nil {
 		return nil
 	}
-	p := unsafe.Pointer(v.GObject)
-	return C.toGdkDragContext(p)
-}
-
-// Native returns a pointer to the underlying GdkDragContext.
-func (v *DragContext) Native() uintptr {
-	return uintptr(unsafe.Pointer(v.native()))
+	ptr := unsafe.Pointer(v.Object.Native())
+	return C.toGdkDragContext(ptr)
 }
 
 func marshalDragContext(p uintptr) (interface{}, error) {
 	c := C.g_value_get_object((*C.GValue)(unsafe.Pointer(p)))
-	obj := &glib.Object{glib.ToGObject(unsafe.Pointer(c))}
+	obj := glib.ToObject(unsafe.Pointer(c))
 	return &DragContext{obj}, nil
 }
 
@@ -848,7 +836,12 @@ func (v *DragContext) ListTargets() *glib.List {
 
 // Event is a representation of GDK's GdkEvent.
 type Event struct {
-	GdkEvent *C.GdkEvent
+	gdkEvent *C.GdkEvent
+}
+
+func EventNew() *Event {
+	c := &C.GdkEvent{}
+	return &Event{c}
 }
 
 // native returns a pointer to the underlying GdkEvent.
@@ -856,7 +849,7 @@ func (v *Event) native() *C.GdkEvent {
 	if v == nil {
 		return nil
 	}
-	return v.GdkEvent
+	return (*C.GdkEvent)(v.gdkEvent)
 }
 
 // Native returns a pointer to the underlying GdkEvent.
@@ -883,9 +876,8 @@ type EventButton struct {
 }
 
 func EventButtonNew() *EventButton {
-	ee := (*C.GdkEvent)(unsafe.Pointer(&C.GdkEventButton{}))
-	ev := Event{ee}
-	return &EventButton{&ev}
+	v := EventNew()
+	return &EventButton{v}
 }
 
 // EventButtonNewFromEvent returns an EventButton from an Event.
@@ -896,18 +888,15 @@ func EventButtonNew() *EventButton {
 // *EventButton. EventButtonNewFromEvent provides a means of creating
 // an EventKey from the Event.
 func EventButtonNewFromEvent(event *Event) *EventButton {
-	ee := (*C.GdkEvent)(unsafe.Pointer(event.native()))
-	ev := Event{ee}
-	return &EventButton{&ev}
-}
-
-// Native returns a pointer to the underlying GdkEventButton.
-func (v *EventButton) Native() uintptr {
-	return uintptr(unsafe.Pointer(v.native()))
+	return &EventButton{event}
 }
 
 func (v *EventButton) native() *C.GdkEventButton {
-	return (*C.GdkEventButton)(unsafe.Pointer(v.Event.native()))
+	if v == nil {
+		return nil
+	}
+	ptr := v.Event.native()
+	return C.toGdkEventButton(ptr)
 }
 
 func (v *EventButton) X() float64 {
@@ -980,9 +969,8 @@ type EventKey struct {
 }
 
 func EventKeyNew() *EventKey {
-	ee := (*C.GdkEvent)(unsafe.Pointer(&C.GdkEventKey{}))
-	ev := Event{ee}
-	return &EventKey{&ev}
+	v := EventNew()
+	return &EventKey{v}
 }
 
 // EventKeyNewFromEvent returns an EventKey from an Event.
@@ -993,18 +981,15 @@ func EventKeyNew() *EventKey {
 // *EventKey. EventKeyNewFromEvent provides a means of creating
 // an EventKey from the Event.
 func EventKeyNewFromEvent(event *Event) *EventKey {
-	ee := (*C.GdkEvent)(unsafe.Pointer(event.native()))
-	ev := Event{ee}
-	return &EventKey{&ev}
-}
-
-// Native returns a pointer to the underlying GdkEventKey.
-func (v *EventKey) Native() uintptr {
-	return uintptr(unsafe.Pointer(v.native()))
+	return &EventKey{event}
 }
 
 func (v *EventKey) native() *C.GdkEventKey {
-	return (*C.GdkEventKey)(unsafe.Pointer(v.Event.native()))
+	if v == nil {
+		return nil
+	}
+	ptr := v.Event.native()
+	return C.toGdkEventKey(ptr)
 }
 
 func (v *EventKey) KeyVal() uint {
@@ -1031,9 +1016,8 @@ type EventMotion struct {
 }
 
 func EventMotionNew() *EventMotion {
-	ee := (*C.GdkEvent)(unsafe.Pointer(&C.GdkEventMotion{}))
-	ev := Event{ee}
-	return &EventMotion{&ev}
+	v := EventNew()
+	return &EventMotion{v}
 }
 
 // EventMotionNewFromEvent returns an EventMotion from an Event.
@@ -1044,18 +1028,15 @@ func EventMotionNew() *EventMotion {
 // *EventMotion. EventMotionNewFromEvent provides a means of creating
 // an EventKey from the Event.
 func EventMotionNewFromEvent(event *Event) *EventMotion {
-	ee := (*C.GdkEvent)(unsafe.Pointer(event.native()))
-	ev := Event{ee}
-	return &EventMotion{&ev}
-}
-
-// Native returns a pointer to the underlying GdkEventMotion.
-func (v *EventMotion) Native() uintptr {
-	return uintptr(unsafe.Pointer(v.native()))
+	return &EventMotion{event}
 }
 
 func (v *EventMotion) native() *C.GdkEventMotion {
-	return (*C.GdkEventMotion)(unsafe.Pointer(v.Event.native()))
+	if v == nil {
+		return nil
+	}
+	ptr := v.Event.native()
+	return C.toGdkEventMotion(ptr)
 }
 
 func (v *EventMotion) MotionVal() (float64, float64) {
@@ -1080,9 +1061,8 @@ type EventScroll struct {
 }
 
 func EventScrollNew() *EventScroll {
-	ee := (*C.GdkEvent)(unsafe.Pointer(&C.GdkEventScroll{}))
-	ev := Event{ee}
-	return &EventScroll{&ev}
+	v := EventNew()
+	return &EventScroll{v}
 }
 
 // EventScrollNewFromEvent returns an EventScroll from an Event.
@@ -1093,18 +1073,15 @@ func EventScrollNew() *EventScroll {
 // *EventScroll. EventScrollNewFromEvent provides a means of creating
 // an EventKey from the Event.
 func EventScrollNewFromEvent(event *Event) *EventScroll {
-	ee := (*C.GdkEvent)(unsafe.Pointer(event.native()))
-	ev := Event{ee}
-	return &EventScroll{&ev}
-}
-
-// Native returns a pointer to the underlying GdkEventScroll.
-func (v *EventScroll) Native() uintptr {
-	return uintptr(unsafe.Pointer(v.native()))
+	return &EventScroll{event}
 }
 
 func (v *EventScroll) native() *C.GdkEventScroll {
-	return (*C.GdkEventScroll)(unsafe.Pointer(v.Event.native()))
+	if v == nil {
+		return nil
+	}
+	ptr := v.Event.native()
+	return C.toGdkEventScroll(ptr)
 }
 
 func (v *EventScroll) DeltaX() float64 {
@@ -1143,9 +1120,8 @@ type EventWindowState struct {
 }
 
 func EventWindowStateNew() *EventWindowState {
-	ee := (*C.GdkEvent)(unsafe.Pointer(&C.GdkEventWindowState{}))
-	ev := Event{ee}
-	return &EventWindowState{&ev}
+	v := EventNew()
+	return &EventWindowState{v}
 }
 
 // EventWindowStateNewFromEvent returns an EventWindowState from an Event.
@@ -1156,18 +1132,15 @@ func EventWindowStateNew() *EventWindowState {
 // *EventWindowState. EventWindowStateNewFromEvent provides a means of creating
 // an EventWindowState from the Event.
 func EventWindowStateNewFromEvent(event *Event) *EventWindowState {
-	ee := (*C.GdkEvent)(unsafe.Pointer(event.native()))
-	ev := Event{ee}
-	return &EventWindowState{&ev}
-}
-
-// Native returns a pointer to the underlying GdkEventWindowState.
-func (v *EventWindowState) Native() uintptr {
-	return uintptr(unsafe.Pointer(v.native()))
+	return &EventWindowState{event}
 }
 
 func (v *EventWindowState) native() *C.GdkEventWindowState {
-	return (*C.GdkEventWindowState)(unsafe.Pointer(v.Event.native()))
+	if v == nil {
+		return nil
+	}
+	ptr := v.Event.native()
+	return C.toGdkEventWindowState(ptr)
 }
 
 func (v *EventWindowState) Type() EventType {
@@ -1214,21 +1187,16 @@ type Pixbuf struct {
 
 // native returns a pointer to the underlying GdkPixbuf.
 func (v *Pixbuf) native() *C.GdkPixbuf {
-	if v == nil || v.GObject == nil {
+	if v == nil {
 		return nil
 	}
-	p := unsafe.Pointer(v.GObject)
-	return C.toGdkPixbuf(p)
-}
-
-// Native returns a pointer to the underlying GdkPixbuf.
-func (v *Pixbuf) Native() uintptr {
-	return uintptr(unsafe.Pointer(v.native()))
+	ptr := unsafe.Pointer(v.Object.Native())
+	return C.toGdkPixbuf(ptr)
 }
 
 func marshalPixbuf(p uintptr) (interface{}, error) {
 	c := C.g_value_get_object((*C.GValue)(unsafe.Pointer(p)))
-	obj := &glib.Object{glib.ToGObject(unsafe.Pointer(c))}
+	obj := glib.ToObject(unsafe.Pointer(c))
 	return &Pixbuf{obj}, nil
 }
 
@@ -1308,7 +1276,7 @@ func (v *Pixbuf) GetOption(key string) (value string, ok bool) {
 	if c == nil {
 		return "", false
 	}
-	return C.GoString((*C.char)(c)), true
+	return goString(c), true
 }
 
 // PixbufNew is a wrapper around gdk_pixbuf_new().
@@ -1338,10 +1306,10 @@ func PixbufNewFromFile(filename string) (*Pixbuf, error) {
 	defer C.free(unsafe.Pointer(cstr))
 
 	var err *C.GError
-	res := C.gdk_pixbuf_new_from_file((*C.char)(cstr), &err)
+	res := C.gdk_pixbuf_new_from_file(cstr, &err)
 	if res == nil {
 		defer C.g_error_free(err)
-		return nil, errors.New(C.GoString((*C.char)(err.message)))
+		return nil, errors.New(goString(err.message))
 	}
 
 	return &Pixbuf{glib.Take(unsafe.Pointer(res))}, nil
@@ -1356,7 +1324,7 @@ func PixbufNewFromFileAtSize(filename string, width, height int) (*Pixbuf, error
 	res := C.gdk_pixbuf_new_from_file_at_size(cstr, C.int(width), C.int(height), &err)
 	if err != nil {
 		defer C.g_error_free(err)
-		return nil, errors.New(C.GoString((*C.char)(err.message)))
+		return nil, errors.New(goString(err.message))
 	}
 
 	if res == nil {
@@ -1376,7 +1344,7 @@ func PixbufNewFromFileAtScale(filename string, width, height int, preserveAspect
 		gbool(preserveAspectRatio), &err)
 	if err != nil {
 		defer C.g_error_free(err)
-		return nil, errors.New(C.GoString((*C.char)(err.message)))
+		return nil, errors.New(goString(err.message))
 	}
 
 	if res == nil {
@@ -1439,7 +1407,7 @@ func (v *Pixbuf) SaveJPEG(path string, quality int) error {
 	c := C._gdk_pixbuf_save_jpeg(v.native(), cpath, &err, cquality)
 	if !gobool(c) {
 		defer C.g_error_free(err)
-		return errors.New(C.GoString((*C.char)(err.message)))
+		return errors.New(goString(err.message))
 	}
 
 	return nil
@@ -1457,7 +1425,7 @@ func (v *Pixbuf) SavePNG(path string, compression int) error {
 	c := C._gdk_pixbuf_save_png(v.native(), cpath, &err, ccompression)
 	if !gobool(c) {
 		defer C.g_error_free(err)
-		return errors.New(C.GoString((*C.char)(err.message)))
+		return errors.New(goString(err.message))
 	}
 	return nil
 }
@@ -1485,11 +1453,11 @@ type PixbufLoader struct {
 
 // native() returns a pointer to the underlying GdkPixbufLoader.
 func (v *PixbufLoader) native() *C.GdkPixbufLoader {
-	if v == nil || v.GObject == nil {
+	if v == nil {
 		return nil
 	}
-	p := unsafe.Pointer(v.GObject)
-	return C.toGdkPixbufLoader(p)
+	ptr := unsafe.Pointer(v.Object.Native())
+	return C.toGdkPixbufLoader(ptr)
 }
 
 // PixbufLoaderNew() is a wrapper around gdk_pixbuf_loader_new().
@@ -1510,10 +1478,10 @@ func PixbufLoaderNewWithType(t string) (*PixbufLoader, error) {
 	cstr := C.CString(t)
 	defer C.free(unsafe.Pointer(cstr))
 
-	c := C.gdk_pixbuf_loader_new_with_type((*C.char)(cstr), &err)
+	c := C.gdk_pixbuf_loader_new_with_type(cstr, &err)
 	if err != nil {
 		defer C.g_error_free(err)
-		return nil, errors.New(C.GoString((*C.char)(err.message)))
+		return nil, errors.New(goString(err.message))
 	}
 
 	if c == nil {
@@ -1543,7 +1511,7 @@ func (v *PixbufLoader) Write(data []byte) (int, error) {
 
 	if !gobool(c) {
 		defer C.g_error_free(err)
-		return 0, errors.New(C.GoString((*C.char)(err.message)))
+		return 0, errors.New(goString(err.message))
 	}
 
 	return len(data), nil
@@ -1557,7 +1525,7 @@ func (v *PixbufLoader) Close() error {
 
 	if ok := gobool(C.gdk_pixbuf_loader_close(v.native(), &err)); !ok {
 		defer C.g_error_free(err)
-		return errors.New(C.GoString((*C.char)(err.message)))
+		return errors.New(goString(err.message))
 	}
 	return nil
 }
@@ -1619,15 +1587,16 @@ func (v *RGBA) Native() uintptr {
 
 // Parse is a representation of gdk_rgba_parse().
 func (v *RGBA) Parse(spec string) bool {
-	cstr := (*C.gchar)(C.CString(spec))
+	cstr := C.CString(spec)
 	defer C.free(unsafe.Pointer(cstr))
 
-	return gobool(C.gdk_rgba_parse(v.rgba, cstr))
+	return gobool(C.gdk_rgba_parse(v.rgba, (*C.gchar)(cstr)))
 }
 
 // String is a representation of gdk_rgba_to_string().
 func (v *RGBA) String() string {
-	return C.GoString((*C.char)(C.gdk_rgba_to_string(v.rgba)))
+	c := C.gdk_rgba_to_string(v.rgba)
+	return goString(c)
 }
 
 // GdkRGBA * 	gdk_rgba_copy ()
@@ -1646,7 +1615,7 @@ func PixbufGetType() glib.Type {
 
 // Rectangle is a representation of GDK's GdkRectangle type.
 type Rectangle struct {
-	GdkRectangle C.GdkRectangle
+	gdkRectangle *C.GdkRectangle
 }
 
 func WrapRectangle(p uintptr) *Rectangle {
@@ -1657,32 +1626,42 @@ func wrapRectangle(obj *C.GdkRectangle) *Rectangle {
 	if obj == nil {
 		return nil
 	}
-	return &Rectangle{*obj}
+	return &Rectangle{obj}
+}
+
+func (v *Rectangle) Native() uintptr {
+	if v == nil {
+		return 0
+	}
+	return uintptr(unsafe.Pointer(v.gdkRectangle))
 }
 
 // Native() returns a pointer to the underlying GdkRectangle.
-func (r *Rectangle) native() *C.GdkRectangle {
-	return &r.GdkRectangle
+func (v *Rectangle) native() *C.GdkRectangle {
+	if v == nil {
+		return nil
+	}
+	return v.gdkRectangle
 }
 
 // GetX returns x field of the underlying GdkRectangle.
-func (r *Rectangle) GetX() int {
-	return int(r.native().x)
+func (v *Rectangle) GetX() int {
+	return int(v.native().x)
 }
 
 // GetY returns y field of the underlying GdkRectangle.
-func (r *Rectangle) GetY() int {
-	return int(r.native().y)
+func (v *Rectangle) GetY() int {
+	return int(v.native().y)
 }
 
 // GetWidth returns width field of the underlying GdkRectangle.
-func (r *Rectangle) GetWidth() int {
-	return int(r.native().width)
+func (v *Rectangle) GetWidth() int {
+	return int(v.native().width)
 }
 
 // GetHeight returns height field of the underlying GdkRectangle.
-func (r *Rectangle) GetHeight() int {
-	return int(r.native().height)
+func (v *Rectangle) GetHeight() int {
+	return int(v.native().height)
 }
 
 /*
@@ -1695,20 +1674,16 @@ type Visual struct {
 }
 
 func (v *Visual) native() *C.GdkVisual {
-	if v == nil || v.GObject == nil {
+	if v == nil {
 		return nil
 	}
-	p := unsafe.Pointer(v.GObject)
-	return C.toGdkVisual(p)
-}
-
-func (v *Visual) Native() uintptr {
-	return uintptr(unsafe.Pointer(v.native()))
+	ptr := unsafe.Pointer(v.Object.Native())
+	return C.toGdkVisual(ptr)
 }
 
 func marshalVisual(p uintptr) (interface{}, error) {
 	c := C.g_value_get_object((*C.GValue)(unsafe.Pointer(p)))
-	obj := &glib.Object{glib.ToGObject(unsafe.Pointer(c))}
+	obj := glib.ToObject(unsafe.Pointer(c))
 	return &Visual{obj}, nil
 }
 
@@ -1721,28 +1696,18 @@ type Window struct {
 	*glib.Object
 }
 
-// SetCursor is a wrapper around gdk_window_set_cursor().
-func (v *Window) SetCursor(cursor *Cursor) {
-	C.gdk_window_set_cursor(v.native(), cursor.native())
-}
-
 // native returns a pointer to the underlying GdkWindow.
 func (v *Window) native() *C.GdkWindow {
-	if v == nil || v.GObject == nil {
+	if v == nil {
 		return nil
 	}
-	p := unsafe.Pointer(v.GObject)
-	return C.toGdkWindow(p)
-}
-
-// Native returns a pointer to the underlying GdkWindow.
-func (v *Window) Native() uintptr {
-	return uintptr(unsafe.Pointer(v.native()))
+	ptr := unsafe.Pointer(v.Object.Native())
+	return C.toGdkWindow(ptr)
 }
 
 func marshalWindow(p uintptr) (interface{}, error) {
 	c := C.g_value_get_object((*C.GValue)(unsafe.Pointer(p)))
-	obj := &glib.Object{glib.ToGObject(unsafe.Pointer(c))}
+	obj := glib.ToObject(unsafe.Pointer(c))
 	return &Window{obj}, nil
 }
 
@@ -1750,6 +1715,11 @@ func toWindow(s *C.GdkWindow) (*Window, error) {
 	if s == nil {
 		return nil, nilPtrErr
 	}
-	obj := &glib.Object{glib.ToGObject(unsafe.Pointer(s))}
+	obj := glib.ToObject(unsafe.Pointer(s))
 	return &Window{obj}, nil
+}
+
+// SetCursor is a wrapper around gdk_window_set_cursor().
+func (v *Window) SetCursor(cursor *Cursor) {
+	C.gdk_window_set_cursor(v.native(), cursor.native())
 }

@@ -10,7 +10,7 @@ import "C"
 import (
 	"unsafe"
 
-	"github.com/gotk3/gotk3/glib"
+	"github.com/d2r2/gotk3/glib"
 )
 
 // PrefersAppMenu is a wrapper around gtk_application_prefers_app_menu().
@@ -20,28 +20,23 @@ func (v *Application) PrefersAppMenu() bool {
 
 // GetActionsForAccel is a wrapper around gtk_application_get_actions_for_accel().
 func (v *Application) GetActionsForAccel(acc string) []string {
-	cstr1 := (*C.gchar)(C.CString(acc))
-	defer C.free(unsafe.Pointer(cstr1))
+	cstr := C.CString(acc)
+	defer C.free(unsafe.Pointer(cstr))
 
-	var acts []string
-	c := C.gtk_application_get_actions_for_accel(v.native(), cstr1)
-	originalc := c
-	defer C.g_strfreev(originalc)
+	c := C.gtk_application_get_actions_for_accel(v.native(), (*C.gchar)(cstr))
+	// both pointer array and strings also should be freed.
+	defer C.g_strfreev(c)
 
-	for *c != nil {
-		acts = append(acts, C.GoString((*C.char)(*c)))
-		c = C.next_gcharptr(c)
-	}
-
+	acts := goStringArray(c)
 	return acts
 }
 
 // GetMenuByID is a wrapper around gtk_application_get_menu_by_id().
 func (v *Application) GetMenuByID(id string) *glib.Menu {
-	cstr1 := (*C.gchar)(C.CString(id))
-	defer C.free(unsafe.Pointer(cstr1))
+	cstr := C.CString(id)
+	defer C.free(unsafe.Pointer(cstr))
 
-	c := C.gtk_application_get_menu_by_id(v.native(), cstr1)
+	c := C.gtk_application_get_menu_by_id(v.native(), (*C.gchar)(cstr))
 	if c == nil {
 		return nil
 	}

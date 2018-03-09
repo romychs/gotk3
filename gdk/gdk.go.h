@@ -16,13 +16,25 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
+#ifndef __GDK_GO_H__
+#define __GDK_GO_H__
+
+#include <stdint.h>
 #include <stdlib.h>
+#include <stdio.h>
+#include <gdk/gdk.h>
 
 // Type Casting
 static GdkAtom
 toGdkAtom(void *p)
 {
 	return ((GdkAtom)p);
+}
+
+static GObject *
+toGObject(void *p)
+{
+	return (GObject *)(p);
 }
 
 static GdkDevice *
@@ -98,3 +110,35 @@ toGdkWindow(void *p)
 {
 	return (GDK_WINDOW(p));
 }
+
+static GdkEventButton *
+toGdkEventButton(GdkEvent *e)
+{
+	return (GdkEventButton *)e;
+}
+
+static GdkEventKey *
+toGdkEventKey(GdkEvent *e)
+{
+	return (GdkEventKey *)e;
+}
+
+static GdkEventMotion *
+toGdkEventMotion(GdkEvent *e)
+{
+	return (GdkEventMotion *)e;
+}
+
+static GdkEventScroll *
+toGdkEventScroll(GdkEvent *e)
+{
+	return (GdkEventScroll *)e;
+}
+
+static GdkEventWindowState *
+toGdkEventWindowState(GdkEvent *e)
+{
+	return (GdkEventWindowState *)e;
+}
+
+#endif

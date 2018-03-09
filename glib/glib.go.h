@@ -56,6 +56,91 @@ toGMenuItem(void *p)
 	return (G_MENU_ITEM(p));
 }
 
+static GCancellable*
+toGCancellable(void *p)
+{
+	return (G_CANCELLABLE(p));
+}
+
+static GFileInfo*
+toGFileInfo(void *p)
+{
+	return (G_FILE_INFO(p));
+}
+
+static GInputStream*
+toGInputStream(void *p)
+{
+	return (G_INPUT_STREAM(p));
+}
+
+static GFileInputStream*
+toGFileInputStream(void *p)
+{
+	return (G_FILE_INPUT_STREAM(p));
+}
+
+static GOutputStream*
+toGOutputStream(void *p)
+{
+	return (G_OUTPUT_STREAM(p));
+}
+
+static GFileOutputStream*
+toGFileOutputStream(void *p)
+{
+	return (G_FILE_OUTPUT_STREAM(p));
+}
+
+static GFileEnumerator*
+toGFileEnumerator(void *p)
+{
+	return (G_FILE_ENUMERATOR(p));
+}
+
+static GIOStream*
+toGIOStream(void *p)
+{
+	return (G_IO_STREAM(p));
+}
+
+static GSeekable*
+toGSeekable(void *p)
+{
+	return (G_SEEKABLE(p));
+}
+
+
+static GFileIOStream*
+toGFileIOStream(void *p)
+{
+	return (G_FILE_IO_STREAM(p));
+}
+
+static GFile *
+toGFile(void *p)
+{
+	return (G_FILE(p));
+}
+
+static GIcon *
+toGIcon(void *p)
+{
+	return (G_ICON(p));
+}
+
+static GThemedIcon *
+toGThemedIcon(void *p)
+{
+	return (G_THEMED_ICON(p));
+}
+
+static GFileIcon *
+toGFileIcon(void *p)
+{
+	return (G_FILE_ICON(p));
+}
+
 static GNotification *
 toGNotification(void *p)
 {

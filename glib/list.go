@@ -13,7 +13,7 @@ import "unsafe"
 
 // List is a representation of Glib's GList.
 type List struct {
-	list *C.struct__GList
+	list *C.GList
 	// If set, dataWrap is called every time NthDataWrapped()
 	// or DataWrapped() is called to wrap raw underlying
 	// value into appropriate type.
@@ -21,17 +21,17 @@ type List struct {
 }
 
 func WrapList(obj uintptr) *List {
-	return wrapList((*C.struct__GList)(unsafe.Pointer(obj)))
+	return wrapList((*C.GList)(unsafe.Pointer(obj)))
 }
 
-func wrapList(obj *C.struct__GList) *List {
+func wrapList(obj *C.GList) *List {
 	if obj == nil {
 		return nil
 	}
 	return &List{list: obj}
 }
 
-func (v *List) wrapNewHead(obj *C.struct__GList) *List {
+func (v *List) wrapNewHead(obj *C.GList) *List {
 	if obj == nil {
 		return nil
 	}
@@ -45,8 +45,8 @@ func (v *List) Native() uintptr {
 	return uintptr(unsafe.Pointer(v.list))
 }
 
-func (v *List) native() *C.struct__GList {
-	if v == nil || v.list == nil {
+func (v *List) native() *C.GList {
+	if v == nil {
 		return nil
 	}
 	return v.list

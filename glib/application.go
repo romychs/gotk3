@@ -15,14 +15,11 @@ type Application struct {
 
 // native() returns a pointer to the underlying GApplication.
 func (v *Application) native() *C.GApplication {
-	if v == nil || v.GObject == nil {
+	if v == nil {
 		return nil
 	}
-	return C.toGApplication(unsafe.Pointer(v.GObject))
-}
-
-func (v *Application) Native() uintptr {
-	return uintptr(unsafe.Pointer(v.native()))
+	ptr := unsafe.Pointer(v.Object.Native())
+	return C.toGApplication(ptr)
 }
 
 func marshalApplication(p uintptr) (interface{}, error) {
@@ -36,37 +33,37 @@ func wrapApplication(obj *Object) *Application {
 
 // ApplicationIDIsValid is a wrapper around g_application_id_is_valid().
 func ApplicationIDIsValid(id string) bool {
-	cstr1 := (*C.gchar)(C.CString(id))
-	defer C.free(unsafe.Pointer(cstr1))
+	cstr := C.CString(id)
+	defer C.free(unsafe.Pointer(cstr))
 
-	return gobool(C.g_application_id_is_valid(cstr1))
+	return gobool(C.g_application_id_is_valid((*C.gchar)(cstr)))
 }
 
 // ApplicationNew is a wrapper around g_application_new().
-func ApplicationNew(appID string, flags ApplicationFlags) *Application {
-	cstr1 := (*C.gchar)(C.CString(appID))
-	defer C.free(unsafe.Pointer(cstr1))
+func ApplicationNew(appID string, flags ApplicationFlags) (*Application, error) {
+	cstr := C.CString(appID)
+	defer C.free(unsafe.Pointer(cstr))
 
-	c := C.g_application_new(cstr1, C.GApplicationFlags(flags))
+	c := C.g_application_new((*C.gchar)(cstr), C.GApplicationFlags(flags))
 	if c == nil {
-		return nil
+		return nil, errNilPtr
 	}
-	return wrapApplication(wrapObject(unsafe.Pointer(c)))
+	return wrapApplication(wrapObject(unsafe.Pointer(c))), nil
 }
 
 // GetApplicationID is a wrapper around g_application_get_application_id().
 func (v *Application) GetApplicationID() string {
 	c := C.g_application_get_application_id(v.native())
 
-	return C.GoString((*C.char)(c))
+	return goString(c)
 }
 
 // SetApplicationID is a wrapper around g_application_set_application_id().
 func (v *Application) SetApplicationID(id string) {
-	cstr1 := (*C.gchar)(C.CString(id))
-	defer C.free(unsafe.Pointer(cstr1))
+	cstr := C.CString(id)
+	defer C.free(unsafe.Pointer((*C.gchar)(cstr)))
 
-	C.g_application_set_application_id(v.native(), cstr1)
+	C.g_application_set_application_id(v.native(), (*C.gchar)(cstr))
 }
 
 // GetInactivityTimeout is a wrapper around g_application_get_inactivity_timeout().
@@ -94,7 +91,7 @@ func (v *Application) SetFlags(flags ApplicationFlags) {
 // func (v *Application) GetResourceBasePath() string {
 // 	c := C.g_application_get_resource_base_path(v.native())
 
-// 	return C.GoString((*C.char)(c))
+// 	return goString(c)
 // }
 
 // Only available in GLib 2.42+
@@ -110,7 +107,7 @@ func (v *Application) SetFlags(flags ApplicationFlags) {
 func (v *Application) GetDbusObjectPath() string {
 	c := C.g_application_get_dbus_object_path(v.native())
 
-	return C.GoString((*C.char)(c))
+	return goString(c)
 }
 
 // GetIsRegistered is a wrapper around g_application_get_is_registered().
@@ -145,18 +142,18 @@ func (v *Application) Activate() {
 
 // SendNotification is a wrapper around g_application_send_notification().
 func (v *Application) SendNotification(id string, notification *Notification) {
-	cstr1 := (*C.gchar)(C.CString(id))
-	defer C.free(unsafe.Pointer(cstr1))
+	cstr := C.CString(id)
+	defer C.free(unsafe.Pointer(cstr))
 
-	C.g_application_send_notification(v.native(), cstr1, notification.native())
+	C.g_application_send_notification(v.native(), (*C.gchar)(cstr), notification.native())
 }
 
 // WithdrawNotification is a wrapper around g_application_withdraw_notification().
 func (v *Application) WithdrawNotification(id string) {
-	cstr1 := (*C.gchar)(C.CString(id))
-	defer C.free(unsafe.Pointer(cstr1))
+	cstr := C.CString(id)
+	defer C.free(unsafe.Pointer(cstr))
 
-	C.g_application_withdraw_notification(v.native(), cstr1)
+	C.g_application_withdraw_notification(v.native(), (*C.gchar)(cstr))
 }
 
 // SetDefault is a wrapper around g_application_set_default().

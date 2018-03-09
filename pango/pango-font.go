@@ -27,7 +27,7 @@ import (
 	//	"github.com/andre-hub/gotk3/cairo"
 	"unsafe"
 
-	"github.com/gotk3/gotk3/glib"
+	"github.com/d2r2/gotk3/glib"
 )
 
 func init() {
@@ -50,7 +50,10 @@ func (v *FontDescription) Native() uintptr {
 }
 
 func (v *FontDescription) native() *C.PangoFontDescription {
-	return (*C.PangoFontDescription)(unsafe.Pointer(v.pangoFontDescription))
+	if v == nil {
+		return nil
+	}
+	return v.pangoFontDescription
 }
 
 // FontMetrics is a representation of PangoFontMetrics.
@@ -64,7 +67,10 @@ func (v *FontMetrics) Native() uintptr {
 }
 
 func (v *FontMetrics) native() *C.PangoFontMetrics {
-	return (*C.PangoFontMetrics)(unsafe.Pointer(v.pangoFontMetrics))
+	if v == nil {
+		return nil
+	}
+	return v.pangoFontMetrics
 }
 
 const (
@@ -209,7 +215,7 @@ func (v *FontDescription) Free() {
 func (v *FontDescription) SetFamily(family string) {
 	cstr := C.CString(family)
 	defer C.free(unsafe.Pointer(cstr))
-	C.pango_font_description_set_family(v.native(), (*C.char)(cstr))
+	C.pango_font_description_set_family(v.native(), cstr)
 }
 
 //void                 pango_font_description_set_family_static (PangoFontDescription *desc,
@@ -217,13 +223,13 @@ func (v *FontDescription) SetFamily(family string) {
 func (v *FontDescription) SetFamilyStatic(family string) {
 	cstr := C.CString(family)
 	defer C.free(unsafe.Pointer(cstr))
-	C.pango_font_description_set_family_static(v.native(), (*C.char)(cstr))
+	C.pango_font_description_set_family_static(v.native(), cstr)
 }
 
 //const char          *pango_font_description_get_family        (const PangoFontDescription *desc) G_GNUC_PURE;
 func (v *FontDescription) GetFamily() string {
 	c := C.pango_font_description_get_family(v.native())
-	return C.GoString((*C.char)(c))
+	return goString(c)
 }
 
 //void                 pango_font_description_set_style         (PangoFontDescription *desc,
@@ -340,7 +346,7 @@ func (v *FontDescription) BetterMatch(old_match, new_match *FontDescription) boo
 func FontDescriptionFromString(str string) *FontDescription {
 	cstr := C.CString(str)
 	defer C.free(unsafe.Pointer(cstr))
-	c := C.pango_font_description_from_string((*C.char)(cstr))
+	c := C.pango_font_description_from_string(cstr)
 	v := new(FontDescription)
 	v.pangoFontDescription = c
 	return v
@@ -349,13 +355,13 @@ func FontDescriptionFromString(str string) *FontDescription {
 //char *                pango_font_description_to_string   (const PangoFontDescription  *desc);
 func (v *FontDescription) ToString() string {
 	c := C.pango_font_description_to_string(v.native())
-	return C.GoString((*C.char)(c))
+	return goString(c)
 }
 
 //char *                pango_font_description_to_filename (const PangoFontDescription  *desc);
 func (v *FontDescription) ToFilename() string {
 	c := C.pango_font_description_to_filename(v.native())
-	return C.GoString((*C.char)(c))
+	return goString(c)
 }
 
 ///*

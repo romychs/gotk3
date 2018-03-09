@@ -30,7 +30,7 @@ const (
 func (v *Context) SelectFontFace(family string, slant FontSlant, weight FontWeight) {
 	cstr := C.CString(family)
 	defer C.free(unsafe.Pointer(cstr))
-	C.cairo_select_font_face(v.native(), (*C.char)(cstr), C.cairo_font_slant_t(slant), C.cairo_font_weight_t(weight))
+	C.cairo_select_font_face(v.native(), cstr, C.cairo_font_slant_t(slant), C.cairo_font_weight_t(weight))
 }
 
 func (v *Context) SetFontSize(size float64) {
@@ -56,55 +56,35 @@ func (v *Context) SetFontSize(size float64) {
 func (v *Context) ShowText(utf8 string) {
 	cstr := C.CString(utf8)
 	defer C.free(unsafe.Pointer(cstr))
-	C.cairo_show_text(v.native(), (*C.char)(cstr))
+	C.cairo_show_text(v.native(), cstr)
 }
 
 // TODO: cairo_show_glyphs
 
 // TODO: cairo_show_text_glyphs
 
+// Implementing Cairo cairo_font_extents_t
 type FontExtents struct {
-	Ascent      float64
-	Descent     float64
-	Height      float64
-	MaxXAdvance float64
-	MaxYAdvance float64
+	cairo_font_extents *C.cairo_font_extents_t
 }
 
 func (v *Context) FontExtents() FontExtents {
 	var extents C.cairo_font_extents_t
 	C.cairo_font_extents(v.native(), &extents)
-	return FontExtents{
-		Ascent:      float64(extents.ascent),
-		Descent:     float64(extents.descent),
-		Height:      float64(extents.height),
-		MaxXAdvance: float64(extents.max_x_advance),
-		MaxYAdvance: float64(extents.max_y_advance),
-	}
+	return FontExtents{&extents}
 }
 
+// Implementing Cairo cairo_text_extents_t
 type TextExtents struct {
-	XBearing float64
-	YBearing float64
-	Width    float64
-	Height   float64
-	XAdvance float64
-	YAdvance float64
+	cairo_text_extents *C.cairo_text_extents_t
 }
 
 func (v *Context) TextExtents(utf8 string) TextExtents {
 	cstr := C.CString(utf8)
 	defer C.free(unsafe.Pointer(cstr))
 	var extents C.cairo_text_extents_t
-	C.cairo_text_extents(v.native(), (*C.char)(cstr), &extents)
-	return TextExtents{
-		XBearing: float64(extents.x_bearing),
-		YBearing: float64(extents.y_bearing),
-		Width:    float64(extents.width),
-		Height:   float64(extents.height),
-		XAdvance: float64(extents.x_advance),
-		YAdvance: float64(extents.y_advance),
-	}
+	C.cairo_text_extents(v.native(), cstr, &extents)
+	return TextExtents{&extents}
 }
 
 // TODO: cairo_glyph_extents
