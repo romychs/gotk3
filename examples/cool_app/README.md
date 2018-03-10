@@ -4,7 +4,7 @@ Feature-rich GTK+3 application written in go
 Aim of this sample application to show all GLIB/GTK+ components and widgets tiered together
 with helpfull code patterns.
 
-It's highly recomended to have GTK+3.12 and high installed, otherwise app will not compile.
+It's obligatory to have GTK+ 3.12 and high installed, otherwise app will not compile.
 
 Advantages of this demonstration:
 1) All actions in application implemented via GAction component, working as entry point
