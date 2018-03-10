@@ -9,7 +9,7 @@ go:
 env:
   - GOARCH=amd64
 
-sudo: required
+sudo: false
 dist: trusty
 
 before_install:
