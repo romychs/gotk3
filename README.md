@@ -22,11 +22,11 @@ Idea to create a fork from the original one of the best
 [GTK+3 adaptation for golang](https://godoc.org/github.com/gotk3) was
 not just add another API functions, but came from the other side - create
 good application example written in go, which demostrate modern GTK+ features
-(as well as old-style one) and code patterns.
+(as well as old-style one) and in addition provide out-of-the-box code patterns.
 
 As a results a lot of refactoring was done with original code, to create on
-the top example application CoolApp, which contains many code samples to build
-modern GTK+3 GUI.
+the top example application CoolApp, which contains many ready to use code samples
+to build go-application with modern GTK+3 GUI.
 
 Short list of changes made:
 1) Code refactored and reformated for better mix of widgets in corresponding files.
