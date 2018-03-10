@@ -9,14 +9,8 @@ Improved GOTK3 (go bindings for GTK+3)
 -->
 
 
-Original [GOTK3](https://godoc.org/github.com/gotk3) project provides Go bindings for GTK+3 and dependent
-projects. Partial binding support for the
-following libraries is currently implemented:
-
-  - GTK+3 (3.12 and later)
-  - GDK 3 (3.12 and later)
-  - GLib 2 (2.36 and later)
-  - Cairo (1.10 and later)
+Original [GOTK3](https://godoc.org/github.com/gotk3/gotk3) project provides Go bindings for GTK+3 and dependent
+projects.
 
 Idea to create a fork from the original one of the best
 [GTK+3 adaptation for golang](https://godoc.org/github.com/gotk3) was
