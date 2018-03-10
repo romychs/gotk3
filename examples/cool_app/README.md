@@ -11,7 +11,7 @@ Features of this demonstration:
 for any activity in application. Advanced use of GAction utilize
 "[action with states](https://developer.gnome.org/GAction/)"
 with seamless integration of such actions with UI menus.
-2) New widgets such as GtkHeaderBar, GtkPopover are used.
+2) New widgets such as GtkHeaderBar, GtkPopover and others are used.
 3) Good example of preference dialog with save/restore functionality.
 4) Helpfull code pattern are present: dialogs and message dislogs demo,
 working with save/restore settings (via GSettings),
