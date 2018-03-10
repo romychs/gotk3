@@ -43,7 +43,7 @@ save/restore settings and so on).
 Sample Use
 ----------
 
-The following example applications can be found in folder
+Example applications could be found in folder
 ["examples"](https://github.com/d2r2/gotk3/tree/master/examples).
 
 > Note: **Pay attention to most powerfull example:** feature-rich "cool_app" application
