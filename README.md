@@ -40,13 +40,13 @@ modern GTK+3 application, which incude menus, toolbars, actions and others
 widgets and tools (including pattern for fullscreen wrap/unwrap, preference dialog,
 save/restore settings and so on).
 
-Sample Use
-----------
+Usage
+------------
 
-Example applications could be found in folder
+Find example applications in folder
 ["examples"](https://github.com/d2r2/gotk3/tree/master/examples).
 
-> Note: **Pay attention to most powerfull example:** feature-rich "cool_app" application
+> Note: **Pay attention to most powerfull example:** feature-rich "Cool App" application
 with the newest GTK+3 widgets and helpfull code patters. Find more information and
 application screenshots **[here](https://github.com/d2r2/gotk3/tree/master/examples/cool_app).**
 
@@ -93,6 +93,15 @@ otherwise any derived application will compile for a long-long time, so run in a
 > go install -tags "gtk_$(pkg-config --modversion gtk+-3.0 | tr . _| cut -d '_' -f 1-2)" github.com/d2r2/gotk3/...
 > ```
 
+Open source projects used
+-------------------------
+- [Tilix](https://github.com/gnunn1/tilix) - a tiling terminal emulator for Linux using GTK+ 3.
+- [GNOME/gedit](https://github.com/GNOME/gedit) IDE.
+
+Contact
+-------
+
+Please use [Github issue tracker](https://github.com/d2r2/gotk3/issues) for filing bugs or feature requests.
 
 License
 -------
