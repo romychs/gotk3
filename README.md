@@ -80,7 +80,7 @@ go {get|build|install} -tags "$(pkg-config --modversion gtk+-3.0 | tr . _| cut -
 ```
 , where one of get/build/install should be specified.
 
-As an option, if you sure to have latest GTK+3 installation (GTK3.22 at the moment),
+As an option, if you sure that you have the latest GTK+3 installation (GTK3.22 at the moment),
 you could run this commands without specifying build tag, like this:
 ```
 go {get|build|install} github.com/d2r2/gotk3/...
