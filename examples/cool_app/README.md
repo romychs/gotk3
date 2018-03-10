@@ -22,7 +22,7 @@ Main form and popover menu:
 
 Main form and main menu:
 
-Fullscreen mode:
+One of few dialogs demo:
 
 Preference dialog:
 
