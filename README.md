@@ -39,7 +39,17 @@ modern GTK+3 application, which incude menus, toolbars, actions and others
 widgets and tools (including pattern for fullscreen wrap/unwrap, preference dialog,
 save/restore settings and so on).
 
-## Documentation
+Sample Use
+----------
+
+The following example applications can be found in folder
+["examples"](https://github.com/d2r2/gotk3/tree/master/examples).
+
+Pay attention to most powerfull example - "cool_app" application with the newest GTK+3 widgets and
+helpfull code patters. For more information please [read]().
+
+Documentation
+-------------
 
 Each package's internal `go doc` style documentation can be viewed
 online without installing this package by using the GoDoc site (links
@@ -53,13 +63,36 @@ installed with the `godoc` tool by running `godoc -http=":6060"` and
 pointing your browser to
 http://localhost:6060/pkg/github.com/d2r2/gotk3
 
-## Installation
+Installation
+------------
 
-gotk3 currently requires GTK 3.6-3.16, GLib 2.36-2.40, and
-Cairo 1.10 or 1.12.  A recent Go (1.6 or newer) is also required.
+GOTK3 currently requires GTK 3.6-3.16, GLib 2.36-2.40, and
+Cairo 1.10 or 1.12. A recent Go (1.6 or newer) is also required.
 
-For detailed instructions see the wiki pages: [installation](https://github.com/d2r2/gotk3/wiki#installation)
+GOTK3 installation and build process support existing GTK+3 API variation which depend on minor version.
+For instance, some noticeable changes in API was made starting from 3.12. So library support next tags
+based on [golang build constraints approach](https://golang.org/pkg/go/build/#hdr-Build_Constraints): gtk_3_6, gtk_3_8, gtk_3_10, gtk_3_12, gtk_3_14, gtk_3_16, gtk_3_18, gtk_3_20.
 
-## License
+Thus, when you trying to get or build library you should specify GTK build tag which correspond
+to your current GTK+3 version installed on computer. So, it should be:
+```
+go {get|build|install} -tags "$(pkg-config --modversion gtk+-3.0 | tr . _| cut -d '_' -f 1-2)" github.com/d2r2/gotk3/...
+```
+, where one of get/build/install should be specified.
+
+As an option, if you sure to have latest GTK+3 installation (GTK3.22 at the moment),
+you could run this commands without specifying build tag, like this:
+```
+go {get|build|install} github.com/d2r2/gotk3/...
+```
+> NOTE: It's highly recommended to install library before use, otherwise any derived
+application will compile for a long-long time, so run before use:
+```
+go install -tags "$(pkg-config --modversion gtk+-3.0 | tr . _| cut -d '_' -f 1-2)" github.com/d2r2/gotk3/...
+```
+
+
+License
+-------
 
 Modified GOTK3 is licensed under the liberal ISC License, as the original version.
