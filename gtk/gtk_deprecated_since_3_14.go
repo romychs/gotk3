@@ -313,7 +313,7 @@ func (v *StatusIcon) SetTooltipText(text string) {
 func (v *StatusIcon) GetTooltipText() string {
 	c := C.gtk_status_icon_get_tooltip_text(v.native())
 	defer C.g_free(C.gpointer(c))
-	return goString(cstr)
+	return goString(c)
 }
 
 // SetTooltipMarkup is a wrapper around gtk_status_icon_set_tooltip_markup()
@@ -383,9 +383,9 @@ func (v *StatusIcon) SetTitle(title string) {
 
 // GetIconName is a wrapper around gtk_status_icon_get_icon_name()
 func (v *StatusIcon) GetIconName() string {
-	cstr := C.gtk_status_icon_get_icon_name(v.native())
+	c := C.gtk_status_icon_get_icon_name(v.native())
 	defer C.g_free(C.gpointer(c))
-	return goString(cstr)
+	return goString(c)
 }
 
 // GetSize is a wrapper around gtk_status_icon_get_size()

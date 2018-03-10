@@ -10,27 +10,41 @@ package gtk
 // #include <gtk/gtk.h>
 // #include "gtk_since_3_10.go.h"
 import "C"
+import (
+	"unsafe"
+
+	"github.com/d2r2/gotk3/glib"
+)
 
 /*
  * GtkDialog
  */
 
 // GetActionArea() is a wrapper around gtk_dialog_get_action_area().
-func (v *Dialog) GetActionArea() (*Box, error) {
+func (v *Dialog) GetActionArea() (*Widget, error) {
 	c := C.gtk_dialog_get_action_area(v.native())
 	if c == nil {
 		return nil, nilPtrErr
 	}
 	obj := glib.Take(unsafe.Pointer(c))
-	box := wrapBox(obj)
-	return box, nil
+	return wrapWidget(obj), nil
 }
 
 /*
  * GtkMessageDialog
  */
 
-// Wrap around gtk_message_dialog_set_image()
-func (v *MessageDialog) SetImage(image *Image) {
-	C.gtk_message_dialog_set_image(v.native(), image.Widget.native())
+// GetImage is a wrapper around gtk_message_dialog_get_image().
+func (v *MessageDialog) GetImage() (*Widget, error) {
+	c := C.gtk_message_dialog_get_image(v.native())
+	if c == nil {
+		return nil, nilPtrErr
+	}
+	obj := glib.Take(unsafe.Pointer(c))
+	return wrapWidget(obj), nil
+}
+
+// SetImage is a wrapper around gtk_message_dialog_set_image().
+func (v *MessageDialog) SetImage(image IWidget) {
+	C.gtk_message_dialog_set_image(v.native(), image.toWidget())
 }
