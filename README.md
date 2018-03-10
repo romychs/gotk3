@@ -76,7 +76,7 @@ based on [golang build constraints approach](https://golang.org/pkg/go/build/#hd
 Thus, when you trying to get or build library you should specify GTK build tag which correspond
 to your current GTK+3 version installed on computer. So, it should be:
 ```
-go {get|build|install} -tags "$(pkg-config --modversion gtk+-3.0 | tr . _| cut -d '_' -f 1-2)" github.com/d2r2/gotk3/...
+go {get|build|install} -tags "gtk_$(pkg-config --modversion gtk+-3.0 | tr . _| cut -d '_' -f 1-2)" github.com/d2r2/gotk3/...
 ```
 , where one of get/build/install should be specified.
 
@@ -88,7 +88,7 @@ go {get|build|install} github.com/d2r2/gotk3/...
 > NOTE: Once you made any changes in the library, it's highly recommended to install it before use,
 otherwise any derived application will compile for a long-long time, so run in advance:
 > ```
-> go install -tags "$(pkg-config --modversion gtk+-3.0 | tr . _| cut -d '_' -f 1-2)" github.com/d2r2/gotk3/...
+> go install -tags "gtk_$(pkg-config --modversion gtk+-3.0 | tr . _| cut -d '_' -f 1-2)" github.com/d2r2/gotk3/...
 > ```
 
 
