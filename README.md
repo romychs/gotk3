@@ -10,8 +10,7 @@ Improved GOTK3 (go bindings for GTK+3)
 
 
 Original [GOTK3](https://godoc.org/github.com/gotk3) project provides Go bindings for GTK+3 and dependent
-projects.  Each component is given its own subdirectory, which is used
-as the import path for the package.  Partial binding support for the
+projects. Partial binding support for the
 following libraries is currently implemented:
 
   - GTK+3 (3.12 and later)
@@ -22,7 +21,7 @@ following libraries is currently implemented:
 Idea to create a fork from the original one of the best
 [GTK+3 adaptation for golang](https://godoc.org/github.com/gotk3) was
 not just add another API functions, but came from the other side - create
-good application example written in go, which demostrate all modern GTK+ features
+good application example written in go, which demostrate modern GTK+ features
 (as well as old-style one) and code patterns.
 
 As a results a lot of refactoring was done with original code, to create on
@@ -30,7 +29,7 @@ the top example application CoolApp, which contains many code samples to build
 modern GTK+3 GUI.
 
 Short list of changes made:
-1) Code refacrored and reformated for better mix of widgets in corresponding files.
+1) Code refactored and reformated for better mix of widgets in corresponding files.
 2) Some amount of error was fixed including memory leaks.
 3) GOTK3 examples which in original version located separately, here integrated in one project.
 4) New GLIB, GTK+ objects and widgets supported, including GAction, GSimpleAction, GActionMap,
