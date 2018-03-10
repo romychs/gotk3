@@ -56,10 +56,10 @@ http://localhost:6060/pkg/github.com/d2r2/gotk3
 ## Installation
 
 gotk3 currently requires GTK 3.6-3.16, GLib 2.36-2.40, and
-Cairo 1.10 or 1.12.  A recent Go (1.3 or newer) is also required.
+Cairo 1.10 or 1.12.  A recent Go (1.6 or newer) is also required.
 
 For detailed instructions see the wiki pages: [installation](https://github.com/d2r2/gotk3/wiki#installation)
 
 ## License
 
-Package gotk3 is licensed under the liberal ISC License, as the original version.
+Modified GOTK3 is licensed under the liberal ISC License, as the original version.
