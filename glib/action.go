@@ -147,7 +147,7 @@ func ParseDetailedName(detailedName string) (actionName string, targetValue *Var
 	var an *C.gchar
 	var tv *C.GVariant
 	var err *C.GError
-	c := C.g_action_parse_detailed_name(cstr, &an, &tv, &err)
+	c := C.g_action_parse_detailed_name((*C.gchar)(cstr), &an, &tv, &err)
 	if c == 0 {
 		defer C.g_error_free(err)
 		return "", nil, errors.New(goString(err.message))
