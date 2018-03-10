@@ -16,15 +16,19 @@ demonstration of such actions in menus.
 working with save/restore settings (via GSettings),
 fullscreen mode wrap/unwrap, actions with states or stateless and others.
 
-Screenshot
-==========
+Screenshots
+===========
 Main form and popover menu:
+![image](https://raw.github.com/d2r2/gotk3/master/examples/cool_app/docs/cool_app_screen_1.png)
 
 Main form and main menu:
+![image](https://raw.github.com/d2r2/gotk3/master/examples/cool_app/docs/cool_app_screen_2.png)
 
 One of few dialogs demo:
+![image](https://raw.github.com/d2r2/gotk3/master/examples/cool_app/docs/cool_app_screen_3.png)
 
 Preference dialog:
+![image](https://raw.github.com/d2r2/gotk3/master/examples/cool_app/docs/cool_app_screen_4.png)
 
 
 Installation
