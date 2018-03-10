@@ -21,7 +21,8 @@ following libraries is currently implemented:
 Idea to create a fork from the original one of the best
 [GTK+3 adaptation for golang](https://godoc.org/github.com/gotk3) was
 not just add another API functions, but came from the other side - create
-good application example written in go, which demostrate modern GTK+ features
+[good application example](https://github.com/d2r2/gotk3/tree/master/examples/cool_app)
+written in go, which demostrate modern GTK+ features
 (as well as old-style one) and in addition provide out-of-the-box code patterns.
 
 As a results a lot of refactoring was done with original code, to create on
