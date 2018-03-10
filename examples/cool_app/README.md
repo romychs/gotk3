@@ -1,8 +1,8 @@
 Feature-rich GTK+3 app demo written in go
 =================================================
 
-Aim of this sample application to show all GLIB/GTK+ components and widgets tiered together
-with helpfull code patterns.
+Aim of this application to interconnect all GLIB/GTK+ components and widgets together
+with use of helpfull code patterns.
 
 It's obligatory to have GTK+ 3.12 and high installed, otherwise app will not compile.
 
