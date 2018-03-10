@@ -773,21 +773,21 @@ func (v *File) Equal(file *File) bool {
 func (v *File) GetBasename() string {
 	c := C.g_file_get_basename(v.native())
 	defer C.g_free(C.gpointer(c))
-	return goString((*C.char)(c))
+	return goString((*C.gchar)(c))
 }
 
 // char *	g_file_get_path ()
 func (v *File) GetPath() string {
 	c := C.g_file_get_path(v.native())
 	defer C.g_free(C.gpointer(c))
-	return goString((*C.char)(c))
+	return goString((*C.gchar)(c))
 }
 
 // char *	g_file_get_uri ()
 func (v *File) GetUri() string {
 	c := C.g_file_get_uri(v.native())
 	defer C.g_free(C.gpointer(c))
-	return goString((*C.char)(c))
+	return goString((*C.gchar)(c))
 }
 
 // GFile *	g_file_get_parent ()
@@ -847,7 +847,7 @@ func (v *File) HasPrefix(prefix *File) bool {
 func (v *File) GetRelativePath(descendant *File) string {
 	c := C.g_file_get_relative_path(v.native(), descendant.native())
 	defer C.g_free(C.gpointer(c))
-	return goString((*C.char)(c))
+	return goString((*C.gchar)(c))
 }
 
 // gboolean	g_file_is_native ()
@@ -869,7 +869,7 @@ func (v *File) HasUriScheme(uriScheme string) bool {
 func (v *File) GetUriScheme() string {
 	c := C.g_file_get_uri_scheme(v.native())
 	defer C.g_free(C.gpointer(c))
-	return goString((*C.char)(c))
+	return goString((*C.gchar)(c))
 }
 
 // GFileInputStream *	g_file_read ()
