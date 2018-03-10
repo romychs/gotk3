@@ -1,5 +1,5 @@
-Feature-rich GTK+3 application written in go
-============================================
+Feature-rich GTK+3 app demo written in go
+=================================================
 
 Aim of this sample application to show all GLIB/GTK+ components and widgets tiered together
 with helpfull code patterns.
@@ -34,3 +34,6 @@ Preference dialog:
 Installation
 ============
 
+Almost no action needed, the main requirements is the GOTK3 library should be preliminary installed.
+Still, to make a "preference dialog" function properly, scripts `install_schema.sh`/`uninstall_schema.sh`
+should be used, to copy and compile [GTK setting's schema](https://developer.gnome.org/GSettings/).
