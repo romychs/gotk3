@@ -31,7 +31,8 @@ to build go-application with modern GTK+3 GUI.
 Short list of changes made:
 1) Code refactored and reformated for better mix of widgets in corresponding files.
 2) Some amount of error was fixed including memory leaks.
-3) GOTK3 examples which in original version located separately, here integrated in one project.
+3) GOTK3 examples which in original version were located separately, have been integrated
+here in one project.
 4) New GLIB, GTK+ objects and widgets supported, including GAction, GSimpleAction, GActionMap,
 GMenuModel, GMenu, GtkActionable, GFile and so on.
 5) CoolApp example application created to demonstrate golang code patterns to build
@@ -45,8 +46,8 @@ Sample Use
 The following example applications can be found in folder
 ["examples"](https://github.com/d2r2/gotk3/tree/master/examples).
 
-Pay attention to most powerfull example - "cool_app" application with the newest GTK+3 widgets and
-helpfull code patters. For more information please [read]().
+Pay attention to most powerfull example - feature-rich "cool_app" application with the newest GTK+3 widgets and
+helpfull code patters. Find more information [here](https://github.com/d2r2/gotk3/tree/master/examples/cool_app).
 
 Documentation
 -------------
