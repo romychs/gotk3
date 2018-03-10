@@ -835,7 +835,8 @@ _gtk_dialog_new_with_buttons(char *title, GtkWindow *parent, GtkDialogFlags flag
 {
 	GtkWidget		*w;
 
-	w = gtk_dialog_new_with_buttons(title, parent, flags, button_text, button_response);
+	w = gtk_dialog_new_with_buttons(title, parent, flags,
+			button_text, button_response, (char *)NULL);
 	return (w);
 }
 

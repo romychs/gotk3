@@ -1,3 +1,10 @@
+// This file includes wrapers for symbols included since GTK 3.12, and
+// and should not be included in a build intended to target any older GTK
+// versions.  To target an older build, such as 3.10, use
+// 'go build -tags gtk_3_10'.  Otherwise, if no build tags are used, GTK 3.12
+// is assumed and this file is built.
+// +build !gtk_3_6,!gtk_3_8,!gtk_3_10
+
 package main
 
 import (
