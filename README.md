@@ -85,7 +85,7 @@ you could run this commands without specifying build tag, like this:
 ```
 go {get|build|install} github.com/d2r2/gotk3/...
 ```
-> NOTE: Once you made any changes in the library, it's highly recommended to install it before use,
+> NOTE: Once you made any changes in the library, it's highly recommended to install it before further use,
 otherwise any derived application will compile for a long-long time, so run in advance:
 > ```
 > go install -tags "gtk_$(pkg-config --modversion gtk+-3.0 | tr . _| cut -d '_' -f 1-2)" github.com/d2r2/gotk3/...
