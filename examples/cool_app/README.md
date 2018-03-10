@@ -18,7 +18,7 @@ working with save/restore settings (via GSettings),
 fullscreen mode wrap/unwrap, actions with states or stateless and others.
 
 Screenshots
-===========
+-----------
 Main form and popover menu:
 ![image](https://raw.github.com/d2r2/gotk3/master/examples/cool_app/docs/cool_app_screen_1.png)
 
@@ -33,7 +33,7 @@ Preference dialog:
 
 
 Installation
-============
+------------
 
 Almost no action needed, the main requirement is to have the GOTK3 library preliminary installed.
 Still, to make a "preference dialog" function properly, scripts `install_schema.sh`/`uninstall_schema.sh`
