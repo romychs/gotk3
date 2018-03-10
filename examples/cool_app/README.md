@@ -34,7 +34,7 @@ Preference dialog:
 Installation
 ============
 
-Almost no action needed, the main prerequirements is the GOTK3 library should be preliminary installed.
+Almost no action needed, the main requirement is to have the GOTK3 library preliminary installed.
 Still, to make a "preference dialog" function properly, scripts `install_schema.sh`/`uninstall_schema.sh`
 should be used, to copy and compile [GLIB setting's schema](https://developer.gnome.org/GSettings/).
 
