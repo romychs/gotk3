@@ -40,8 +40,8 @@ Installation
 ------------
 
 Almost no action needed, the main requirement is to have the GOTK3 library preliminary installed.
-Still, to make a "preference dialog" function properly, scripts `install_schema.sh`/`uninstall_schema.sh`
-should be used, to install/compile [GLIB setting's schema](https://developer.gnome.org/GSettings/).
+Still, to make a "preference dialog" function properly scripts `install_schema.sh`/`uninstall_schema.sh`
+must be used, to install/compile [GLIB setting's schema](https://developer.gnome.org/GSettings/).
 
 To run application type in console `go run ./cool_app.go`.
 
