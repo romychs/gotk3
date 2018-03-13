@@ -23,12 +23,12 @@ import (
 // ===================================================================================
 // ************************* UTILITIES SECTION START *********************************
 // ===================================================================================
-/*	Copy this section to separate file in real application as utilities functions to simplify
-	creation of GTK+ 3 components and controls, including menus, dialog boxes, messages,
-	app settings save and restore and so on...
-*/
+//	In real application copy this section to separate file as utilities functions to simplify
+//	creation of GLIB/GTK+3 components and widgets, including menus, dialog boxes, messages,
+//	app settings and so on...
 
-func setupHeader(title, subtitle string, showCloseButton bool) (*gtk.HeaderBar, error) {
+// SetupHeader construct Header widget with standart initialization.
+func SetupHeader(title, subtitle string, showCloseButton bool) (*gtk.HeaderBar, error) {
 	hdr, err := gtk.HeaderBarNew()
 	if err != nil {
 		return nil, err
@@ -41,7 +41,8 @@ func setupHeader(title, subtitle string, showCloseButton bool) (*gtk.HeaderBar, 
 	return hdr, nil
 }
 
-func setupMenuItemWithIcon(label, detailedAction string, icon *glib.Icon) (*glib.MenuItem, error) {
+// SetupMenuItemWithIcon construct MenuItem widget with icon image.
+func SetupMenuItemWithIcon(label, detailedAction string, icon *glib.Icon) (*glib.MenuItem, error) {
 	mi, err := glib.MenuItemNew(label, detailedAction)
 	if err != nil {
 		return nil, err
@@ -51,7 +52,9 @@ func setupMenuItemWithIcon(label, detailedAction string, icon *glib.Icon) (*glib
 	return mi, nil
 }
 
-func setupMenuItemWithThemedIcon(label, detailedAction, iconName string) (*glib.MenuItem, error) {
+// SetupMenuItemWithThemedIcon construct MenuItem widget with image
+// taken by iconName from themed icons image lib.
+func SetupMenuItemWithThemedIcon(label, detailedAction, iconName string) (*glib.MenuItem, error) {
 	iconNameVar, err := glib.VariantStringNew(iconName)
 	if err != nil {
 		return nil, err
@@ -64,7 +67,8 @@ func setupMenuItemWithThemedIcon(label, detailedAction, iconName string) (*glib.
 	return mi, nil
 }
 
-func setupToolButton(themedIconName, label string) (*gtk.ToolButton, error) {
+// SetupToolButton construct ToolButton widget with standart initialization.
+func SetupToolButton(themedIconName, label string) (*gtk.ToolButton, error) {
 	var btn *gtk.ToolButton
 	var img *gtk.Image
 	var err error
@@ -83,7 +87,9 @@ func setupToolButton(themedIconName, label string) (*gtk.ToolButton, error) {
 	return btn, nil
 }
 
-func setupButtonWithThemedImage(themedIconName string) (*gtk.Button, error) {
+// SetupButtonWithThemedImage construct Button widget with image
+// taken by themedIconName from themed icons image lib.
+func SetupButtonWithThemedImage(themedIconName string) (*gtk.Button, error) {
 	img, err := gtk.ImageNew()
 	if err != nil {
 		return nil, err
@@ -100,7 +106,9 @@ func setupButtonWithThemedImage(themedIconName string) (*gtk.Button, error) {
 	return btn, nil
 }
 
-func setupMenuButtonWithThemedImage(themedIconName string) (*gtk.MenuButton, error) {
+// SetupMenuButtonWithThemedImage construct MenuButton widget with image
+// taken by themedIconName from themed icons image lib.
+func SetupMenuButtonWithThemedImage(themedIconName string) (*gtk.MenuButton, error) {
 	img, err := gtk.ImageNew()
 	if err != nil {
 		return nil, err
@@ -117,6 +125,8 @@ func setupMenuButtonWithThemedImage(themedIconName string) (*gtk.MenuButton, err
 	return btn, nil
 }
 
+// AppendSectionAsHorzButtons used for Popover widget menu
+// as a hint to display items as a horizontal buttons.
 func AppendSectionAsHorzButtons(main, section *glib.Menu) error {
 	val1, err := glib.VariantStringNew("horizontal-buttons")
 	if err != nil {
@@ -133,6 +143,9 @@ func AppendSectionAsHorzButtons(main, section *glib.Menu) error {
 	return nil
 }
 
+// DialogButton simplify Dialog window initialization.
+// Keep all necessary information about how attached
+// dialog button should look and act.
 type DialogButton struct {
 	Text      string
 	Response  gtk.ResponseType
@@ -140,7 +153,8 @@ type DialogButton struct {
 	Customize func(button *gtk.Button) error
 }
 
-func getActiveWindow(win *gtk.Window) (*gtk.Window, error) {
+// GetActiveWindow find real active window in application running.
+func GetActiveWindow(win *gtk.Window) (*gtk.Window, error) {
 	app, err := win.GetApplication()
 	if err != nil {
 		return nil, err
@@ -148,61 +162,79 @@ func getActiveWindow(win *gtk.Window) (*gtk.Window, error) {
 	return app.GetActiveWindow(), nil
 }
 
-func isResponseYes(response gtk.ResponseType) bool {
+// IsResponseYes gives true if dialog window
+// responded with gtk.RESPONSE_YES.
+func IsResponseYes(response gtk.ResponseType) bool {
 	return response == gtk.RESPONSE_YES
 }
 
-func isResponseNo(response gtk.ResponseType) bool {
+// IsResponseNo gives true if dialog window
+// responded with gtk.RESPONSE_NO.
+func IsResponseNo(response gtk.ResponseType) bool {
 	return response == gtk.RESPONSE_NO
 }
 
-func isResponseNone(response gtk.ResponseType) bool {
+// IsResponseNone gives true if dialog window
+// responded with gtk.RESPONSE_NONE.
+func IsResponseNone(response gtk.ResponseType) bool {
 	return response == gtk.RESPONSE_NONE
 }
 
-func isResponseOk(response gtk.ResponseType) bool {
+// IsResponseOk gives true if dialog window
+// responded with gtk.RESPONSE_OK.
+func IsResponseOk(response gtk.ResponseType) bool {
 	return response == gtk.RESPONSE_OK
 }
 
-func isResponseCancel(response gtk.ResponseType) bool {
+// IsResponseCancel gives true if dialog window
+// responded with gtk.RESPONSE_CANCEL.
+func IsResponseCancel(response gtk.ResponseType) bool {
 	return response == gtk.RESPONSE_CANCEL
 }
 
-func isResponseReject(response gtk.ResponseType) bool {
+// IsResponseReject gives true if dialog window
+// responded with gtk.RESPONSE_REJECT.
+func IsResponseReject(response gtk.ResponseType) bool {
 	return response == gtk.RESPONSE_REJECT
 }
 
-func isResponseClose(response gtk.ResponseType) bool {
+// IsResponseClose gives true if dialog window
+// responded with gtk.RESPONSE_CLOSE.
+func IsResponseClose(response gtk.ResponseType) bool {
 	return response == gtk.RESPONSE_CLOSE
 }
 
-func isResponseDeleteEvent(response gtk.ResponseType) bool {
+// IsResponseDeleteEvent gives true if dialog window
+// responded with gtk.RESPONSE_DELETE_EVENT.
+func IsResponseDeleteEvent(response gtk.ResponseType) bool {
 	return response == gtk.RESPONSE_DELETE_EVENT
 }
 
-func printResponse(response gtk.ResponseType) {
-	if isResponseNo(response) {
+// PrintDialogResponse print dialog responce.
+func PrintDialogResponse(response gtk.ResponseType) {
+	if IsResponseNo(response) {
 		log.Println("Dialog result = NO")
-	} else if isResponseYes(response) {
+	} else if IsResponseYes(response) {
 		log.Println("Dialog result = YES")
-	} else if isResponseNone(response) {
+	} else if IsResponseNone(response) {
 		log.Println("Dialog result = NONE")
-	} else if isResponseOk(response) {
+	} else if IsResponseOk(response) {
 		log.Println("Dialog result = OK")
-	} else if isResponseReject(response) {
+	} else if IsResponseReject(response) {
 		log.Println("Dialog result = REJECT")
-	} else if isResponseCancel(response) {
+	} else if IsResponseCancel(response) {
 		log.Println("Dialog result = CANCEL")
-	} else if isResponseClose(response) {
+	} else if IsResponseClose(response) {
 		log.Println("Dialog result = CLOSE")
-	} else if isResponseDeleteEvent(response) {
+	} else if IsResponseDeleteEvent(response) {
 		log.Println("Dialog result = DELETE_EVENT")
 	}
 }
 
-func setupMessageDialog(parent *gtk.Window, markupTitle string, messages []string,
+// SetupMessageDialog construct MessageDialog widget with customized settings.
+func SetupMessageDialog(parent *gtk.Window, markupTitle string, messages []string,
 	addButtons []DialogButton, addExtraControls func(area *gtk.Box) error) (*gtk.MessageDialog, error) {
-	active, err := getActiveWindow(parent)
+	active, err := GetActiveWindow(parent)
 	if err != nil {
 		return nil, err
 	}
@@ -278,9 +310,10 @@ func setupMessageDialog(parent *gtk.Window, markupTitle string, messages []strin
 	return dlg, nil
 }
 
-func runMessageDialog(parent *gtk.Window, markupTitle string, messages []string, ignoreCloseBox bool,
+// RunMessageDialog construct and run MessageDialog widget with customized settings.
+func RunMessageDialog(parent *gtk.Window, markupTitle string, messages []string, ignoreCloseBox bool,
 	addButtons []DialogButton, addExtraControls func(area *gtk.Box) error) (gtk.ResponseType, error) {
-	dlg, err := setupMessageDialog(parent, markupTitle, messages, addButtons, addExtraControls)
+	dlg, err := SetupMessageDialog(parent, markupTitle, messages, addButtons, addExtraControls)
 	if err != nil {
 		return 0, err
 	}
@@ -295,11 +328,12 @@ func runMessageDialog(parent *gtk.Window, markupTitle string, messages []string,
 	return gtk.ResponseType(res), nil
 }
 
-func setupDialog(parent *gtk.Window, messageType gtk.MessageType, userHeaderbar bool,
+// SetupDialog construct Dialog widget with customized settings.
+func SetupDialog(parent *gtk.Window, messageType gtk.MessageType, userHeaderbar bool,
 	title string, text []string, textAlign gtk.Align, addButtons []DialogButton,
 	addExtraControls func(area *gtk.Box) error) (*gtk.Dialog, error) {
 
-	active, err := getActiveWindow(parent)
+	active, err := GetActiveWindow(parent)
 	if err != nil {
 		return nil, err
 	}
@@ -388,20 +422,6 @@ func setupDialog(parent *gtk.Window, messageType gtk.MessageType, userHeaderbar 
 		}
 	}
 
-	/*
-		style, err := btn.GetStyleContext()
-		if err != nil {
-			return
-		}
-		//style.AddClass("suggested-action")
-		style.AddClass("destructive-action")
-		//style.AddClass("flat")
-		//style.AddClass("circular")
-		//style.AddClass("text-button")
-		style.AddClass("image-button")
-		style.RemoveClass("destructive-action")
-	*/
-
 	col := 1
 	row := 0
 
@@ -428,18 +448,6 @@ func setupDialog(parent *gtk.Window, messageType gtk.MessageType, userHeaderbar 
 		}
 	}
 
-	/*
-		if userHeaderbar {
-			hdr, err := dlg.GetHeaderBar()
-			if err != nil {
-				return nil, err
-			}
-
-			_, w := hdr.GetPreferredWidth()
-			dlg.Resize(w, 100)
-		}
-	*/
-
 	_, w := dlg.GetPreferredWidth()
 	_, h := dlg.GetPreferredHeight()
 	dlg.Resize(w, h)
@@ -447,10 +455,11 @@ func setupDialog(parent *gtk.Window, messageType gtk.MessageType, userHeaderbar 
 	return dlg, nil
 }
 
-func runDialog(parent *gtk.Window, messageType gtk.MessageType, userHeaderbar bool,
+// RunDialog construct and run Dialog widget with customized settings.
+func RunDialog(parent *gtk.Window, messageType gtk.MessageType, userHeaderbar bool,
 	title string, text []string, textAlign gtk.Align, ignoreCloseBox bool, addButtons []DialogButton,
 	addExtraControls func(area *gtk.Box) error) (gtk.ResponseType, error) {
-	dlg, err := setupDialog(parent, messageType, userHeaderbar, title,
+	dlg, err := SetupDialog(parent, messageType, userHeaderbar, title,
 		text, textAlign, addButtons, addExtraControls)
 	if err != nil {
 		return 0, err
@@ -466,7 +475,9 @@ func runDialog(parent *gtk.Window, messageType gtk.MessageType, userHeaderbar bo
 	return gtk.ResponseType(res), nil
 }
 
-func getActionNameAndState(act *glib.SimpleAction) (string, *glib.Variant, error) {
+// GetActionNameAndState dsiplay status of action-with-state, which used in
+// menu-with-state behaviour. Convenient for debug purpose.
+func GetActionNameAndState(act *glib.SimpleAction) (string, *glib.Variant, error) {
 	name, err := act.GetName()
 	if err != nil {
 		return "", nil, err
@@ -475,6 +486,11 @@ func getActionNameAndState(act *glib.SimpleAction) (string, *glib.Variant, error
 	return name, state, nil
 }
 
+//
+//	Code taken from https://github.com/gnunn1/tilix project
+//
+
+// Binding cache link between Key string identifier and GLIB object property.
 type Binding struct {
 	Key      string
 	Object   glib.IObject
@@ -482,30 +498,24 @@ type Binding struct {
 	Flags    glib.SettingsBindFlags
 }
 
-/**
-
-	Code taken from https://github.com/gnunn1/tilix project
-
-* Bookkeeping class that keps track of objects which are
-* binded to a GSettings object so they can be unbinded later. it
-* also supports the concept of deferred bindings where a binding
-* can be added but is not actually attached to a Settings object
-* until one is set.
-*/
+// BindingHelper is a bookkeeping class that keps track of objects which are
+// binded to a GSettings object so they can be unbinded later. it
+// also supports the concept of deferred bindings where a binding
+// can be added but is not actually attached to a Settings object
+// until one is set.
 type BindingHelper struct {
 	bindings []Binding
 	settings *glib.Settings
 }
 
+// BindingHelperNew creates new BindingHelper object.
 func BindingHelperNew(settings *glib.Settings) *BindingHelper {
 	bh := &BindingHelper{settings: settings}
 	return bh
 }
 
-/**
- * Setting a new GSettings object will cause this class to unbind
- * previously set bindings and re-bind to the new settings automatically.
- */
+// SetSettings will replace underlying GLIB Settings object to unbind
+// previously set bindings and re-bind to the new settings automatically.
 func (v *BindingHelper) SetSettings(value *glib.Settings) {
 	if value != v.settings {
 		if v.settings != nil {
@@ -526,16 +536,12 @@ func (v *BindingHelper) bindAll() {
 	}
 }
 
-/**
- * Adds a binding to the list
- */
+// addBind add a binding to the list
 func (v *BindingHelper) addBind(key string, object glib.IObject, property string, flags glib.SettingsBindFlags) {
 	v.bindings = append(v.bindings, Binding{key, object, property, flags})
 }
 
-/**
- * Add a binding to list and binds to Settings if it is set.
- */
+// Bind add a binding to list and binds to Settings if it is set.
 func (v *BindingHelper) Bind(key string, object glib.IObject, property string, flags glib.SettingsBindFlags) {
 	v.addBind(key, object, property, flags)
 	if v.settings != nil {
@@ -543,26 +549,21 @@ func (v *BindingHelper) Bind(key string, object glib.IObject, property string, f
 	}
 }
 
-/**
- * Unbinds all added binds from settings object
- */
+// Unbind all added binds from settings object.
 func (v *BindingHelper) Unbind() {
 	for _, b := range v.bindings {
 		v.settings.Unbind(b.Object, b.Property)
 	}
 }
 
-/**
- * Unbinds all bindings and clears list of bindings.
- */
+// Clear unbind all bindings and clears list of bindings.
 func (v *BindingHelper) Clear() {
 	v.Unbind()
 	v.bindings = nil
 }
 
-/**
- * Sets margins of a widget to the passed values
- */
+// SetMargins set margins of a widget to the passed values,
+// replacing 4 calls with only one.
 func SetMargins(widget gtk.IWidget, left int, top int, right int, bottom int) {
 	w := widget.GetWidget()
 	w.SetMarginStart(left)
@@ -571,16 +572,12 @@ func SetMargins(widget gtk.IWidget, left int, top int, right int, bottom int) {
 	w.SetMarginBottom(bottom)
 }
 
-/**
- * Sets all margins of a widget to the same value
- */
+// SetAllMargins set all margins of a widget to the same value.
 func SetAllMargins(widget gtk.IWidget, margin int) {
 	SetMargins(widget, margin, margin, margin, margin)
 }
 
-/**
- * Appends multiple values to a row in a list store
- */
+// AppendValues append multiple values to a row in a list store.
 func AppendValues(ls *gtk.ListStore, values ...string) *gtk.TreeIter {
 	iter := ls.Append()
 	for i := 0; i < len(values); i++ {
@@ -589,10 +586,8 @@ func AppendValues(ls *gtk.ListStore, values ...string) *gtk.TreeIter {
 	return iter
 }
 
-/**
- * Creates a combobox that holds a set of name/value pairs
- * where the name is displayed.
- */
+// CreateNameValueCombo create a combobox that holds
+// a set of name/value pairs where the name is displayed.
 func CreateNameValueCombo(keyValues []struct{ value, key string }) (*gtk.ComboBox, error) {
 	ls, err := gtk.ListStoreNew(glib.TYPE_STRING, glib.TYPE_STRING)
 	if err != nil {
@@ -620,6 +615,7 @@ func CreateNameValueCombo(keyValues []struct{ value, key string }) (*gtk.ComboBo
 	return cb, nil
 }
 
+// GetGtkVersion return actualy installed GTK+ version.
 func GetGtkVersion() (magor, minor, micro uint) {
 	magor = gtk.GetMajorVersion()
 	minor = gtk.GetMinorVersion()
@@ -635,7 +631,7 @@ func GetGtkVersion() (magor, minor, micro uint) {
 var (
 	APP_ID string = "org.d2r2.gotk3.cool_app_1"
 
-	APP_TITLE string = "Cool app (GTK+ 3 UI adaptation for golang based on imporved GOTK3)"
+	APP_TITLE string = "Cool App (GTK+ 3 UI adaptation for golang based on imporved GOTK3)"
 
 	//Preference Constants
 	SETTINGS_ID string = APP_ID + ".Settings"
@@ -686,7 +682,9 @@ var (
 	SETTINGS_USE_TABS_KEY string = "use-tabs"
 )
 
-type GUI_Data struct {
+// Keeps here global fullscreen data, which available throughout the application.
+// TODO: add thread-safe protection.
+type FullscreenGlobalData struct {
 	EventBox             *gtk.EventBox
 	Revealer             *gtk.Revealer
 	FullscreeAction      *glib.Action
@@ -695,7 +693,7 @@ type GUI_Data struct {
 	Timer                *time.Timer
 }
 
-// Deomnstration of Popover menu creation with different kind of menus:
+// Demonstration of Popover menu creation with different kind of menus:
 //	1) Regular menus (with text)
 //	2) Button menus with themed icons (native GTK+ icons) and loaded file-base icons
 //	3) Submenus
@@ -714,17 +712,17 @@ func createMenuModelForPopover() (glib.IMenuModel, error) {
 	if err != nil {
 		return nil, err
 	}
-	item, err = setupMenuItemWithThemedIcon("About", "win.AboutAction", "help-about-symbolic")
+	item, err = SetupMenuItemWithThemedIcon("About", "win.AboutAction", "help-about-symbolic")
 	if err != nil {
 		return nil, err
 	}
 	section.AppendItem(item)
-	item, err = setupMenuItemWithThemedIcon("Preference", "win.PreferenceAction", "preferences-other-symbolic")
+	item, err = SetupMenuItemWithThemedIcon("Preference", "win.PreferenceAction", "preferences-other-symbolic")
 	if err != nil {
 		return nil, err
 	}
 	section.AppendItem(item)
-	item, err = setupMenuItemWithThemedIcon("Fullscreen", "win.FullscreenAction", "view-fullscreen-symbolic")
+	item, err = SetupMenuItemWithThemedIcon("Fullscreen", "win.FullscreenAction", "view-fullscreen-symbolic")
 	if err != nil {
 		return nil, err
 	}
@@ -782,7 +780,7 @@ func createMenuModelForPopover() (glib.IMenuModel, error) {
 	if err != nil {
 		return nil, err
 	}
-	item, err = setupMenuItemWithThemedIcon("Quit application", "win.QuitAction", "application-exit-symbolic")
+	item, err = SetupMenuItemWithThemedIcon("Quit application", "win.QuitAction", "application-exit-symbolic")
 	if err != nil {
 		return nil, err
 	}
@@ -795,6 +793,7 @@ func createMenuModelForPopover() (glib.IMenuModel, error) {
 	return main, nil
 }
 
+// Creates GLIB's MenuModel interface for using in GTK MenuBar.
 func createMenuModelForMenuBar() (glib.IMenuModel, error) {
 	rootMenu, err := glib.MenuNew()
 	if err != nil {
@@ -874,7 +873,16 @@ func createMenuModelForMenuBar() (glib.IMenuModel, error) {
 	if err != nil {
 		return nil, err
 	}
-	item, err = setupMenuItemWithIcon("Preference dialog demo", "win.PreferenceAction", &icon.Icon)
+	item, err = SetupMenuItemWithIcon("Preference dialog demo", "win.PreferenceAction", &icon.Icon)
+	if err != nil {
+		return nil, err
+	}
+	section.AppendItem(item)
+	icon2, err := glib.ThemedIconNew("help-about-symbolic")
+	if err != nil {
+		return nil, err
+	}
+	item, err = SetupMenuItemWithIcon("About demo", "win.AboutAction", &icon2.Icon)
 	if err != nil {
 		return nil, err
 	}
@@ -886,11 +894,11 @@ func createMenuModelForMenuBar() (glib.IMenuModel, error) {
 	if err != nil {
 		return nil, err
 	}
-	icon2, err := glib.ThemedIconNew("application-exit-symbolic")
+	icon3, err := glib.ThemedIconNew("application-exit-symbolic")
 	if err != nil {
 		return nil, err
 	}
-	item, err = setupMenuItemWithIcon("Quit application", "win.QuitAction", &icon2.Icon)
+	item, err = SetupMenuItemWithIcon("Quit application", "win.QuitAction", &icon3.Icon)
 	if err != nil {
 		return nil, err
 	}
@@ -900,40 +908,7 @@ func createMenuModelForMenuBar() (glib.IMenuModel, error) {
 	return rootMenu, nil
 }
 
-/*
-func createToolbar() (*gtk.Toolbar, error) {
-	tbx, err := gtk.ToolbarNew()
-	if err != nil {
-		return nil, err
-	}
-
-	dirName := "./icons"
-	files, err := ioutil.ReadDir(dirName)
-	if err != nil {
-		return nil, err
-	}
-
-	for _, f := range files {
-		fullName, err := filepath.Abs(path.Join(dirName, f.Name()))
-		if err != nil {
-			return nil, err
-		}
-		if strings.HasSuffix(fullName, "32x32.gif") {
-			img, err := gtk.ImageNewFromFile(fullName)
-			if err != nil {
-				return nil, err
-			}
-			titem, err := gtk.ToolButtonNew(img, "")
-			if err != nil {
-				return nil, err
-			}
-			tbx.Add(titem)
-		}
-	}
-	return tbx, nil
-}
-*/
-
+// Creates GTK Toolbar actions attached to buttons.
 func createToolbar() (*gtk.Toolbar, error) {
 	tbx, err := gtk.ToolbarNew()
 	if err != nil {
@@ -1042,6 +1017,8 @@ func createToolbar() (*gtk.Toolbar, error) {
 	return tbx, nil
 }
 
+// Create demonstration action-with-state with boolean logyc (on/of).
+// Action trigger is included.
 func createCheckBoxAction() (glib.IAction, error) {
 	v, err := glib.VariantBooleanNew(true)
 	if err != nil {
@@ -1056,9 +1033,9 @@ func createCheckBoxAction() (glib.IAction, error) {
 	}
 
 	act.Connect("activate", func(action *glib.SimpleAction, param *glib.Variant) {
-		name, state, err := getActionNameAndState(action)
+		name, state, err := GetActionNameAndState(action)
 		if err != nil {
-			return
+			log.Fatal(err)
 		}
 		log.Println(spew.Sprintf("%v action activated with current state %v and args %v",
 			name, state, param))
@@ -1066,7 +1043,7 @@ func createCheckBoxAction() (glib.IAction, error) {
 		if state != nil && state.IsOfType(glib.VARIANT_TYPE_BOOLEAN) {
 			state, err = glib.VariantBooleanNew(!state.GetBoolean())
 			if err != nil {
-				return
+				log.Fatal(err)
 			}
 			action.ChangeState(state)
 		}
@@ -1075,6 +1052,8 @@ func createCheckBoxAction() (glib.IAction, error) {
 	return act, nil
 }
 
+// Create demonstration action-with-state with list logyc (opt1/opt2/.../optN).
+// Action trigger is included.
 func createChooseAction() (glib.IAction, error) {
 	v, err := glib.VariantStringNew("green")
 	if err != nil {
@@ -1089,9 +1068,9 @@ func createChooseAction() (glib.IAction, error) {
 	}
 
 	act.Connect("activate", func(action *glib.SimpleAction, param *glib.Variant) {
-		name, state, err := getActionNameAndState(action)
+		name, state, err := GetActionNameAndState(action)
 		if err != nil {
-			return
+			log.Fatal(err)
 		}
 		log.Println(spew.Sprintf("%v action activated with current state %v and args %v",
 			name, state, param))
@@ -1102,7 +1081,9 @@ func createChooseAction() (glib.IAction, error) {
 	return act, nil
 }
 
-func createFullscreenAction(win *gtk.Window, data *GUI_Data) (glib.IAction, error) {
+// Create fullscreen action with boolean in the base (fullscreen on/off)
+// Action trigger is included.
+func createFullscreenAction(win *gtk.Window, data *FullscreenGlobalData) (glib.IAction, error) {
 	v, err := glib.VariantBooleanNew(false)
 	if err != nil {
 		return nil, err
@@ -1114,9 +1095,9 @@ func createFullscreenAction(win *gtk.Window, data *GUI_Data) (glib.IAction, erro
 	data.FullscreeAction = &act.Action
 
 	act.Connect("activate", func(action *glib.SimpleAction, param *glib.Variant) {
-		name, state, err := getActionNameAndState(action)
+		name, state, err := GetActionNameAndState(action)
 		if err != nil {
-			return
+			log.Fatal(err)
 		}
 		log.Println(spew.Sprintf("%v action activated with current state %v and args %v",
 			name, state, param))
@@ -1124,7 +1105,7 @@ func createFullscreenAction(win *gtk.Window, data *GUI_Data) (glib.IAction, erro
 		if state != nil && state.IsOfType(glib.VARIANT_TYPE_BOOLEAN) {
 			state, err = glib.VariantBooleanNew(!state.GetBoolean())
 			if err != nil {
-				return
+				log.Fatal(err)
 			}
 			action.ChangeState(state)
 
@@ -1145,6 +1126,8 @@ func createFullscreenAction(win *gtk.Window, data *GUI_Data) (glib.IAction, erro
 	return act, nil
 }
 
+// Create regular exip app action.
+// Action trigger is included.
 func createQuitAction(win *gtk.Window) (glib.IAction, error) {
 	act, err := glib.SimpleActionNew("QuitAction", nil)
 	if err != nil {
@@ -1152,16 +1135,16 @@ func createQuitAction(win *gtk.Window) (glib.IAction, error) {
 	}
 
 	act.Connect("activate", func(action *glib.SimpleAction, param *glib.Variant) {
-		name, state, err := getActionNameAndState(action)
+		name, state, err := GetActionNameAndState(action)
 		if err != nil {
-			return
+			log.Fatal(err)
 		}
 		log.Println(spew.Sprintf("%v action activated with current state %v and args %v",
 			name, state, param))
 
 		application, err := win.GetApplication()
 		if err != nil {
-			return
+			log.Fatal(err)
 		}
 		application.Quit()
 	})
@@ -1169,6 +1152,8 @@ func createQuitAction(win *gtk.Window) (glib.IAction, error) {
 	return act, nil
 }
 
+// Create regular "about dialog" action.
+// Action trigger is included.
 func createAboutAction(win *gtk.Window) (glib.IAction, error) {
 	act, err := glib.SimpleActionNew("AboutAction", nil)
 	if err != nil {
@@ -1176,31 +1161,41 @@ func createAboutAction(win *gtk.Window) (glib.IAction, error) {
 	}
 
 	act.Connect("activate", func(action *glib.SimpleAction, param *glib.Variant) {
-		name, state, err := getActionNameAndState(action)
+		name, state, err := GetActionNameAndState(action)
 		if err != nil {
-			return
+			log.Fatal(err)
 		}
 		log.Println(spew.Sprintf("%v action activated with current state %v and args %v",
 			name, state, param))
 
 		dlg, err := gtk.AboutDialogNew()
 		if err != nil {
-			return
+			log.Fatal(err)
 		}
 
 		dlg.SetAuthors([]string{"Denis Dyakov <denis.dyakov@gmail.com>"})
-		dlg.SetProgramName("Cool app")
+		dlg.SetProgramName("Cool App")
 		dlg.SetLogoIconName("face-cool-symbolic")
 		dlg.SetVersion("0.1")
 
 		var buf bytes.Buffer
 		major, minor, micro := GetGtkVersion()
 		buf.WriteString(fmt.Sprintln(fmt.Sprintf("GTK+ version %d.%d.%d", major, minor, micro)))
-
+		buf.WriteString(fmt.Sprintln())
 		buf.WriteString(fmt.Sprintln("This application built for education purpose and compose"))
-		buf.WriteString(fmt.Sprintln("modern practices around GTK3 user interface composing."))
-		buf.WriteString(fmt.Sprintln("TODO: write infromation about interfaces app demostrate."))
+		buf.WriteString(fmt.Sprintln("practices around GTK+3 user interface."))
+		buf.WriteString(fmt.Sprintln())
+		buf.WriteString(fmt.Sprintln("Features:"))
+		buf.WriteString(fmt.Sprintln("- Actions as code entry points with states and stateless."))
+		buf.WriteString(fmt.Sprintln("- Fullscreen mode code pattern out-of-the-box."))
+		buf.WriteString(fmt.Sprintln("- Preference dialog demo with save/restore functionality out-of-the-box."))
+		buf.WriteString(fmt.Sprintln("- Modern popover menu functionality (right upper corner button)."))
+		buf.WriteString(fmt.Sprintln("- Various dialog's windows demonstations."))
+		buf.WriteString(fmt.Sprintln())
+		buf.WriteString(fmt.Sprint("Visit my github page for other golang projects:"))
 		dlg.SetComments(buf.String())
+
+		dlg.SetWebsite("https://github.com/d2r2/")
 
 		dlg.SetTransientFor(win)
 		dlg.SetModal(true)
@@ -1210,6 +1205,8 @@ func createAboutAction(win *gtk.Window) (glib.IAction, error) {
 	return act, nil
 }
 
+// Create demonstration GTK MessageDialog action.
+// Action trigger is included.
 func createDialogAction1(win *gtk.Window) (glib.IAction, error) {
 	act, err := glib.SimpleActionNew("DialogAction1", nil)
 	if err != nil {
@@ -1217,16 +1214,16 @@ func createDialogAction1(win *gtk.Window) (glib.IAction, error) {
 	}
 
 	act.Connect("activate", func(action *glib.SimpleAction, param *glib.Variant) {
-		name, state, err := getActionNameAndState(action)
+		name, state, err := GetActionNameAndState(action)
 		if err != nil {
-			return
+			log.Fatal(err)
 		}
 		log.Println(spew.Sprintf("%v action activated with current state %v and args %v",
 			name, state, param))
 
 		title := "<span weight='bold' size='larger'>Configuration Issue Detected (demonstration)</span>"
 		text := []string{
-			"Message dialog (old style) demonstration.",
+			"Message dialog based on GTK+ MessageDialog.",
 			"This message based on GtkMessageDialog functionality.\n" +
 				"GtkMessageDialog doesn't support setting of image\n" +
 				"via SetImage as message type specification since 3.22.\n" +
@@ -1239,9 +1236,9 @@ func createDialogAction1(win *gtk.Window) (glib.IAction, error) {
 			{"_OK", gtk.RESPONSE_OK, false, nil},
 		}
 
-		response, err := runMessageDialog(win, title, text, false, buttons,
+		response, err := RunMessageDialog(win, title, text, false, buttons,
 			func(area *gtk.Box) error {
-				lbl, err := gtk.LabelNew("Click the link below for more information:")
+				lbl, err := gtk.LabelNew("Click the link below for more information, if still not clear:")
 				if err != nil {
 					return err
 				}
@@ -1266,12 +1263,14 @@ func createDialogAction1(win *gtk.Window) (glib.IAction, error) {
 			log.Fatal(err)
 		}
 
-		printResponse(response)
+		PrintDialogResponse(response)
 	})
 
 	return act, nil
 }
 
+// Create demonstration GTK Dialog action.
+// Action trigger is included.
 func createDialogAction2(win *gtk.Window) (glib.IAction, error) {
 	act, err := glib.SimpleActionNew("DialogAction2", nil)
 	if err != nil {
@@ -1279,7 +1278,7 @@ func createDialogAction2(win *gtk.Window) (glib.IAction, error) {
 	}
 
 	act.Connect("activate", func(action *glib.SimpleAction, param *glib.Variant) {
-		name, state, err := getActionNameAndState(action)
+		name, state, err := GetActionNameAndState(action)
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -1288,7 +1287,7 @@ func createDialogAction2(win *gtk.Window) (glib.IAction, error) {
 
 		title := "Configuration Issue Detected (demonstration)"
 		text := []string{
-			"Message dialog (new style) demonstration.",
+			"Message dialog based on GTK+ Dialog.",
 			"This message based on GtkDialog functionality.",
 			"There appears to be an issue with the configuration of the application.\n" +
 				"This issue is not serious, but correcting it will improve your experience.",
@@ -1297,9 +1296,9 @@ func createDialogAction2(win *gtk.Window) (glib.IAction, error) {
 			{"_OK", gtk.RESPONSE_OK, false, nil},
 		}
 
-		response, err := runDialog(win, gtk.MESSAGE_WARNING, true, title, text, gtk.ALIGN_START, false, buttons,
+		response, err := RunDialog(win, gtk.MESSAGE_WARNING, true, title, text, gtk.ALIGN_START, false, buttons,
 			func(area *gtk.Box) error {
-				lbl, err := gtk.LabelNew("Click the link below for more information:")
+				lbl, err := gtk.LabelNew("Click the link below for more information, if still not clear:")
 				if err != nil {
 					return err
 				}
@@ -1324,12 +1323,14 @@ func createDialogAction2(win *gtk.Window) (glib.IAction, error) {
 			log.Fatal(err)
 		}
 
-		printResponse(response)
+		PrintDialogResponse(response)
 	})
 
 	return act, nil
 }
 
+// Create demonstration GTK MessageDialog action.
+// Action trigger is included.
 func createDialogAction3(win *gtk.Window) (glib.IAction, error) {
 	act, err := glib.SimpleActionNew("DialogAction3", nil)
 	if err != nil {
@@ -1337,16 +1338,16 @@ func createDialogAction3(win *gtk.Window) (glib.IAction, error) {
 	}
 
 	act.Connect("activate", func(action *glib.SimpleAction, param *glib.Variant) {
-		name, state, err := getActionNameAndState(action)
+		name, state, err := GetActionNameAndState(action)
 		if err != nil {
-			return
+			log.Fatal(err)
 		}
 		log.Println(spew.Sprintf("%v action activated with current state %v and args %v",
 			name, state, param))
 
 		title := "<span weight='bold' size='larger'>Configuration Issue Detected (demonstration)</span>"
 		text := []string{
-			"Message dialog (old style) demonstration.",
+			"Message dialog based on GTK+ MessageDialog.",
 			"This message based on GtkMessageDialog functionality.\n" +
 				"GtkMessageDialog doesn't support setting of image\n" +
 				"via SetImage as message type specification since 3.22.\n" +
@@ -1368,39 +1369,35 @@ func createDialogAction3(win *gtk.Window) (glib.IAction, error) {
 			{"_No", gtk.RESPONSE_NO, true, nil},
 		}
 
-		response, err := runMessageDialog(win, title, text, true, buttons,
+		response, err := RunMessageDialog(win, title, text, true, buttons,
 			func(area *gtk.Box) error {
-				lbl, err := gtk.LabelNew("Click the link below for more information:")
+				lbl, err := gtk.LabelNew("Click the link below for more information, if still not clear:")
 				if err != nil {
 					return err
 				}
 				lbl.SetHAlign(gtk.ALIGN_START)
 				area.Add(lbl)
-				/*
-						link, err := gtk.LinkButtonNew("https://www.youtube.com/watch?v=dQw4w9WgXcQ")
-						if err != nil {
-							return err
-						}
-						area.Add(link)
 
-					cb, err := gtk.CheckButtonNewWithLabel("Do not show this message again")
-					if err != nil {
-						return err
-					}
-					area.Add(cb)
-				*/
+				link, err := gtk.LinkButtonNew("https://www.youtube.com/watch?v=dQw4w9WgXcQ")
+				if err != nil {
+					return err
+				}
+				area.Add(link)
+
 				return nil
 			})
 		if err != nil {
 			log.Fatal(err)
 		}
 
-		printResponse(response)
+		PrintDialogResponse(response)
 	})
 
 	return act, nil
 }
 
+// Create demonstration GTK Dialog action.
+// Action trigger is included.
 func createDialogAction4(win *gtk.Window) (glib.IAction, error) {
 	act, err := glib.SimpleActionNew("DialogAction4", nil)
 	if err != nil {
@@ -1408,7 +1405,7 @@ func createDialogAction4(win *gtk.Window) (glib.IAction, error) {
 	}
 
 	act.Connect("activate", func(action *glib.SimpleAction, param *glib.Variant) {
-		name, state, err := getActionNameAndState(action)
+		name, state, err := GetActionNameAndState(action)
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -1433,18 +1430,20 @@ func createDialogAction4(win *gtk.Window) (glib.IAction, error) {
 			{"_No", gtk.RESPONSE_NO, false, nil},
 		}
 
-		response, err := runDialog(win, gtk.MESSAGE_QUESTION, true, title, text, gtk.ALIGN_CENTER, true, buttons,
+		response, err := RunDialog(win, gtk.MESSAGE_QUESTION, true, title, text, gtk.ALIGN_CENTER, true, buttons,
 			nil)
 		if err != nil {
 			log.Fatal(err)
 		}
 
-		printResponse(response)
+		PrintDialogResponse(response)
 	})
 
 	return act, nil
 }
 
+// Create demonstration GTK Dialog action.
+// Action trigger is included.
 func createDialogAction5(win *gtk.Window) (glib.IAction, error) {
 	act, err := glib.SimpleActionNew("DialogAction5", nil)
 	if err != nil {
@@ -1452,7 +1451,7 @@ func createDialogAction5(win *gtk.Window) (glib.IAction, error) {
 	}
 
 	act.Connect("activate", func(action *glib.SimpleAction, param *glib.Variant) {
-		name, state, err := getActionNameAndState(action)
+		name, state, err := GetActionNameAndState(action)
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -1477,18 +1476,23 @@ func createDialogAction5(win *gtk.Window) (glib.IAction, error) {
 			{"_No", gtk.RESPONSE_NO, true, nil},
 		}
 
-		response, err := runDialog(win, gtk.MESSAGE_QUESTION, false, title, text, gtk.ALIGN_CENTER, true, buttons,
+		response, err := RunDialog(win, gtk.MESSAGE_QUESTION, false, title, text, gtk.ALIGN_CENTER, true, buttons,
 			nil)
 		if err != nil {
 			log.Fatal(err)
 		}
 
-		printResponse(response)
+		PrintDialogResponse(response)
 	})
 
 	return act, nil
 }
 
+// Create sophisticated multi-page preference dialog
+// with save/restore functionallity to/from the GLib Setting object.
+// Action activation require to have GLib Setting Schema
+// prliminary installed, otherwise will not work raising message.
+// Installation bash script from app folder must be performed in advance.
 func createPreferenceAction(win *gtk.Window) (glib.IAction, error) {
 	act, err := glib.SimpleActionNew("PreferenceAction", nil)
 	if err != nil {
@@ -1496,7 +1500,7 @@ func createPreferenceAction(win *gtk.Window) (glib.IAction, error) {
 	}
 
 	act.Connect("activate", func(action *glib.SimpleAction, param *glib.Variant) {
-		name, state, err := getActionNameAndState(action)
+		name, state, err := GetActionNameAndState(action)
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -1524,12 +1528,6 @@ func createPreferenceAction(win *gtk.Window) (glib.IAction, error) {
 			win.Show()
 
 			win.Connect("destroy", func(window *gtk.ApplicationWindow) {
-				/*
-					application, err := window.GetApplication()
-					if err != nil {
-						return
-					}
-				*/
 				window.Destroy()
 			})
 		}
@@ -1539,7 +1537,8 @@ func createPreferenceAction(win *gtk.Window) (glib.IAction, error) {
 	return act, nil
 }
 
-func createRevealer(data *GUI_Data) (*gtk.Revealer, error) {
+// Automatically hide/unhide panel used when fullscreen mode is on.
+func createRevealer(data *FullscreenGlobalData) (*gtk.Revealer, error) {
 	rev, err := gtk.RevealerNew()
 	if err != nil {
 		return nil, err
@@ -1555,7 +1554,7 @@ func createRevealer(data *GUI_Data) (*gtk.Revealer, error) {
 		return nil, err
 	}
 
-	btn, err := setupMenuButtonWithThemedImage("open-menu-symbolic")
+	btn, err := SetupMenuButtonWithThemedImage("open-menu-symbolic")
 	if err != nil {
 		return nil, err
 	}
@@ -1569,14 +1568,14 @@ func createRevealer(data *GUI_Data) (*gtk.Revealer, error) {
 		return nil, err
 	}
 
-	btn3, err := setupToolButton("view-restore-symbolic", "Leave ssdfsdf")
+	btn3, err := SetupToolButton("view-restore-symbolic", "Leave ssdfsdf")
 	if err != nil {
 		return nil, err
 	}
 	//	btn2.SetTitle("asdasdas")
 	btn3.SetActionName("win.FullscreenAction")
 
-	hdr, err := setupHeader(APP_TITLE, "(fullscreen mode)", false)
+	hdr, err := SetupHeader(APP_TITLE, "(fullscreen mode)", false)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -1591,7 +1590,8 @@ func createRevealer(data *GUI_Data) (*gtk.Revealer, error) {
 
 }
 
-func manageFullscreenHeaderHideTimer(data *GUI_Data, dur time.Duration, start bool) {
+// Define timer timeouts to hide fullscreen header in case of inactivity.
+func manageFullscreenHeaderHideTimer(data *FullscreenGlobalData, dur time.Duration, start bool) {
 	if start {
 		if data.Timer != nil {
 			if !data.Timer.Stop() {
@@ -1610,7 +1610,8 @@ func manageFullscreenHeaderHideTimer(data *GUI_Data, dur time.Duration, start bo
 	}
 }
 
-func showFullscreenHeader(data *GUI_Data, show bool) {
+// Show/hide fullscreen header.
+func showFullscreenHeader(data *FullscreenGlobalData, show bool) {
 	if show {
 		data.InFullscreenEventBox = true
 
@@ -1627,7 +1628,8 @@ func showFullscreenHeader(data *GUI_Data, show bool) {
 	}
 }
 
-func createEventBox(data *GUI_Data) (*gtk.EventBox, error) {
+// Create EventBox widget to catch mouse move events over hidden fullscreen panel.
+func createEventBox(data *FullscreenGlobalData) (*gtk.EventBox, error) {
 	eb, err := gtk.EventBoxNew()
 	if err != nil {
 		return nil, err
@@ -1650,38 +1652,33 @@ func createEventBox(data *GUI_Data) (*gtk.EventBox, error) {
 	return eb, nil
 }
 
-type GenericPreferenceRow struct {
-	gtk.ListBoxRow
+// Keeps here extra data for each page of multi-page preference dialog.
+type PreferenceRow struct {
 	Name  string
 	Title string
 }
 
-func GenericPreferenceRowNew(name, title string) (*GenericPreferenceRow, error) {
-	lbr, err := gtk.ListBoxRowNew()
-	if err != nil {
-		return nil, err
-	}
-
-	v := &GenericPreferenceRow{ListBoxRow: *lbr, Name: name, Title: title}
+func PreferenceRowNew(name, title string) (*PreferenceRow, *gtk.ListBoxRow, error) {
+	pr := &PreferenceRow{Name: name, Title: title}
 	lbl, err := gtk.LabelNew(name)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
+	}
+
+	lbr, err := gtk.ListBoxRowNew()
+	if err != nil {
+		return nil, nil, err
 	}
 	lbl.SetHAlign(gtk.ALIGN_START)
 	SetAllMargins(lbl, 6)
-	v.Add(lbl)
+	lbr.Add(lbl)
 
-	return v, nil
+	return pr, lbr, nil
 }
 
-/**
- * Global preferences page *
- */
-type GlobalPreferences struct {
-	gtk.Box
-}
-
-func GlobalPreferencesNew(gsSettings *glib.Settings) (*GlobalPreferences, error) {
+// Create preference dialog with "Global" page, where controls
+// being bound to GLib Setting object to save/restore functionality.
+func GlobalPreferencesNew(gsSettings *glib.Settings) (*gtk.Box, error) {
 	box, err := gtk.BoxNew(gtk.ORIENTATION_VERTICAL, 6)
 	if err != nil {
 		return nil, err
@@ -1770,30 +1767,6 @@ func GlobalPreferencesNew(gsSettings *glib.Settings) (*GlobalPreferences, error)
 	bh.Bind(SETTINGS_WINDOW_SAVE_STATE_KEY, cbWindowSaveState, "active", glib.SETTINGS_BIND_DEFAULT)
 	box.Add(cbWindowSaveState)
 
-	/*
-		//Show Notifications, only show option if notifications are supported
-		if checkVTEFeature(TerminalFeature.EVENT_NOTIFICATION) {
-			cbNotify, err := gtk.CheckButtonNewWithLabel("Send desktop notification on process complete")
-			if err != nil {
-				return nil, err
-			}
-			bh.Bind(SETTINGS_NOTIFY_ON_PROCESS_COMPLETE_KEY, cbNotify, "active", glib.SETTINGS_BIND_DEFAULT)
-			box.Add(cbNotify)
-		}
-
-		   //New Instance Options
-		   Box bNewInstance = new Box(Orientation.HORIZONTAL, 6);
-
-		   Label lblNewInstance = new Label(_("On new instance"));
-		   lblNewInstance.setHalign(Align.END);
-		   bNewInstance.add(lblNewInstance);
-		   ComboBox cbNewInstance = createNameValueCombo([_("New Window"), _("New Session"), _("Split Right"), _("Split Down"),
-		   	_("Focus Window")], SETTINGS_NEW_INSTANCE_MODE_VALUES);
-		   bh.bind(SETTINGS_NEW_INSTANCE_MODE_KEY, cbNewInstance, "active-id", glib.SETTINGS_BIND_DEFAULT);
-		   bNewInstance.add(cbNewInstance);
-		   add(bNewInstance);
-	*/
-
 	// *********** Clipboard Options
 	lblClipboard, err := gtk.LabelNew(fmt.Sprintf("<b>%s</b>", "Clipboard"))
 	if err != nil {
@@ -1835,23 +1808,36 @@ func GlobalPreferencesNew(gsSettings *glib.Settings) (*GlobalPreferences, error)
 	bh.Bind(SETTINGS_COPY_ON_SELECT_KEY, cbCopyOnSelect, "active", glib.SETTINGS_BIND_DEFAULT)
 	box.Add(cbCopyOnSelect)
 
+	// Disclaimer
+	wdg, err := gtk.SeparatorNew(gtk.ORIENTATION_HORIZONTAL)
+	if err != nil {
+		return nil, err
+	}
+	box.Add(wdg)
+	var buf bytes.Buffer
+	buf.WriteString(fmt.Sprintln("******************************************************"))
+	buf.WriteString(fmt.Sprintln("Design of this preference page taken from <a href=\"https://github.com/gnunn1/tilix\">Tilix</a> project."))
+	buf.WriteString(fmt.Sprintln("Settings here only for demonstration purpose and have"))
+	buf.WriteString(fmt.Sprintln("minimal impact to application, or none at all."))
+	buf.WriteString(fmt.Sprintln("******************************************************"))
+	lbl, err := gtk.LabelNew("")
+	if err != nil {
+		return nil, err
+	}
+	lbl.SetMarkup(buf.String())
+	lbl.SetJustify(gtk.JUSTIFY_CENTER)
+	box.PackEnd(lbl, true, true, 0)
+
 	box.Connect("destroy", func(b *gtk.Box) {
 		bh.Unbind()
 	})
 
-	v := &GlobalPreferences{Box: *box}
-
-	return v, nil
+	return box, nil
 }
 
-/**
- * Appearance preferences page
- */
-type AppearancePreferences struct {
-	gtk.Box
-}
-
-func AppearancePreferencesNew(gsSettings *glib.Settings) (*AppearancePreferences, error) {
+// Create preference dialog with "Appearance" page, where controls
+// being bound to GLib Setting object to save/restore functionality.
+func AppearancePreferencesNew(gsSettings *glib.Settings) (*gtk.Box, error) {
 	box, err := gtk.BoxNew(gtk.ORIENTATION_VERTICAL, 6)
 	if err != nil {
 		return nil, err
@@ -1989,7 +1975,7 @@ func AppearancePreferencesNew(gsSettings *glib.Settings) (*AppearancePreferences
 		}
 	})
 
-	btnReset, err := setupButtonWithThemedImage("edit-delete-symbolic")
+	btnReset, err := SetupButtonWithThemedImage("edit-delete-symbolic")
 	if err != nil {
 		return nil, err
 	}
@@ -2025,52 +2011,8 @@ func AppearancePreferencesNew(gsSettings *glib.Settings) (*AppearancePreferences
 	bImage.Add(cbImageMode)
 	grid.Attach(bImage, 1, row, 1, 1)
 	row++
-	/*
-	   //Session Name
-	   Label lblSessionName = new Label(_("Default session name"));
-	   lblSessionName.setHalign(Align.END);
-	   grid.attach(lblSessionName, 0, row, 1, 1);
 
-	   Entry eSessionName = new Entry();
-	   eSessionName.setHexpand(true);
-	   bh.bind(SETTINGS_SESSION_NAME_KEY, eSessionName, "text", GSettingsBindFlags.DEFAULT);
-	   if (Version.checkVersion(3, 16, 0).length == 0) {
-	       grid.attach(createTitleEditHelper(eSessionName, TitleEditScope.SESSION), 1, row, 1, 1);
-	   } else {
-	       grid.attach(eSessionName, 1, row, 1, 1);
-	   }
-	   row++;
-
-	   //Application Title
-	   Label lblAppTitle = new Label(_("Application title"));
-	   lblAppTitle.setHalign(Align.END);
-	   grid.attach(lblAppTitle, 0, row, 1, 1);
-
-	   Entry eAppTitle = new Entry();
-	   eAppTitle.setHexpand(true);
-	   bh.bind(SETTINGS_APP_TITLE_KEY, eAppTitle, "text", GSettingsBindFlags.DEFAULT);
-	   if (Version.checkVersion(3, 16, 0).length == 0) {
-	       grid.attach(createTitleEditHelper(eAppTitle, TitleEditScope.WINDOW), 1, row, 1, 1);
-	   } else {
-	       grid.attach(eAppTitle, 1, row, 1, 1);
-	   }
-	   row++;
-	*/
 	box.Add(grid)
-	/*
-	   //Enable Transparency, only enabled if less then 3.18
-	   if (Version.getMajorVersion() <= 3 && Version.getMinorVersion() < 18) {
-	       CheckButton cbTransparent = new CheckButton(_("Enable transparency, requires re-start"));
-	       bh.bind(SETTINGS_ENABLE_TRANSPARENCY_KEY, cbTransparent, "active", GSettingsBindFlags.DEFAULT);
-	       add(cbTransparent);
-	   }
-
-	   if (Version.checkVersion(3, 16, 0).length == 0) {
-	       CheckButton cbWideHandle = new CheckButton(_("Use a wide handle for splitters"));
-	       bh.bind(SETTINGS_ENABLE_WIDE_HANDLE_KEY, cbWideHandle, "active", GSettingsBindFlags.DEFAULT);
-	       add(cbWideHandle);
-	   }
-	*/
 
 	cbRightSidebar, err := gtk.CheckButtonNewWithLabel("Place the sidebar on the right")
 	if err != nil {
@@ -2085,27 +2027,39 @@ func AppearancePreferencesNew(gsSettings *glib.Settings) (*AppearancePreferences
 	}
 	bh.Bind(SETTINGS_TERMINAL_TITLE_SHOW_WHEN_SINGLE_KEY, cbTitleShowWhenSingle, "active", glib.SETTINGS_BIND_DEFAULT)
 	box.Add(cbTitleShowWhenSingle)
-	/*
-	   if (Version.checkVersion(3, GTK_SCROLLEDWINDOW_VERSION, 0).length == 0 && environment.get("GTK_OVERLAY_SCROLLING","1") == "1") {
-	       CheckButton cbOverlay = new CheckButton(_("Use overlay scrollbars (Application restart required)"));
-	       bh.bind(SETTINGS_USE_OVERLAY_SCROLLBAR_KEY, cbOverlay, "active", GSettingsBindFlags.DEFAULT);
-	       add(cbOverlay);
-	   }
-	*/
 
 	cbUseTabs, err := gtk.CheckButtonNewWithLabel("Use tabs instead of sidebar (Application restart required)")
 	bh.Bind(SETTINGS_USE_TABS_KEY, cbUseTabs, "active", glib.SETTINGS_BIND_DEFAULT)
 	box.Add(cbUseTabs)
 
+	// Disclaimer
+	wdg, err := gtk.SeparatorNew(gtk.ORIENTATION_HORIZONTAL)
+	if err != nil {
+		return nil, err
+	}
+	box.Add(wdg)
+	var buf bytes.Buffer
+	buf.WriteString(fmt.Sprintln("******************************************************"))
+	buf.WriteString(fmt.Sprintln("Design of this preference page taken from <a href=\"https://github.com/gnunn1/tilix\">Tilix</a> project."))
+	buf.WriteString(fmt.Sprintln("Settings here only for demonstration purpose and have"))
+	buf.WriteString(fmt.Sprintln("minimal impact to application, or none at all."))
+	buf.WriteString(fmt.Sprintln("******************************************************"))
+	lbl, err = gtk.LabelNew("")
+	if err != nil {
+		return nil, err
+	}
+	lbl.SetMarkup(buf.String())
+	lbl.SetJustify(gtk.JUSTIFY_CENTER)
+	box.PackEnd(lbl, true, true, 0)
+
 	box.Connect("destroy", func(b *gtk.Box) {
 		bh.Unbind()
 	})
 
-	v := &AppearancePreferences{Box: *box}
-
-	return v, nil
+	return box, nil
 }
 
+// Verify, that GLib Setting's schema is installed, otherwise return false.
 func checkSchemaSettingsIsInstalled(app *gtk.Application) (bool, error) {
 	parentWin := app.GetActiveWindow()
 	// Verify that GSettingsSchema is installed
@@ -2121,7 +2075,7 @@ func checkSchemaSettingsIsInstalled(app *gtk.Application) (bool, error) {
 			{"_OK", gtk.RESPONSE_OK, false, nil},
 		}
 
-		_, err := runMessageDialog(parentWin, title, text, false, buttons, nil)
+		_, err := RunMessageDialog(parentWin, title, text, false, buttons, nil)
 		if err != nil {
 			return false, err
 		}
@@ -2139,7 +2093,7 @@ func checkSchemaSettingsIsInstalled(app *gtk.Application) (bool, error) {
 			{"_OK", gtk.RESPONSE_OK, false, nil},
 		}
 
-		_, err := runMessageDialog(parentWin, title, text, false, buttons, nil)
+		_, err := RunMessageDialog(parentWin, title, text, false, buttons, nil)
 		if err != nil {
 			return false, err
 		}
@@ -2148,6 +2102,8 @@ func checkSchemaSettingsIsInstalled(app *gtk.Application) (bool, error) {
 	return true, nil
 }
 
+// Create sophisticated multi-page preference dialog
+// with save/restore functionallity to/from the GLib Setting object.
 func createPreferenceDialog(app *gtk.Application) (*gtk.ApplicationWindow, error) {
 	parentWin := app.GetActiveWindow()
 	win, err := gtk.ApplicationWindowNew(app)
@@ -2157,7 +2113,6 @@ func createPreferenceDialog(app *gtk.Application) (*gtk.ApplicationWindow, error
 
 	// Settings
 	win.SetTitle("Preferences")
-	//win.setTypeHint(WindowTypeHint.DIALOG);
 	win.SetTransientFor(parentWin)
 	win.SetDestroyWithParent(true)
 	win.SetShowMenubar(false)
@@ -2167,23 +2122,13 @@ func createPreferenceDialog(app *gtk.Application) (*gtk.ApplicationWindow, error
 	}
 
 	// Create window header
-
-	hbMain, err := setupHeader("", "", true)
+	hbMain, err := SetupHeader("", "", true)
 	if err != nil {
 		return nil, err
 	}
 	hbMain.SetHExpand(true)
 
-	searchButton, err := gtk.ToggleButtonNew()
-	img, err := gtk.ImageNew()
-	if err != nil {
-		return nil, err
-	}
-	img.SetFromIconName("system-search-symbolic", gtk.ICON_SIZE_MENU)
-	searchButton.SetNoShowAll(true)
-	hbMain.PackEnd(searchButton)
-
-	hbSide, err := setupHeader("Preferences", "", false)
+	hbSide, err := SetupHeader("Preferences", "", false)
 	if err != nil {
 		return nil, err
 	}
@@ -2192,21 +2137,14 @@ func createPreferenceDialog(app *gtk.Application) (*gtk.ApplicationWindow, error
 	bTitle, err := gtk.BoxNew(gtk.ORIENTATION_HORIZONTAL, 0)
 	bTitle.Add(hbSide)
 	sTitle, err := gtk.SeparatorNew(gtk.ORIENTATION_VERTICAL)
-	//sTitle.getStyleContext().addClass("tilix-title-separator");
 	bTitle.Add(sTitle)
 	bTitle.Add(hbMain)
 
 	win.SetTitlebar(bTitle)
-	/*
-	   this.addOnNotify(delegate(ParamSpec, ObjectG) {
-	       onDecorationLayout();
-	   }, "gtk-decoration-layout");
-	   onDecorationLayout();
-	*/
 
 	var list = make(map[uintptr]interface{})
 
-	//Create Stack and boxes
+	// Create Stack and boxes
 	pages, err := gtk.StackNew()
 	if err != nil {
 		return nil, err
@@ -2224,7 +2162,7 @@ func createPreferenceDialog(app *gtk.Application) (*gtk.ApplicationWindow, error
 	lbSide.SetVExpand(true)
 	lbSide.Connect("row-selected", func(lb *gtk.ListBox, row *gtk.ListBoxRow) {
 		r := list[row.Native()]
-		if r1, ok := r.(*GenericPreferenceRow); ok {
+		if r1, ok := r.(*PreferenceRow); ok {
 			//log.Println(spew.Sprintf("%+v", r1))
 			pages.SetVisibleChildName(r1.Name)
 			hbMain.SetTitle(r1.Title)
@@ -2236,11 +2174,11 @@ func createPreferenceDialog(app *gtk.Application) (*gtk.ApplicationWindow, error
 		return nil, err
 	}
 	pages.AddTitled(gp, "Global", "Global")
-	row, err := GenericPreferenceRowNew("Global", "Global")
+	pr, row, err := PreferenceRowNew("Global", "Global")
 	if err != nil {
 		return nil, err
 	}
-	list[row.Native()] = row
+	list[row.Native()] = pr
 	lbSide.Add(row)
 
 	ap, err := AppearancePreferencesNew(gsSettings)
@@ -2248,29 +2186,12 @@ func createPreferenceDialog(app *gtk.Application) (*gtk.ApplicationWindow, error
 		return nil, err
 	}
 	pages.AddTitled(ap, "Appearance", "Appearance")
-	row, err = GenericPreferenceRowNew("Appearance", "Appearance")
+	pr, row, err = PreferenceRowNew("Appearance", "Appearance")
 	if err != nil {
 		return nil, err
 	}
-	list[row.Native()] = row
+	list[row.Native()] = pr
 	lbSide.Add(row)
-
-	/*
-	   QuakePreferences qp = new QuakePreferences(gsSettings, _wayland);
-	   pages.addTitled(qp, N_("Quake"), _("Quake"));
-	   addNonProfileRow(new GenericPreferenceRow(N_("Quake"), _("Quake")));
-
-	   bmEditor = new GlobalBookmarkEditor();
-	   pages.addTitled(bmEditor, N_("Bookmarks"), _("Bookmarks"));
-	   addNonProfileRow(new GenericPreferenceRow(N_("Bookmarks"), _("Bookmarks")));
-
-	   ShortcutPreferences sp = new ShortcutPreferences(gsSettings);
-	   searchButton.addOnToggled(delegate(ToggleButton button) {
-	       sp.toggleShortcutsFind();
-	   });
-	   pages.addTitled(sp, N_("Shortcuts"), _("Shortcuts"));
-	   addNonProfileRow(new GenericPreferenceRow(N_("Shortcuts"), _("Shortcuts")));
-	*/
 
 	sw, err := gtk.ScrolledWindowNew(nil, nil)
 	if err != nil {
@@ -2286,14 +2207,6 @@ func createPreferenceDialog(app *gtk.Application) (*gtk.ApplicationWindow, error
 		return nil, err
 	}
 	bSide.Add(sw)
-	/*
-		sep, err := gtk.SeparatorNew(gtk.ORIENTATION_HORIZONTAL)
-		if err != nil {
-			return nil, err
-		}
-		bSide.Add(sep)
-		bSide.Add(bButtons)
-	*/
 
 	box, err := gtk.BoxNew(gtk.ORIENTATION_HORIZONTAL, 0)
 	if err != nil {
@@ -2323,7 +2236,7 @@ func createPreferenceDialog(app *gtk.Application) (*gtk.ApplicationWindow, error
 	sgMain.AddWidget(hbMain)
 	sgMain.AddWidget(pages)
 
-	//Set initial title
+	// Set initial title
 	hbMain.SetTitle("Global")
 
 	return win, nil
@@ -2331,7 +2244,7 @@ func createPreferenceDialog(app *gtk.Application) (*gtk.ApplicationWindow, error
 
 func main() {
 
-	data := &GUI_Data{}
+	data := &FullscreenGlobalData{}
 
 	gtk.Init(nil)
 	app, err := gtk.ApplicationNew(APP_ID, glib.APPLICATION_FLAGS_NONE)
@@ -2350,10 +2263,9 @@ func main() {
 		win.Connect("destroy", func(window *gtk.ApplicationWindow) {
 			application, err := window.GetApplication()
 			if err != nil {
-				return
+				log.Fatal(err)
 			}
 			application.Quit()
-			// gtk.MainQuit()
 		})
 
 		var act glib.IAction
@@ -2422,23 +2334,20 @@ func main() {
 		if err != nil {
 			log.Fatal(err)
 		}
-		btn, err := setupMenuButtonWithThemedImage("open-menu-symbolic")
+		btn, err := SetupMenuButtonWithThemedImage("open-menu-symbolic")
 		if err != nil {
 			log.Fatal(err)
 		}
 		btn.SetUsePopover(true)
 		btn.SetMenuModel(menu)
 
-		hdr, err := setupHeader(APP_TITLE, "", true)
+		hdr, err := SetupHeader(APP_TITLE, "", true)
 		if err != nil {
 			log.Fatal(err)
 		}
-
 		hdr.PackEnd(btn)
 
 		win.SetTitlebar(hdr)
-
-		//bindModel(po)
 
 		box, err := gtk.BoxNew(gtk.ORIENTATION_VERTICAL, 0)
 		if err != nil {
@@ -2495,26 +2404,15 @@ func main() {
 		win.AddAction(act)
 
 		win.ShowAll()
-		//win.SetFocus(btn)
-		//win.GrabFocus()
 
+		// Run code, when app message queue becomes empty.
+		glib.IdleAdd(func() {
+			action := win.LookupAction("AboutAction")
+			if action != nil {
+				action.Activate(nil)
+			}
+		})
 	})
 
-	// thm, err := gtk.IconThemeGetDefault()
-	// if err != nil {
-	// 	log.Fatal(err)
-	// }
-	// pbf, err := thm.LoadIcon("mail-send-receive-symbolic", gtk.ICON_SIZE_BUTTON, 0)
-	// if err != nil {
-	// 	log.Fatal(err)
-	// }
-
-	// Use objcopy utility and debug/elf to embedd and read resources from executable file
-
-	// img, err := gtk.ImageNewFromFile("./ajax-loader-gears_32x32.gif")
-	// img, err := gtk.ImageNewFromFile("./dotdot32x32.gif")
-
 	app.Run([]string{})
-	// app.Application.Unref()
-	// gtk.Main()
 }

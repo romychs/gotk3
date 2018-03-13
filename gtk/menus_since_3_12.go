@@ -43,8 +43,7 @@ func init() {
 	WrapMap["GtkPopover"] = wrapPopover
 }
 
-//TODO(sjon): Implement GtkPopover
-//GtkPopover
+// Popover is a representation of GTK's GtkPopover.
 type Popover struct {
 	Bin
 }

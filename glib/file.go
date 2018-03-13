@@ -47,13 +47,13 @@ func CancellableNew() (*Cancellable, error) {
 	return wrapCancellable(obj), nil
 }
 
-// gboolean	g_cancellable_is_cancelled ()
+// IsCancelled is a wrapper around g_cancellable_is_cancelled().
 func (v *Cancellable) IsCancelled() bool {
 	c := C.g_cancellable_is_cancelled(v.native())
 	return gobool(c)
 }
 
-// void	g_cancellable_reset ()
+// Reset is a wrapper around g_cancellable_reset().
 func (v *Cancellable) Reset() {
 	C.g_cancellable_reset(v.native())
 }
@@ -606,7 +606,6 @@ func wrapFileIOStream(obj *Object) *FileIOStream {
 }
 
 // FileCreateFlags is a representation of GLib's GFileCreateFlags.
-
 type FileCreateFlags int
 
 const (
