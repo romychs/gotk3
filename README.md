@@ -89,10 +89,10 @@ otherwise any derived application will compile for a long-long time, so run in a
 > go install -tags "gtk_$(pkg-config --modversion gtk+-3.0 | tr . _| cut -d '_' -f 1-2)" github.com/d2r2/gotk3/...
 > ```
 
-Open source projects used
+GTK+3 open source projects used
 -------------------------
-- [Tilix](https://github.com/gnunn1/tilix) - a tiling terminal emulator for Linux using GTK+ 3.
-- [GNOME/gedit](https://github.com/GNOME/gedit) IDE.
+- [Tilix](https://github.com/gnunn1/tilix) - tiling terminal emulator for Linux using GTK+ 3.
+- [GNOME/gedit](https://github.com/GNOME/gedit) - standard GNOME editor.
 
 Contact
 -------
