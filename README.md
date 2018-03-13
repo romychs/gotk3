@@ -17,10 +17,11 @@ Idea to create a fork from one of the best
 not just add another API functions, but came from the other side - create
 [good application example](https://github.com/d2r2/gotk3/tree/master/examples/cool_app)
 written in go, which demostrate modern GTK+ features
-(as well as old-style one) and in addition provide out-of-the-box code patterns.
+(as well as old-style one) and in addition provide out-of-the-box code patterns
+to compose quickly GTK+3 application.
 
 As a results a lot of refactoring was done with original code, to create on
-the top example application CoolApp, which contains many ready to use code samples
+the top example application Cool App, which contains many ready to use code samples
 to build go-application with modern GTK+3 GUI.
 
 Short list of changes made:
