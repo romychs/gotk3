@@ -24,16 +24,16 @@ Screenshots
 Main form with about dialog:
 ![image](https://raw.github.com/d2r2/gotk3/master/examples/cool_app/docs/cool_app_screen_1.png)
 
-Main form and popover menu:
+Main form and modern popover menu:
 ![image](https://raw.github.com/d2r2/gotk3/master/examples/cool_app/docs/cool_app_screen_2.png)
 
-Main form and main menu:
+Main form and classic main menu:
 ![image](https://raw.github.com/d2r2/gotk3/master/examples/cool_app/docs/cool_app_screen_3.png)
 
 One of few dialogs demo:
 ![image](https://raw.github.com/d2r2/gotk3/master/examples/cool_app/docs/cool_app_screen_4.png)
 
-Preference dialog:
+Preference dialog with save/restore feature:
 ![image](https://raw.github.com/d2r2/gotk3/master/examples/cool_app/docs/cool_app_screen_5.png)
 
 
