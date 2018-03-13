@@ -4,7 +4,8 @@ Feature-rich GTK+3 app demo written in go
 Aim of this application is to interconnect GLIB/GTK+ components and widgets together
 with use of helpfull code patterns, meet the real needs of developers.
 
-It's obligatory to have GTK+ 3.12 and high installed, otherwise app will not compile.
+It's obligatory to have GTK+ 3.12 and high installed, otherwise app will not compile
+(GtkPopover, GtkHeaderBar require more recent GTK+3 installation).
 
 Features of this demonstration:
 1) All actions in application implemented via GLib's GAction component working as entry point
