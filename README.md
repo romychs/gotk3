@@ -25,7 +25,7 @@ to build go-application with modern GTK+3 GUI.
 
 Short list of changes made:
 1) Code refactored and reformated for better mix of widgets in corresponding files.
-2) Some amount of error was fixed including memory leaks.
+2) Some amount of errors was fixed including memory leaks.
 3) GOTK3 examples which in original version were located separately, have been integrated
 here in one project.
 4) New GLIB, GTK+ objects and widgets supported, including GAction, GSimpleAction, GActionMap,
