@@ -19,17 +19,21 @@ fullscreen mode on/off, actions with states or stateless and others.
 
 Screenshots
 -----------
-Main form and popover menu:
+
+Main form with about dialog:
 ![image](https://raw.github.com/d2r2/gotk3/master/examples/cool_app/docs/cool_app_screen_1.png)
 
-Main form and main menu:
+Main form and popover menu:
 ![image](https://raw.github.com/d2r2/gotk3/master/examples/cool_app/docs/cool_app_screen_2.png)
 
-One of few dialogs demo:
+Main form and main menu:
 ![image](https://raw.github.com/d2r2/gotk3/master/examples/cool_app/docs/cool_app_screen_3.png)
 
-Preference dialog:
+One of few dialogs demo:
 ![image](https://raw.github.com/d2r2/gotk3/master/examples/cool_app/docs/cool_app_screen_4.png)
+
+Preference dialog:
+![image](https://raw.github.com/d2r2/gotk3/master/examples/cool_app/docs/cool_app_screen_5.png)
 
 
 Installation
