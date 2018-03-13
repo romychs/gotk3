@@ -45,7 +45,7 @@ must be used, to install/compile [GLIB setting's schema](https://developer.gnome
 
 To run application type in console `go run ./cool_app.go`.
 
-Additional recomendations
+Additional recommendations
 -------------------------
 - Use GNOME application `gtk3-icon-browser` to find themed icons available at your linux desktop.
 
