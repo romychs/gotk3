@@ -7,15 +7,15 @@ with use of helpfull code patterns, meet the real needs of developers.
 It's obligatory to have GTK+ 3.12 and high installed, otherwise app will not compile.
 
 Features of this demonstration:
-1) All actions in application implemented via GAction component, working as entry point
+1) All actions in application implemented via GLib's GAction component working as entry point
 for any activity in application. Advanced use of GAction utilize
 "[action with states](https://developer.gnome.org/GAction/)"
-with seamless integration of such actions with UI menus.
+with seamless integration of such actions to UI menus.
 2) New widgets such as GtkHeaderBar, GtkPopover and others are used.
 3) Good example of preference dialog with save/restore functionality.
-4) Helpfull code pattern are present: dialogs and message dislogs demo,
+4) Helpfull code pattern are present: dialogs and message boxes demo
 working with save/restore settings (via GSettings),
-fullscreen mode wrap/unwrap, actions with states or stateless and others.
+fullscreen mode on/off, actions with states or stateless and others.
 
 Screenshots
 -----------
