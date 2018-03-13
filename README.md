@@ -33,7 +33,7 @@ here in one project.
 GMenuModel, GMenu, GtkActionable, GFile and so on.
 5) CoolApp example application created to demonstrate golang code patterns to build
 modern GTK+3 application, which incude menus, toolbars, actions and others
-widgets and tools (including pattern for fullscreen wrap/unwrap, preference dialog,
+widgets and tools (including pattern for fullscreen wrap/unwrap, preference dialog sample,
 save/restore settings and so on).
 
 Usage
