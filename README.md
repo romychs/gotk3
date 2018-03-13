@@ -12,7 +12,7 @@ Improved GOTK3 (go bindings for GTK+3)
 Original [GOTK3](https://godoc.org/github.com/gotk3/gotk3) project provides Go bindings for GTK+3 and dependent
 projects.
 
-Idea to create a fork from the original one of the best
+Idea to create a fork from one of the best
 [GTK+3 adaptation for golang](https://godoc.org/github.com/gotk3) was
 not just add another API functions, but came from the other side - create
 [good application example](https://github.com/d2r2/gotk3/tree/master/examples/cool_app)
