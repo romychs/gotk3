@@ -10,7 +10,7 @@ It's obligatory to have GTK+ 3.12 and high installed, otherwise app will not com
 Features of this demonstration:
 1) All actions in application implemented via GLib's GAction component working as entry point
 for any activity in application. Advanced use of GAction utilize
-"[action with states](https://developer.gnome.org/GAction/)"
+"[action with states and parameters](https://developer.gnome.org/GAction/)"
 with seamless integration of such actions to UI menus.
 2) New widgets such as GtkHeaderBar, GtkPopover and others are used.
 3) Good example of preference dialog with save/restore functionality.
