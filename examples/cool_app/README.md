@@ -33,7 +33,7 @@ Main form and classic main menu:
 One of few dialogs demo:
 ![image](https://raw.github.com/d2r2/gotk3/master/examples/cool_app/docs/cool_app_screen_4.png)
 
-Preference dialog with save/restore settings feature:
+Preference dialog with save/restore settings:
 ![image](https://raw.github.com/d2r2/gotk3/master/examples/cool_app/docs/cool_app_screen_5.png)
 
 
