@@ -8,7 +8,7 @@ It's obligatory to have GTK+ 3.12 and high installed, otherwise app will not com
 (GtkPopover, GtkHeaderBar require more recent GTK+3 installation).
 
 Features of this demonstration:
-1) All actions in application implemented via GLib's GAction component working as entry point
+1) All actions in application implemented via GLIB's GAction component working as entry point
 for any activity in application. Advanced use of GAction utilize
 "[action with states and parameters](https://developer.gnome.org/GAction/)"
 with seamless integration of such actions to UI menus.
@@ -33,7 +33,7 @@ Main form and classic main menu:
 One of few dialogs demo:
 ![image](https://raw.github.com/d2r2/gotk3/master/examples/cool_app/docs/cool_app_screen_4.png)
 
-Preference dialog with save/restore settings:
+Preference dialog with save/restore settings functionality:
 ![image](https://raw.github.com/d2r2/gotk3/master/examples/cool_app/docs/cool_app_screen_5.png)
 
 
