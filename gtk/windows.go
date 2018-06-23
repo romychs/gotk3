@@ -1975,8 +1975,11 @@ func (v *FileChooser) GetFilename() string {
 
 // SetFilename is a wrapper around gtk_file_chooser_set_filename().
 func (v *FileChooser) SetFilename(filename string) bool {
-	cstr := C.CString(filename)
-	defer C.free(unsafe.Pointer(cstr))
+	var cstr *C.char
+	if filename != "" {
+		cstr = C.CString(filename)
+		defer C.free(unsafe.Pointer(cstr))
+	}
 	c := C.gtk_file_chooser_set_filename(v.native(), cstr)
 	return gobool(c)
 }

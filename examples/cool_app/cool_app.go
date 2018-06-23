@@ -1529,6 +1529,7 @@ func createPreferenceAction(win *gtk.Window) (glib.IAction, error) {
 
 			win.Connect("destroy", func(window *gtk.ApplicationWindow) {
 				window.Destroy()
+				log.Println("Destroy window")
 			})
 		}
 
@@ -1830,6 +1831,7 @@ func GlobalPreferencesNew(gsSettings *glib.Settings) (*gtk.Box, error) {
 
 	box.Connect("destroy", func(b *gtk.Box) {
 		bh.Unbind()
+		log.Println("Destroy box")
 	})
 
 	return box, nil
@@ -2354,6 +2356,10 @@ func main() {
 			log.Fatal(err)
 		}
 
+		box.Connect("destroy", func() {
+			log.Println("Destroy box")
+		})
+
 		eb, err := createEventBox(data)
 		if err != nil {
 			log.Fatal(err)
@@ -2394,6 +2400,49 @@ func main() {
 			log.Fatal(err)
 		}
 		box.PackStart(div, false, false, 0)
+
+		sw, err := gtk.ScrolledWindowNew(nil, nil)
+		// sw, err := gtk.BoxNew(gtk.ORIENTATION_VERTICAL, 0)
+		// sw, err := gtk.FrameNew("sdfsdfsdf")
+		// sw, err := gtk.ButtonNew()
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		vp, err := gtk.ViewportNew(nil, nil)
+		if err != nil {
+			log.Fatal(err)
+		}
+		box2, err := gtk.BoxNew(gtk.ORIENTATION_HORIZONTAL, 0)
+		if err != nil {
+			log.Fatal(err)
+		}
+		box2.Connect("destroy", func() {
+			log.Println("Destroy box2")
+		})
+
+		vp.Add(box2)
+		sw.Add(vp)
+		sw.Connect("destroy", func() {
+			log.Println("Destroy sw")
+			// chd, err := sw.GetChild()
+			// if err != nil {
+			// 	log.Fatal(err)
+			// }
+			// log.Println(spew.Sprintf("%+v", chd))
+			// log.Println(spew.Sprintf("%+v", box2))
+			// sw.Remove(chd)
+			// chd.Unref()
+			// chd.Destroy()
+
+			// parent, err := chd.GetParent()
+			// if err != nil {
+			// log.Fatal(err)
+			// }
+
+		})
+
+		box.Add(sw)
 
 		win.Add(box)
 

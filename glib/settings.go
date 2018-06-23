@@ -6,7 +6,9 @@ package glib
 // #include <glib-object.h>
 // #include "glib.go.h"
 import "C"
-import "unsafe"
+import (
+	"unsafe"
+)
 
 // Settings is a representation of GSettings.
 type Settings struct {
@@ -231,6 +233,8 @@ func (v *Settings) GetString(key string) string {
 	defer C.free(unsafe.Pointer(cstr))
 
 	c := C.g_settings_get_string(v.native(), (*C.gchar)(cstr))
+	defer C.g_free(C.gpointer(c))
+
 	return goString(c)
 }
 
@@ -277,6 +281,7 @@ func (v *Settings) SetFlags(key string, value uint) bool {
 	return gobool(C.g_settings_set_flags(v.native(), (*C.gchar)(cstr), C.guint(value)))
 }
 
+// GVariant * 	g_settings_get_value ()
 func (v *Settings) GetValue(key string) *Variant {
 	cstr := C.CString(key)
 	defer C.free(unsafe.Pointer(cstr))
@@ -285,6 +290,7 @@ func (v *Settings) GetValue(key string) *Variant {
 	return WrapVariant(unsafe.Pointer(c))
 }
 
+// gboolean 	g_settings_set_value ()
 func (v *Settings) SetValue(key string, value *Variant) bool {
 	cstr := C.CString(key)
 	defer C.free(unsafe.Pointer(cstr))
@@ -304,6 +310,7 @@ const (
 	SETTINGS_BIND_INVERT_BOOLEAN SettingsBindFlags = C.G_SETTINGS_BIND_INVERT_BOOLEAN
 )
 
+// void 	g_settings_bind ()
 func (v *Settings) Bind(key string, object IObject, property string, flags SettingsBindFlags) {
 	ckey := C.CString(key)
 	defer C.free(unsafe.Pointer(ckey))
@@ -315,6 +322,7 @@ func (v *Settings) Bind(key string, object IObject, property string, flags Setti
 		(*C.gchar)(cproperty), C.GSettingsBindFlags(flags))
 }
 
+// void 	g_settings_unbind ()
 func (v *Settings) Unbind(object IObject, property string) {
 	cproperty := C.CString(property)
 	defer C.free(unsafe.Pointer(cproperty))
@@ -323,25 +331,53 @@ func (v *Settings) Unbind(object IObject, property string) {
 		(*C.gchar)(cproperty))
 }
 
-// GVariant * 	g_settings_get_value ()
-// gboolean 	g_settings_set_value ()
+// gchar ** 	g_settings_get_strv ()
+func (v *Settings) GetStrv(key string) []string {
+	cstr := C.CString(key)
+	defer C.free(unsafe.Pointer(cstr))
+
+	c := C.g_settings_get_strv(v.native(), cstr)
+	// we do not own the memory for these strings, so we must not use strfreev
+	// but we must free the actual pointer we receive.
+	defer C.g_free(C.gpointer(c))
+
+	strs := goStringArray(c)
+	return strs
+}
+
+// gboolean 	g_settings_set_strv ()
+func (v *Settings) SetStrv(key string, value []string) bool {
+	cstr := C.CString(key)
+	defer C.free(unsafe.Pointer(cstr))
+
+	count := C.int(len(value))
+	cvalue := C.make_strings(count + 1)
+	defer C.destroy_strings(cvalue)
+
+	for i, str := range value {
+		cval := C.CString(str)
+		defer C.free(unsafe.Pointer(cval))
+		C.set_string(cvalue, C.int(i), (*C.gchar)(cval))
+	}
+	C.set_string(cvalue, C.int(len(value)), nil)
+
+	c := C.g_settings_set_strv(v.native(), cstr, cvalue)
+	return gobool(c)
+}
+
+// gchar ** 	g_settings_list_keys ()
 // GVariant * 	g_settings_get_user_value ()
 // GVariant * 	g_settings_get_default_value ()
 // const gchar * const * 	g_settings_list_schemas ()
 // const gchar * const * 	g_settings_list_relocatable_schemas ()
-// gchar ** 	g_settings_list_keys ()
 // GVariant * 	g_settings_get_range ()
 // gboolean 	g_settings_range_check ()
 // void 	g_settings_get ()
 // gboolean 	g_settings_set ()
 // gpointer 	g_settings_get_mapped ()
-// void 	g_settings_bind ()
 // void 	g_settings_bind_with_mapping ()
 // void 	g_settings_bind_writable ()
-// void 	g_settings_unbind ()
 // gaction * 	g_settings_create_action ()
-// gchar ** 	g_settings_get_strv ()
-// gboolean 	g_settings_set_strv ()
 
 // SettingsSchema is a representation of GSettingsSchema.
 type SettingsSchema struct {
@@ -361,6 +397,11 @@ func (v *SettingsSchema) native() *C.GSettingsSchema {
 		return nil
 	}
 	return v.schema
+}
+
+func marshalSettingsSchema(p uintptr) (interface{}, error) {
+	c := C.g_value_get_boxed((*C.GValue)(unsafe.Pointer(p)))
+	return &SettingsSchema{(*C.GSettingsSchema)(unsafe.Pointer(c))}, nil
 }
 
 // Ref() is a wrapper around g_settings_schema_ref().
@@ -395,6 +436,15 @@ func (v *SettingsSchema) HasKey(v1 string) bool {
 	defer C.free(unsafe.Pointer(cstr))
 
 	return gobool(C.g_settings_schema_has_key(v.native(), (*C.gchar)(cstr)))
+}
+
+func (v *SettingsSchema) ListKeys() []string {
+	c := C.g_settings_schema_list_keys(v.native())
+	// both pointer array and strings should be freed.
+	defer C.g_strfreev(c)
+
+	strs := goStringArray(c)
+	return strs
 }
 
 // // ListChildren() is a wrapper around g_settings_schema_list_children().
@@ -572,3 +622,10 @@ func NullSettingsBackendNew() (*SettingsBackend, error) {
 // void 	g_settings_backend_writable_changed ()
 // void 	g_settings_backend_changed_tree ()
 // void 	g_settings_backend_flatten_tree ()
+
+func init() {
+	tm := []TypeMarshaler{
+		{Type(C.g_settings_schema_get_type()), marshalSettingsSchema},
+	}
+	RegisterGValueMarshalers(tm)
+}

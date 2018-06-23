@@ -555,8 +555,11 @@ func (v *Entry) GetIconAtPos(x, y int) int {
 
 // SetIconTooltipText() is a wrapper around gtk_entry_set_icon_tooltip_text().
 func (v *Entry) SetIconTooltipText(iconPos EntryIconPosition, tooltip string) {
-	cstr := C.CString(tooltip)
-	defer C.free(unsafe.Pointer(cstr))
+	var cstr *C.char
+	if tooltip != "" {
+		cstr = C.CString(tooltip)
+		defer C.free(unsafe.Pointer(cstr))
+	}
 	C.gtk_entry_set_icon_tooltip_text(v.native(),
 		C.GtkEntryIconPosition(iconPos), (*C.gchar)(cstr))
 }

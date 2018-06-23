@@ -304,8 +304,11 @@ func (v *StatusIcon) GetStorageType() ImageType {
 
 // SetTooltipText is a wrapper around gtk_status_icon_set_tooltip_text()
 func (v *StatusIcon) SetTooltipText(text string) {
-	cstr := C.CString(text)
-	defer C.free(unsafe.Pointer(cstr))
+	var cstr *C.char
+	if text != "" {
+		cstr = C.CString(text)
+		defer C.free(unsafe.Pointer(cstr))
+	}
 	C.gtk_status_icon_set_tooltip_text(v.native(), (*C.gchar)(cstr))
 }
 

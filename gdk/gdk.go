@@ -43,6 +43,7 @@ func init() {
 		{glib.Type(C.gdk_modifier_type_get_type()), marshalModifierType},
 		{glib.Type(C.gdk_pixbuf_alpha_mode_get_type()), marshalPixbufAlphaMode},
 		{glib.Type(C.gdk_event_mask_get_type()), marshalEventMask},
+		{glib.Type(C.gdk_rectangle_get_type()), marshalRectangle},
 
 		// Objects/Interfaces
 		{glib.Type(C.gdk_device_get_type()), marshalDevice},
@@ -1618,15 +1619,17 @@ type Rectangle struct {
 	gdkRectangle *C.GdkRectangle
 }
 
-func WrapRectangle(p uintptr) *Rectangle {
-	return wrapRectangle((*C.GdkRectangle)(unsafe.Pointer(p)))
+func marshalRectangle(p uintptr) (interface{}, error) {
+	c := C.g_value_get_boxed((*C.GValue)(unsafe.Pointer(p)))
+	c2 := (*C.GdkRectangle)(unsafe.Pointer(c))
+	return wrapRectangle(c2), nil
 }
 
 func wrapRectangle(obj *C.GdkRectangle) *Rectangle {
-	if obj == nil {
-		return nil
-	}
 	return &Rectangle{obj}
+}
+func WrapRectangle(p uintptr) *Rectangle {
+	return wrapRectangle((*C.GdkRectangle)(unsafe.Pointer(p)))
 }
 
 func (v *Rectangle) Native() uintptr {

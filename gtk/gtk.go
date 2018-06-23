@@ -1431,11 +1431,14 @@ type CssProvider struct {
 	*glib.Object
 }
 
-func (v *CssProvider) toStyleProvider() *C.GtkStyleProvider {
-	if v == nil {
-		return nil
-	}
-	return C.toGtkStyleProvider(unsafe.Pointer(v.native()))
+func marshalCssProvider(p uintptr) (interface{}, error) {
+	c := C.g_value_get_object(C.toGValue(unsafe.Pointer(p)))
+	obj := glib.Take(unsafe.Pointer(c))
+	return wrapCssProvider(obj), nil
+}
+
+func wrapCssProvider(obj *glib.Object) *CssProvider {
+	return &CssProvider{obj}
 }
 
 // native returns a pointer to the underlying GtkCssProvider.
@@ -1447,8 +1450,11 @@ func (v *CssProvider) native() *C.GtkCssProvider {
 	return C.toGtkCssProvider(ptr)
 }
 
-func wrapCssProvider(obj *glib.Object) *CssProvider {
-	return &CssProvider{obj}
+func (v *CssProvider) toStyleProvider() *C.GtkStyleProvider {
+	if v == nil {
+		return nil
+	}
+	return C.toGtkStyleProvider(unsafe.Pointer(v.native()))
 }
 
 // CssProviderNew is a wrapper around gtk_css_provider_new().
@@ -2101,10 +2107,11 @@ type ScrolledWindow struct {
 
 // native returns a pointer to the underlying GtkScrolledWindow.
 func (v *ScrolledWindow) native() *C.GtkScrolledWindow {
-	if v == nil || v.Object == nil {
+	if v == nil {
 		return nil
 	}
-	return C.toGtkScrolledWindow(unsafe.Pointer(v.Native()))
+	ptr := unsafe.Pointer(v.Object.Native())
+	return C.toGtkScrolledWindow(ptr)
 }
 
 func marshalScrolledWindow(p uintptr) (interface{}, error) {
@@ -2118,7 +2125,7 @@ func wrapScrolledWindow(obj *glib.Object) *ScrolledWindow {
 	return &ScrolledWindow{*bin}
 }
 
-// ScrolledWindowNew() is a wrapper around gtk_scrolled_window_new().
+// ScrolledWindowNew is a wrapper around gtk_scrolled_window_new().
 func ScrolledWindowNew(hadjustment, vadjustment *Adjustment) (*ScrolledWindow, error) {
 	var hadj, vadj *C.GtkAdjustment
 	if hadjustment != nil {
@@ -2135,14 +2142,14 @@ func ScrolledWindowNew(hadjustment, vadjustment *Adjustment) (*ScrolledWindow, e
 	return wrapScrolledWindow(obj), nil
 }
 
-// SetPolicy() is a wrapper around gtk_scrolled_window_set_policy().
+// SetPolicy is a wrapper around gtk_scrolled_window_set_policy().
 func (v *ScrolledWindow) SetPolicy(hScrollbarPolicy, vScrollbarPolicy PolicyType) {
 	C.gtk_scrolled_window_set_policy(v.native(),
 		C.GtkPolicyType(hScrollbarPolicy),
 		C.GtkPolicyType(vScrollbarPolicy))
 }
 
-// GetHAdjustment() is a wrapper around gtk_scrolled_window_get_hadjustment().
+// GetHAdjustment is a wrapper around gtk_scrolled_window_get_hadjustment().
 func (v *ScrolledWindow) GetHAdjustment() *Adjustment {
 	c := C.gtk_scrolled_window_get_hadjustment(v.native())
 	if c == nil {
@@ -2152,12 +2159,12 @@ func (v *ScrolledWindow) GetHAdjustment() *Adjustment {
 	return wrapAdjustment(obj)
 }
 
-// SetHAdjustment() is a wrapper around gtk_scrolled_window_set_hadjustment().
+// SetHAdjustment is a wrapper around gtk_scrolled_window_set_hadjustment().
 func (v *ScrolledWindow) SetHAdjustment(adjustment *Adjustment) {
 	C.gtk_scrolled_window_set_hadjustment(v.native(), adjustment.native())
 }
 
-// GetVAdjustment() is a wrapper around gtk_scrolled_window_get_vadjustment().
+// GetVAdjustment is a wrapper around gtk_scrolled_window_get_vadjustment().
 func (v *ScrolledWindow) GetVAdjustment() *Adjustment {
 	c := C.gtk_scrolled_window_get_vadjustment(v.native())
 	if c == nil {
@@ -2167,20 +2174,86 @@ func (v *ScrolledWindow) GetVAdjustment() *Adjustment {
 	return wrapAdjustment(obj)
 }
 
-// SetVAdjustment() is a wrapper around gtk_scrolled_window_set_vadjustment().
+// SetVAdjustment is a wrapper around gtk_scrolled_window_set_vadjustment().
 func (v *ScrolledWindow) SetVAdjustment(adjustment *Adjustment) {
 	C.gtk_scrolled_window_set_vadjustment(v.native(), adjustment.native())
 }
 
-// GetShadowType() is a wrapper around gtk_scrolled_window_get_shadow_type().
+// GetShadowType is a wrapper around gtk_scrolled_window_get_shadow_type().
 func (v *ScrolledWindow) GetShadowType() ShadowType {
 	c := C.gtk_scrolled_window_get_shadow_type(v.native())
 	return ShadowType(c)
 }
 
-// SetShadowType() is a wrapper around gtk_scrolled_window_set_vadjustment().
+// SetShadowType is a wrapper around gtk_scrolled_window_set_vadjustment().
 func (v *ScrolledWindow) SetShadowType(shadowType ShadowType) {
 	C.gtk_scrolled_window_set_shadow_type(v.native(), C.GtkShadowType(shadowType))
+}
+
+// GetMinContentWidth is a wrapper around gtk_scrolled_window_get_min_content_width().
+func (v *ScrolledWindow) GetMinContentWidth() int {
+	c := C.gtk_scrolled_window_get_min_content_width(v.native())
+	return int(c)
+}
+
+// SetMinContentWidth is a wrapper around gtk_scrolled_window_set_min_content_width().
+func (v *ScrolledWindow) SetMinContentWidth(width int) {
+	C.gtk_scrolled_window_set_min_content_width(v.native(), C.gint(width))
+}
+
+// GetMinContentHeight is a wrapper around gtk_scrolled_window_get_min_content_height().
+func (v *ScrolledWindow) GetMinContentHeight() int {
+	c := C.gtk_scrolled_window_get_min_content_height(v.native())
+	return int(c)
+}
+
+// SetMinContentHeight is a wrapper around gtk_scrolled_window_set_min_content_height().
+func (v *ScrolledWindow) SetMinContentHeight(height int) {
+	C.gtk_scrolled_window_set_min_content_height(v.native(), C.gint(height))
+}
+
+// GetMaxContentWidth is a wrapper around gtk_scrolled_window_get_max_content_width().
+func (v *ScrolledWindow) GetMaxContentWidth() int {
+	c := C.gtk_scrolled_window_get_max_content_width(v.native())
+	return int(c)
+}
+
+// SetMaxContentWidth is a wrapper around gtk_scrolled_window_set_max_content_width().
+func (v *ScrolledWindow) SetMaxContentWidth(width int) {
+	C.gtk_scrolled_window_set_max_content_width(v.native(), C.gint(width))
+}
+
+// GetMaxContentHeight is a wrapper around gtk_scrolled_window_get_max_content_height().
+func (v *ScrolledWindow) GetMaxContentHeight() int {
+	c := C.gtk_scrolled_window_get_max_content_height(v.native())
+	return int(c)
+}
+
+// SetMaxContentHeight is a wrapper around gtk_scrolled_window_set_max_content_height().
+func (v *ScrolledWindow) SetMaxContentHeight(height int) {
+	C.gtk_scrolled_window_set_max_content_height(v.native(), C.gint(height))
+}
+
+// GetPropagateNaturalWidth is a wrapper around gtk_scrolled_window_get_propagate_natural_width().
+func (v *ScrolledWindow) GetPropagateNaturalWidth() bool {
+	c := C.gtk_scrolled_window_get_propagate_natural_width(v.native())
+	return gobool(c)
+}
+
+// SetPropagateNaturalWidth is a wrapper around gtk_scrolled_window_set_propagate_natural_width().
+func (v *ScrolledWindow) SetPropagateNaturalWidth(propagate bool) {
+	C.gtk_scrolled_window_set_propagate_natural_width(v.native(), gbool(propagate))
+}
+
+// GetPropagateNaturalHeight is a wrapper around gtk_scrolled_window_get_propagate_natural_height().
+func (v *ScrolledWindow) GetPropagateNaturalHeight() bool {
+	c := C.gtk_scrolled_window_get_propagate_natural_height(v.native())
+	return gobool(c)
+}
+
+// SetPropagateNaturalHeight is a wrapper around gtk_scrolled_window_set_propagate_natural_height().
+func (v *ScrolledWindow) SetPropagateNaturalHeight(propagate bool) {
+	C.gtk_scrolled_window_set_propagate_natural_height(v.native(), gbool(propagate))
 }
 
 /*

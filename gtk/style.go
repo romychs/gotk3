@@ -223,3 +223,46 @@ func RemoveProviderForScreen(s *gdk.Screen, provider IStyleProvider) {
 // void 	gtk_style_context_set_scale ()
 // gint 	gtk_style_context_get_scale ()
 // GList * 	gtk_style_context_list_classes ()
+
+/*
+ * GtkCssProvider
+ */
+
+/*
+type CssProvider struct {
+	gtkCssProvider *C.GtkCssProvider
+}
+
+func marshalCssProvider(p uintptr) (interface{}, error) {
+	c := C.g_value_get_boxed((*C.GValue)(unsafe.Pointer(p)))
+	c2 := (*C.GtkCssProvider)(unsafe.Pointer(c))
+	return wrapCssProvider(c2), nil
+}
+
+func wrapCssProvider(obj *C.GtkCssProvider) *CssProvider {
+	return &CssProvider{obj}
+}
+
+// Native() returns a pointer to the underlying GdkRectangle.
+func (v *CssProvider) native() *C.GtkCssProvider {
+	if v == nil {
+		return nil
+	}
+	return v.gtkStyleProvider
+}
+
+func (v *CssProvider) LoadFromData(data string) error {
+	cstr := C.CString(data)
+	defer C.free(unsafe.Pointer(cstr))
+
+	var err *C.GError
+
+	C.gtk_css_provider_load_from_data(v.native(), cstr, -1, &err)
+	if err != nil {
+		defer C.g_error_free(err)
+		return errors.New(goString(err.message))
+	}
+
+	return nil
+}
+*/

@@ -24,7 +24,7 @@
 
 
   Modified and adapted from gnome-terminal for use with Tilix by Gerald Nunn
-  Modified and adapted for use as a golang GTK+ cool_app_1 example by Denis Dyakov
+  Modified and adapted for use with a golang GTK+ cool_app_1 example by Denis Dyakov
 -->
 <schemalist gettext-domain="cool_app_1">
 

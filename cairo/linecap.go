@@ -12,6 +12,7 @@ import (
 // LineCap is a representation of Cairo's cairo_line_cap_t.
 type LineCap int
 
+// Line cap styles
 const (
 	LINE_CAP_BUTT   LineCap = C.CAIRO_LINE_CAP_BUTT
 	LINE_CAP_ROUND  LineCap = C.CAIRO_LINE_CAP_ROUND

@@ -66,6 +66,16 @@ func (v *Widget) native() *C.GtkWidget {
 	return C.toGtkWidget(ptr)
 }
 
+func marshalWidget(p uintptr) (interface{}, error) {
+	c := C.g_value_get_object((*C.GValue)(unsafe.Pointer(p)))
+	obj := glib.Take(unsafe.Pointer(c))
+	return wrapWidget(obj), nil
+}
+
+func wrapWidget(obj *glib.Object) *Widget {
+	return &Widget{glib.InitiallyUnowned{obj}}
+}
+
 func (v *Widget) toWidget() *C.GtkWidget {
 	if v == nil {
 		return nil
@@ -75,16 +85,6 @@ func (v *Widget) toWidget() *C.GtkWidget {
 
 func (v *Widget) GetWidget() *Widget {
 	return v
-}
-
-func marshalWidget(p uintptr) (interface{}, error) {
-	c := C.g_value_get_object((*C.GValue)(unsafe.Pointer(p)))
-	obj := glib.Take(unsafe.Pointer(c))
-	return wrapWidget(obj), nil
-}
-
-func wrapWidget(obj *glib.Object) *Widget {
-	return &Widget{glib.InitiallyUnowned{obj}}
 }
 
 // Destroy is a wrapper around gtk_widget_destroy().
@@ -538,8 +538,11 @@ func (v *Widget) GetTooltipText() string {
 
 // SetTooltipText is a wrapper around gtk_widget_set_tooltip_text().
 func (v *Widget) SetTooltipText(text string) {
-	cstr := C.CString(text)
-	defer C.free(unsafe.Pointer(cstr))
+	var cstr *C.char
+	if text != "" {
+		cstr = C.CString(text)
+		defer C.free(unsafe.Pointer(cstr))
+	}
 	C.gtk_widget_set_tooltip_text(v.native(), (*C.gchar)(cstr))
 }
 
@@ -715,6 +718,10 @@ func marshalContainer(p uintptr) (interface{}, error) {
 func wrapContainer(obj *glib.Object) *Container {
 	widget := wrapWidget(obj)
 	return &Container{*widget}
+}
+
+func (v *Container) GetContainer() *Container {
+	return v
 }
 
 // Add is a wrapper around gtk_container_add().

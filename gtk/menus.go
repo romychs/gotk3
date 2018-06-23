@@ -825,8 +825,11 @@ func (v *ToolItem) GetExpand() bool {
 
 // SetTooltipText is a wrapper around gtk_tool_item_set_tooltip_text().
 func (v *ToolItem) SetTooltipText(text string) {
-	cstr := C.CString(text)
-	defer C.free(unsafe.Pointer(cstr))
+	var cstr *C.char
+	if text != "" {
+		cstr = C.CString(text)
+		defer C.free(unsafe.Pointer(cstr))
+	}
 	C.gtk_tool_item_set_tooltip_text(v.native(), (*C.gchar)(cstr))
 }
 

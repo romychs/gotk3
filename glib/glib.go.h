@@ -159,6 +159,12 @@ toGSettings(void *p)
 	return (G_SETTINGS(p));
 }
 
+static GSettingsSchema *
+toGSettingsSchema(void *p)
+{
+	return (GSettingsSchema *)(p);
+}
+
 static GSettingsBackend *
 toGSettingsBackend(void *p)
 {

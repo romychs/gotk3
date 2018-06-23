@@ -221,6 +221,12 @@ func SimpleActionNew(name string, parameterType *VariantType) (*SimpleAction, er
 	return wrapSimpleAction(obj), nil
 }
 
+func SimpleActionFromAction(action IAction) (*SimpleAction, error) {
+	c := action.toAction()
+	obj := Take(unsafe.Pointer(c))
+	return wrapSimpleAction(obj), nil
+}
+
 // GSimpleAction *
 // g_simple_action_new_stateful (const gchar *name,
 //                               const GVariantType *parameter_type,

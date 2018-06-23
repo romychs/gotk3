@@ -712,8 +712,11 @@ func (v *ProgressBar) GetShowText() bool {
 
 // SetText() is a wrapper around gtk_progress_bar_set_text().
 func (v *ProgressBar) SetText(text string) {
-	cstr := C.CString(text)
-	defer C.free(unsafe.Pointer(cstr))
+	var cstr *C.char
+	if text != "" {
+		cstr := C.CString(text)
+		defer C.free(unsafe.Pointer(cstr))
+	}
 	C.gtk_progress_bar_set_text(v.native(), (*C.gchar)(cstr))
 }
 

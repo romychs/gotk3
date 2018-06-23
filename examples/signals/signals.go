@@ -86,6 +86,7 @@ func windowWidget() *gtk.Widget {
 	}
 	grid.Add(sb)
 	sb.SetHExpand(true)
+	sb.SetText("")
 	grid.AttachNextTo(pb, sb, gtk.POS_RIGHT, 1, 1)
 	label.SetHExpand(true)
 
@@ -95,7 +96,7 @@ func windowWidget() *gtk.Widget {
 	// generated, but when you still wish to connect the callback with some
 	// variables only visible in this scope.
 	sb.Connect("value-changed", func(sb *gtk.SpinButton, pb *gtk.ProgressBar) {
-		pb.SetFraction(sb.GetValue() / 1)
+		pb.SetFraction(sb.GetValue())
 	}, pb)
 
 	label, err = gtk.LabelNew("")
