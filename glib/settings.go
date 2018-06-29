@@ -438,15 +438,6 @@ func (v *SettingsSchema) HasKey(v1 string) bool {
 	return gobool(C.g_settings_schema_has_key(v.native(), (*C.gchar)(cstr)))
 }
 
-func (v *SettingsSchema) ListKeys() []string {
-	c := C.g_settings_schema_list_keys(v.native())
-	// both pointer array and strings should be freed.
-	defer C.g_strfreev(c)
-
-	strs := goStringArray(c)
-	return strs
-}
-
 // // ListChildren() is a wrapper around g_settings_schema_list_children().
 // func (v *SettingsSchema) ListChildren() []string {
 // 	return toGoStringArray(C.g_settings_schema_list_children(v.native()))
