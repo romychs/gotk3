@@ -41,7 +41,7 @@ while [ "$1" != "" ]; do
     shift
 done
 
-echo "GOTK3 build accross GLib ${GLib}, GTK ${GTK} ..."
+echo "GOTK3 build across GLib ${GLib}, GTK ${GTK} ..."
 go build -v -tags "glib_${GLib} gtk_${GTK}" ./...
 
 
