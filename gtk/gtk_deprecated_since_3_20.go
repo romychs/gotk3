@@ -7,12 +7,6 @@ package gtk
 // #include <stdlib.h>
 import "C"
 
-// GetFocusOnClick() is a wrapper around gtk_button_get_focus_on_click().
-func (v *Button) GetFocusOnClick() bool {
-	c := C.gtk_button_get_focus_on_click(v.native())
-	return gobool(c)
-}
-
 // BeginsTag is a wrapper around gtk_text_iter_begins_tag().
 func (v *TextIter) BeginsTag(v1 *TextTag) bool {
 	return gobool(C.gtk_text_iter_begins_tag(v.native(), v1.native()))
@@ -29,12 +23,24 @@ func (v *Window) SetDefaultGeometry(width, height int) {
 		C.gint(height))
 }
 
-// SetFocusOnClick() is a wrapper around gtk_button_set_focus_on_click().
+// GetFocusOnClick is a wrapper around gtk_button_get_focus_on_click().
+func (v *Button) GetFocusOnClick() bool {
+	c := C.gtk_button_get_focus_on_click(v.native())
+	return gobool(c)
+}
+
+// SetFocusOnClick is a wrapper around gtk_button_set_focus_on_click().
 func (v *Button) SetFocusOnClick(focusOnClick bool) {
 	C.gtk_button_set_focus_on_click(v.native(), gbool(focusOnClick))
 }
 
-// SetFocusOnClick() is a wrapper around gtk_button_set_focus_on_click().
+// GetFocusOnClick is a wrapper around gtk_combo_box_get_focus_on_click().
+func (v *ComboBox) GetFocusOnClick() bool {
+	c := C.gtk_combo_box_get_focus_on_click(v.native())
+	return gobool(c)
+}
+
+// SetFocusOnClick is a wrapper around gtk_combo_box_set_focus_on_click().
 func (v *ComboBox) SetFocusOnClick(focusOnClick bool) {
-	C.gtk_combobox_set_focus_on_click(v.native(), gbool(focusOnClick))
+	C.gtk_combo_box_set_focus_on_click(v.native(), gbool(focusOnClick))
 }
