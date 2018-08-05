@@ -15,7 +15,7 @@ matrix:
   include:
     - dist: trusty
     - dist: xenial
-    - dist: artful
+    #- dist: artful
 
 before_install:
   - sudo apt-get update -qq
