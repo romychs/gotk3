@@ -10,7 +10,8 @@ env:
   - GOARCH=amd64
 
 sudo: false
-dist: trusty
+#dist: trusty
+dist: xenial
 
 before_install:
   - sudo apt-get update -qq
