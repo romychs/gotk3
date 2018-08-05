@@ -30,7 +30,7 @@ before_install:
   - echo "GTK version ${GTK_VERSION} (GLib ${GLib_VERSION}, Cairo ${Cairo_VERSION}, Pango ${Pango_VERSION})"
 
 install:
-  - go get -t -tags "gtk_${GTK_VERSION} glib_${GLib_VERSION}" github.com/d2r2/gotk3/...
+  - go get -tags "gtk_${GTK_VERSION} glib_${GLib_VERSION}" github.com/d2r2/gotk3/...
 
 #script:
 #  - go test -tags "gtk_${GTK_VERSION} glib_${GLib_VERSION}"
