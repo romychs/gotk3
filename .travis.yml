@@ -15,6 +15,7 @@ matrix:
   include:
     - dist: trusty
     - dist: xenial
+    - dist: bionic
 
 before_install:
   - sudo apt-get update -qq
