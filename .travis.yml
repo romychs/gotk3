@@ -13,9 +13,10 @@ sudo: false
 
 matrix:
   include:
+    # Gives environment: GTK version 3_10 (GLib 2_40, Cairo 1.13.1, Pango 1.36.3)
     - dist: trusty
+    # Gives enironment: GTK version 3_18 (GLib 2_48, Cairo 1.14.6, Pango 1.38.1)
     - dist: xenial
-    - dist: precise
 
 before_install:
   - sudo apt-get update -qq
