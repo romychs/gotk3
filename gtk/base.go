@@ -546,6 +546,23 @@ func (v *Widget) SetTooltipText(text string) {
 	C.gtk_widget_set_tooltip_text(v.native(), (*C.gchar)(cstr))
 }
 
+// GetTooltipMarkup is a wrapper around gtk_widget_get_tooltip_markup().
+func (v *Widget) GetTooltipMarkup() string {
+	c := C.gtk_widget_get_tooltip_markup(v.native())
+	defer C.g_free(C.gpointer(c))
+	return goString(c)
+}
+
+// SetTooltipMarkup is a wrapper around gtk_widget_set_tooltip_markup().
+func (v *Widget) SetTooltipMarkup(text string) {
+	var cstr *C.char
+	if text != "" {
+		cstr = C.CString(text)
+		defer C.free(unsafe.Pointer(cstr))
+	}
+	C.gtk_widget_set_tooltip_markup(v.native(), (*C.gchar)(cstr))
+}
+
 // GetHAlign is a wrapper around gtk_widget_get_halign().
 func (v *Widget) GetHAlign() Align {
 	c := C.gtk_widget_get_halign(v.native())

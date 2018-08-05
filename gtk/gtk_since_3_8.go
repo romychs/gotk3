@@ -21,6 +21,8 @@
 // is assumed and this file is built.
 // +build !gtk_3_6
 
+// See: https://developer.gnome.org/gtk3/3.8/api-index-3-8.html
+
 package gtk
 
 // #cgo pkg-config: gtk+-3.0

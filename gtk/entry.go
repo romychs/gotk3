@@ -560,6 +560,8 @@ func (v *Entry) SetIconTooltipText(iconPos EntryIconPosition, tooltip string) {
 		cstr = C.CString(tooltip)
 		defer C.free(unsafe.Pointer(cstr))
 	}
+	// Null cstr is allowed by API to unset tooltip, but raise log message
+	// Atk-CRITICAL **: atk_object_set_description: assertion 'ATK_IS_OBJECT (accessible)' failed
 	C.gtk_entry_set_icon_tooltip_text(v.native(),
 		C.GtkEntryIconPosition(iconPos), (*C.gchar)(cstr))
 }

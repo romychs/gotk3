@@ -33,3 +33,8 @@ func (v *Window) SetDefaultGeometry(width, height int) {
 func (v *Button) SetFocusOnClick(focusOnClick bool) {
 	C.gtk_button_set_focus_on_click(v.native(), gbool(focusOnClick))
 }
+
+// SetFocusOnClick() is a wrapper around gtk_button_set_focus_on_click().
+func (v *ComboBox) SetFocusOnClick(focusOnClick bool) {
+	C.gtk_combobox_set_focus_on_click(v.native(), gbool(focusOnClick))
+}

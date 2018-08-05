@@ -1,8 +1,10 @@
 #!/bin/sh
 
 # Autodetected distributive specific versions
+GLIB=$(pkg-config --modversion glib-2.0 | tr . _| cut -d '_' -f 1-2)
 GTK=$(pkg-config --modversion gtk+-3.0 | tr . _| cut -d '_' -f 1-2)
-GLib=$(pkg-config --modversion glib-2.0 | tr . _| cut -d '_' -f 1-2)
+GLIB_AUTO='(autodetected)'
+GTK_AUTO=$GLIB_AUTO
 
 function usage()
 {
@@ -10,8 +12,8 @@ function usage()
     PROG=$(basename $0)
     SHORT_HELP="Usage: ${PROG} [options]
     Options:
-      -GLib <version>   distributive specific GLib version.
-      -GTK <version>    distributive specific GTK version.
+      --GLIB=<version>   distributive specific GLib version.
+      --GTK=<version>    distributive specific GTK version.
       -h                Show this help message."
 
     echo "$SHORT_HELP"
@@ -27,10 +29,12 @@ while [ "$1" != "" ]; do
             exit
             ;;
         --GTK)
-            ENVIRONMENT=$VALUE
+            GTK=$VALUE
+            GTK_AUTO=''
             ;;
-        --GLib)
-            DB_PATH=$VALUE
+        --GLIB)
+            GLIB=$VALUE
+            GLIB_AUTO=''
             ;;
         *)
             echo "ERROR: unknown parameter \"$PARAM\""
@@ -41,7 +45,7 @@ while [ "$1" != "" ]; do
     shift
 done
 
-echo "GOTK3 build across GLib ${GLib}, GTK ${GTK} ..."
-go build -v -tags "glib_${GLib} gtk_${GTK}" ./...
+echo "GOTK3 is building across GLIB ${GLIB}${GLIB_AUTO}, GTK ${GTK}${GTK_AUTO} ..."
+go build -v -tags "glib_${GLIB} gtk_${GTK}" ./...
 
 

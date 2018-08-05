@@ -615,11 +615,19 @@ func CreateNameValueCombo(keyValues []struct{ value, key string }) (*gtk.ComboBo
 	return cb, nil
 }
 
-// GetGtkVersion return actualy installed GTK+ version.
+// GetGtkVersion return a really installed GTK+ version.
 func GetGtkVersion() (magor, minor, micro uint) {
 	magor = gtk.GetMajorVersion()
 	minor = gtk.GetMinorVersion()
 	micro = gtk.GetMicroVersion()
+	return
+}
+
+// GetGlibVersion return a really installed GLIB version.
+func GetGlibVersion() (magor, minor, micro uint) {
+	magor = glib.GetMajorVersion()
+	minor = glib.GetMinorVersion()
+	micro = glib.GetMicroVersion()
 	return
 }
 
@@ -637,6 +645,7 @@ var (
 	SETTINGS_ID string = APP_ID + ".Settings"
 
 	SETTINGS_AUTO_HIDE_MOUSE_KEY                   string = "auto-hide-mouse"
+	SETTINGS_DONT_SHOW_ABOUT_ON_STARTUP_KEY        string = "dont-show-about-dialog-on-startup"
 	SETTINGS_PROMPT_ON_NEW_SESSION_KEY             string = "prompt-on-new-session"
 	SETTINGS_ENABLE_TRANSPARENCY_KEY               string = "enable-transparency"
 	SETTINGS_CLOSE_WITH_LAST_SESSION_KEY           string = "close-with-last-session"
@@ -1154,7 +1163,7 @@ func createQuitAction(win *gtk.Window) (glib.IAction, error) {
 
 // Create regular "about dialog" action.
 // Action trigger is included.
-func createAboutAction(win *gtk.Window) (glib.IAction, error) {
+func createAboutAction(win *gtk.Window, gsSettings *glib.Settings) (glib.IAction, error) {
 	act, err := glib.SimpleActionNew("AboutAction", nil)
 	if err != nil {
 		return nil, err
@@ -1176,11 +1185,32 @@ func createAboutAction(win *gtk.Window) (glib.IAction, error) {
 		dlg.SetAuthors([]string{"Denis Dyakov <denis.dyakov@gmail.com>"})
 		dlg.SetProgramName("Cool App")
 		dlg.SetLogoIconName("face-cool-symbolic")
-		dlg.SetVersion("0.1")
+		dlg.SetVersion("v.0.1")
+
+		bh := BindingHelperNew(gsSettings)
+		// Show about dialog on application startup
+		cbAboutInfo, err := gtk.CheckButtonNewWithLabel("Do not show about information on app startup")
+		if err != nil {
+			log.Fatal(err)
+		}
+		bh.Bind(SETTINGS_DONT_SHOW_ABOUT_ON_STARTUP_KEY, cbAboutInfo, "active", glib.SETTINGS_BIND_DEFAULT)
+
+		content, err := dlg.GetContentArea()
+		if err != nil {
+			log.Fatal(err)
+		}
+		content.Add(cbAboutInfo)
+		content.ShowAll()
 
 		var buf bytes.Buffer
-		major, minor, micro := GetGtkVersion()
-		buf.WriteString(fmt.Sprintln(fmt.Sprintf("GTK+ version %d.%d.%d", major, minor, micro)))
+		glibMajor, glibMinor, glibMicro := GetGlibVersion()
+		glibBuildVersion := glib.GetBuildVersion()
+		gtkMajor, gtkMinor, gtkMicro := GetGtkVersion()
+		gtkBuildVersion := gtk.GetBuildVersion()
+		buf.WriteString(fmt.Sprintln(fmt.Sprintf("GLIB: compile v.%s, platform v.%d.%d.%d",
+			glibBuildVersion, glibMajor, glibMinor, glibMicro)))
+		buf.WriteString(fmt.Sprintln(fmt.Sprintf("GTK+: compile v.%s, platform v.%d.%d.%d",
+			gtkBuildVersion, gtkMajor, gtkMinor, gtkMicro)))
 		buf.WriteString(fmt.Sprintln())
 		buf.WriteString(fmt.Sprintln("This application built for education purpose and compose"))
 		buf.WriteString(fmt.Sprintln("practices around GTK+3 user interface."))
@@ -1192,7 +1222,7 @@ func createAboutAction(win *gtk.Window) (glib.IAction, error) {
 		buf.WriteString(fmt.Sprintln("- Modern popover menu functionality (right upper corner button)."))
 		buf.WriteString(fmt.Sprintln("- Various dialog's windows demonstations."))
 		buf.WriteString(fmt.Sprintln())
-		buf.WriteString(fmt.Sprint("Visit my github page for other golang projects:"))
+		buf.WriteString(fmt.Sprint("Follow my golang projects on GitHub:"))
 		dlg.SetComments(buf.String())
 
 		dlg.SetWebsite("https://github.com/d2r2/")
@@ -1419,12 +1449,16 @@ func createDialogAction4(win *gtk.Window) (glib.IAction, error) {
 		}
 		buttons := []DialogButton{
 			{"_Yes", gtk.RESPONSE_YES, true, func(btn *gtk.Button) error {
-				style, err := btn.GetStyleContext()
-				if err != nil {
-					return err
-				}
-				style.AddClass("suggested-action")
-				//style.AddClass("destructive-action")
+				/*
+					style, err := btn.GetStyleContext()
+					if err != nil {
+						return err
+					}
+					//style.AddClass("suggested-action")
+					style.RemoveClass("suggested-action")
+
+					style.AddClass("destructive-action")
+				*/
 				return nil
 			}},
 			{"_No", gtk.RESPONSE_NO, false, nil},
@@ -1696,6 +1730,14 @@ func GlobalPreferencesNew(gsSettings *glib.Settings) (*gtk.Box, error) {
 	lblBehavior.SetUseMarkup(true)
 	lblBehavior.SetHAlign(gtk.ALIGN_START)
 	box.Add(lblBehavior)
+
+	// Show about dialog on application startup
+	cbAboutInfo, err := gtk.CheckButtonNewWithLabel("Do not show about information on app startup")
+	if err != nil {
+		return nil, err
+	}
+	bh.Bind(SETTINGS_DONT_SHOW_ABOUT_ON_STARTUP_KEY, cbAboutInfo, "active", glib.SETTINGS_BIND_DEFAULT)
+	box.Add(cbAboutInfo)
 
 	//Prompt on new session
 	cbPrompt, err := gtk.CheckButtonNewWithLabel("Prompt when creating a new session")
@@ -2260,7 +2302,7 @@ func main() {
 			log.Fatal(err)
 		}
 		win.SetTitle("Example")
-		win.SetDefaultSize(800, 600)
+		win.SetDefaultSize(900, 600)
 
 		win.Connect("destroy", func(window *gtk.ApplicationWindow) {
 			application, err := window.GetApplication()
@@ -2278,7 +2320,11 @@ func main() {
 		}
 		win.AddAction(act)
 
-		act, err = createAboutAction(&win.Window)
+		gsSettings, err := glib.SettingsNew(SETTINGS_ID)
+		if err != nil {
+			log.Fatal(err)
+		}
+		act, err = createAboutAction(&win.Window, gsSettings)
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -2455,12 +2501,14 @@ func main() {
 		win.ShowAll()
 
 		// Run code, when app message queue becomes empty.
-		glib.IdleAdd(func() {
-			action := win.LookupAction("AboutAction")
-			if action != nil {
-				action.Activate(nil)
-			}
-		})
+		if !gsSettings.GetBoolean(SETTINGS_DONT_SHOW_ABOUT_ON_STARTUP_KEY) {
+			glib.IdleAdd(func() {
+				action := win.LookupAction("AboutAction")
+				if action != nil {
+					action.Activate(nil)
+				}
+			})
+		}
 	})
 
 	app.Run([]string{})

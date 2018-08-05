@@ -4,6 +4,8 @@
 // +build !gtk_3_6,!gtk_3_8
 // not use this: go build -tags gtk_3_8'. Otherwise, if no build tags are used, GTK 3.10
 
+// See: https://developer.gnome.org/gtk3/3.10/api-index-3-10.html
+
 package gtk
 
 // #cgo pkg-config: gtk+-3.0
