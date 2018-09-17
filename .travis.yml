@@ -10,8 +10,13 @@ env:
   - GOARCH=amd64
 
 sudo: false
-#dist: trusty
-dist: xenial
+
+matrix:
+  include:
+    # Gives environment: GTK version 3_10 (GLib 2_40, Cairo 1.13.1, Pango 1.36.3)
+    - dist: trusty
+    # Gives enironment: GTK version 3_18 (GLib 2_48, Cairo 1.14.6, Pango 1.38.1)
+    - dist: xenial
 
 before_install:
   - sudo apt-get update -qq
@@ -23,10 +28,10 @@ before_install:
   - "export GLib_VERSION=$(pkg-config --modversion glib-2.0 | tr . _| cut -d '_' -f 1-2)"
   - "export Cairo_VERSION=$(pkg-config --modversion cairo)"
   - "export Pango_VERSION=$(pkg-config --modversion pango)"
-  - echo "GTK version ${GTK_VERSION} (GLib ${GLib_VERSION}, Cairo ${Cairo_VERSION}, Pango ${Pango_VERSION})"
+  - echo "GTK ${GTK_VERSION}, GLib ${GLib_VERSION} (Cairo ${Cairo_VERSION}, Pango ${Pango_VERSION})"
 
 install:
   - go get -t -tags "gtk_${GTK_VERSION} glib_${GLib_VERSION}" github.com/d2r2/gotk3/...
 
 script:
-  - go test -tags "gtk_${GTK_VERSION} glib_${GLib_VERSION}" ./...
+  - go test -tags "gtk_${GTK_VERSION} glib_${GLib_VERSION}" github.com/d2r2/gotk3/...
