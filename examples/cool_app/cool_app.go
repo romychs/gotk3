@@ -13,6 +13,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"runtime"
 	"time"
 
 	"github.com/d2r2/gotk3/glib"
@@ -1182,7 +1183,7 @@ func createAboutAction(win *gtk.Window, gsSettings *glib.Settings) (glib.IAction
 			log.Fatal(err)
 		}
 
-		dlg.SetAuthors([]string{"Denis Dyakov <denis.dyakov@gmail.com>"})
+		dlg.SetAuthors([]string{"Written by Denis Dyakov <denis.dyakov@gmail.com>"})
 		dlg.SetProgramName("Cool App")
 		dlg.SetLogoIconName("face-cool-symbolic")
 		dlg.SetVersion("v.0.1")
@@ -1207,13 +1208,15 @@ func createAboutAction(win *gtk.Window, gsSettings *glib.Settings) (glib.IAction
 		glibBuildVersion := glib.GetBuildVersion()
 		gtkMajor, gtkMinor, gtkMicro := GetGtkVersion()
 		gtkBuildVersion := gtk.GetBuildVersion()
-		buf.WriteString(fmt.Sprintln(fmt.Sprintf("GLIB: compile v.%s, platform v.%d.%d.%d",
-			glibBuildVersion, glibMajor, glibMinor, glibMicro)))
-		buf.WriteString(fmt.Sprintln(fmt.Sprintf("GTK+: compile v.%s, platform v.%d.%d.%d",
-			gtkBuildVersion, gtkMajor, gtkMinor, gtkMicro)))
-		buf.WriteString(fmt.Sprintln())
 		buf.WriteString(fmt.Sprintln("This application built for education purpose and compose"))
-		buf.WriteString(fmt.Sprintln("practices around GTK+3 user interface."))
+		buf.WriteString(fmt.Sprintln("practices to write GTK+3 user interface in Go language."))
+		buf.WriteString(fmt.Sprintln())
+		buf.WriteString(fmt.Sprintln("Environment:"))
+		buf.WriteString(fmt.Sprintln(fmt.Sprintf("GLIB: compiled with v.%s, detected v.%d.%d.%d",
+			glibBuildVersion, glibMajor, glibMinor, glibMicro)))
+		buf.WriteString(fmt.Sprintln(fmt.Sprintf("GTK+: compiled with v.%s, detected v.%d.%d.%d",
+			gtkBuildVersion, gtkMajor, gtkMinor, gtkMicro)))
+		buf.WriteString(fmt.Sprintln(fmt.Sprintf("Application compiled with %s", runtime.Version())))
 		buf.WriteString(fmt.Sprintln())
 		buf.WriteString(fmt.Sprintln("Features:"))
 		buf.WriteString(fmt.Sprintln("- Actions as code entry points with states and stateless."))
