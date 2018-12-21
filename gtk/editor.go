@@ -741,6 +741,61 @@ func (v *TextBuffer) CreateMark(mark_name string, where *TextIter, left_gravity 
 	return tm
 }
 
+// InsertChildAnchor() is a wrapper around gtk_text_buffer_insert_child_anchor().
+func (v *TextBuffer) InsertChildAnchor(iter *TextIter, anchor *TextChildAnchor) {
+	C.gtk_text_buffer_insert_child_anchor(v.native(), iter.native(), anchor.native())
+}
+
+// CreateChildAnchor() is a wrapper around gtk_text_buffer_insert_child_anchor().
+func (v *TextBuffer) CreateChildAnchor(iter *TextIter) (*TextChildAnchor, error) {
+	c := C.gtk_text_buffer_create_child_anchor(v.native(), iter.native())
+	if c == nil {
+		return nil, nilPtrErr
+	}
+
+	obj := glib.Take(unsafe.Pointer(c))
+	return wrapTextChildAnchor(obj), nil
+}
+
+/*
+ * GtkTextChildAnchor
+ */
+
+// TextChildAnchor is a representation of GTK's GtkTextChildAnchor.
+type TextChildAnchor struct {
+	*glib.Object
+}
+
+// native returns a pointer to the underlying GtkTextBuffer.
+func (v *TextChildAnchor) native() *C.GtkTextChildAnchor {
+	if v == nil {
+		return nil
+	}
+	ptr := unsafe.Pointer(v.Object.Native())
+	return C.toGtkTextChildAnchor(ptr)
+}
+
+func marshalTextChildAnchor(p uintptr) (interface{}, error) {
+	c := C.g_value_get_object(C.toGValue(unsafe.Pointer(p)))
+	obj := glib.Take(unsafe.Pointer(c))
+	return wrapTextChildAnchor(obj), nil
+}
+
+func wrapTextChildAnchor(obj *glib.Object) *TextChildAnchor {
+	return &TextChildAnchor{obj}
+}
+
+// TextChildAnchorNew() is a wrapper around gtk_text_child_anchor_new().
+func TextChildAnchorNew() (*TextChildAnchor, error) {
+	c := C.gtk_text_child_anchor_new()
+	if c == nil {
+		return nil, nilPtrErr
+	}
+
+	obj := glib.Take(unsafe.Pointer(c))
+	return wrapTextChildAnchor(obj), nil
+}
+
 /*
  * GtkTextView
  */
@@ -1101,6 +1156,11 @@ func (v *TextView) StartsDisplayLine(iter *TextIter) bool {
 // MoveVisually is a wrapper around gtk_text_view_move_visually().
 func (v *TextView) MoveVisually(iter *TextIter, count int) bool {
 	return gobool(C.gtk_text_view_move_visually(v.native(), iter.native(), C.gint(count)))
+}
+
+// AddChildAtAnchor is a wrapper around gtk_text_view_add_child_at_anchor().
+func (v *TextView) AddChildAtAnchor(child IWidget, anchor *TextChildAnchor) {
+	C.gtk_text_view_add_child_at_anchor(v.native(), child.toWidget(), anchor.native())
 }
 
 // AddChildInWindow is a wrapper around gtk_text_view_add_child_in_window().

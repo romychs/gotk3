@@ -421,6 +421,12 @@ toGtkTextBuffer(void *p)
 	return (GTK_TEXT_BUFFER(p));
 }
 
+static GtkTextChildAnchor *
+toGtkTextChildAnchor(void *p)
+{
+	return (GTK_TEXT_CHILD_ANCHOR(p));
+}
+
 static GtkTreeIter *
 toGtkTreeIter(void *p)
 {
@@ -796,6 +802,18 @@ static void
 set_type(GType *types, int n, GType t)
 {
 	types[n] = t;
+}
+
+static GdkPixbuf *
+toGdkPixbuf(void *p)
+{
+	return (GDK_PIXBUF(p));
+}
+
+static GdkPixbufAnimation *
+toGdkPixbufAnimation(void *p)
+{
+	return (GDK_PIXBUF_ANIMATION(p));
 }
 
 static GtkTreeViewColumn *

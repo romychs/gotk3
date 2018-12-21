@@ -22,6 +22,7 @@ import "C"
 import (
 	"unsafe"
 
+	"github.com/d2r2/gotk3/gdk"
 	"github.com/d2r2/gotk3/glib"
 )
 
@@ -471,11 +472,13 @@ func (v *Entry) ResetIMContext() {
 	C.gtk_entry_reset_im_context(v.native())
 }
 
-// TODO(jrick) GdkPixbuf
-/*
-func (v *Entry) SetIconFromPixbuf() {
+// SetIconFromPixbuf() is a wrapper around
+// gtk_entry_set_icon_from_pixbuf().
+func (v *Entry) SetIconFromPixbuf(iconPos EntryIconPosition, pixbuf *gdk.Pixbuf) {
+	C.gtk_entry_set_icon_from_pixbuf(v.native(),
+		C.GtkEntryIconPosition(iconPos),
+		C.toGdkPixbuf(unsafe.Pointer(pixbuf.Native())))
 }
-*/
 
 // SetIconFromIconName() is a wrapper around
 // gtk_entry_set_icon_from_icon_name().
@@ -499,11 +502,16 @@ func (v *Entry) GetIconStorageType(iconPos EntryIconPosition) ImageType {
 	return ImageType(c)
 }
 
-// TODO(jrick) GdkPixbuf
-/*
-func (v *Entry) GetIconPixbuf() {
+// GetIconName() is a wrapper around gtk_entry_get_icon_name().
+func (v *Entry) GetIconPixbuf(iconPos EntryIconPosition) (*gdk.Pixbuf, error) {
+	c := C.gtk_entry_get_icon_pixbuf(v.native(),
+		C.GtkEntryIconPosition(iconPos))
+	if c == nil {
+		return nil, nilPtrErr
+	}
+	p := &gdk.Pixbuf{glib.Take(unsafe.Pointer(c))}
+	return p, nil
 }
-*/
 
 // GetIconName() is a wrapper around gtk_entry_get_icon_name().
 func (v *Entry) GetIconName(iconPos EntryIconPosition) (string, error) {

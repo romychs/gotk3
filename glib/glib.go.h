@@ -74,6 +74,18 @@ toGInputStream(void *p)
 	return (G_INPUT_STREAM(p));
 }
 
+static GBytes*
+toGBytes(void *p)
+{
+	return ((GBytes*)(p));
+}
+
+static GMemoryInputStream*
+toGMemoryInputStream(void *p)
+{
+	return (G_MEMORY_INPUT_STREAM(p));
+}
+
 static GFileInputStream*
 toGFileInputStream(void *p)
 {
@@ -84,6 +96,12 @@ static GOutputStream*
 toGOutputStream(void *p)
 {
 	return (G_OUTPUT_STREAM(p));
+}
+
+static GMemoryOutputStream*
+toGMemoryOutputStream(void *p)
+{
+	return (G_MEMORY_OUTPUT_STREAM(p));
 }
 
 static GFileOutputStream*

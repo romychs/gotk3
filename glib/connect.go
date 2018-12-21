@@ -18,10 +18,6 @@ import (
 type SignalHandle uint
 
 func (v *Object) connectClosure(after bool, detailedSignal string, f interface{}, userData ...interface{}) (SignalHandle, error) {
-	if len(userData) > 1 {
-		return 0, errors.New("userData len must be 0 or 1")
-	}
-
 	cstr := C.CString(detailedSignal)
 	defer C.free(unsafe.Pointer(cstr))
 
@@ -90,7 +86,11 @@ func ClosureNew(f interface{}, marshalData ...interface{}) (*C.GClosure, error) 
 	}
 
 	if len(marshalData) > 0 {
-		cc.userData = reflect.ValueOf(marshalData[0])
+		extraArgs := make([]reflect.Value, len(marshalData))
+		for i, v := range marshalData {
+			extraArgs[i] = reflect.ValueOf(v)
+		}
+		cc.userData = extraArgs
 	}
 
 	c := C._g_closure_new()

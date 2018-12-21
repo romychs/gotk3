@@ -28,6 +28,8 @@ func (v BuildVersion) String() string {
 		return "3.20"
 	case GTK_3_22:
 		return "3.22"
+	case GTK_3_24:
+		return "3.24"
 	default:
 		return "< undefined >"
 	}
@@ -44,6 +46,7 @@ const (
 	GTK_3_18
 	GTK_3_20
 	GTK_3_22
+	GTK_3_24 // released September 2018
 )
 
 // Save here version of GTK used to compile the library.

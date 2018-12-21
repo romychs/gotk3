@@ -12,6 +12,91 @@ import (
 	"unsafe"
 )
 
+/*
+ * GBytes
+ */
+
+// Bytes is a representation of GLib's GBytes.
+type Bytes struct {
+	gbytes *C.GBytes
+}
+
+// Cast underlying GBytes to uintptr with protection from nil.
+// No need to check for nil in successor code.
+// Export this method for all other modules and successors
+func (v *Bytes) Native() uintptr {
+	return uintptr(unsafe.Pointer(v.native()))
+}
+
+// native returns a pointer to the underlying GObject.
+func (v *Bytes) native() *C.GBytes {
+	if v == nil {
+		return nil
+	}
+	return v.gbytes
+}
+
+func (v *Bytes) toBytes() *Bytes {
+	return v
+}
+
+// newBytes creates a new Bytes from a GBytes pointer.
+func newBytes(p *C.GBytes) *Bytes {
+	return &Bytes{gbytes: p}
+}
+
+// Wrapper function for new objects with reference management.
+func wrapBytes(ptr unsafe.Pointer) *Bytes {
+	bytes := toBytes(ptr)
+
+	bytes.Ref()
+
+	runtime.SetFinalizer(bytes, (*Bytes).Unref)
+	return bytes
+}
+
+func toBytes(ptr unsafe.Pointer) *Bytes {
+	return newBytes(C.toGBytes(ptr))
+}
+
+// Ref is a wrapper around g_bytes_ref().
+func (v *Bytes) Ref() {
+	C.g_bytes_ref(v.gbytes)
+}
+
+// Unref is a wrapper around g_bytes_unref().
+func (v *Bytes) Unref() {
+	C.g_bytes_unref(v.gbytes)
+}
+
+// BytesNew is a wrapper around g_bytes_new().
+func BytesNew(bytes []byte) (*Bytes, error) {
+	b := (C.gconstpointer)(unsafe.Pointer(&bytes[0]))
+	c := C.g_bytes_new(b, C.ulong(len(bytes)))
+	if c == nil {
+		return nil, errNilPtr
+	}
+	return wrapBytes(unsafe.Pointer(c)), nil
+}
+
+// GetData is a wrapper around g_bytes_get_data().
+func (v *Bytes) GetData() []byte {
+	var size C.gsize
+	c := C.g_bytes_get_data(v.native(), &size)
+	bytes := C.GoBytes(unsafe.Pointer(c), C.int(size))
+	return bytes
+}
+
+// GetSize is a wrapper around g_bytes_get_size().
+func (v *Bytes) GetSize() int {
+	c := C.g_bytes_get_size(v.native())
+	return int(c)
+}
+
+/*
+ * GCancellable
+ */
+
 // Cancellable is a representation of GCancellable.
 type Cancellable struct {
 	*Object
@@ -58,10 +143,14 @@ func (v *Cancellable) Reset() {
 	C.g_cancellable_reset(v.native())
 }
 
-// void	g_cancellable_cancel ()
+// Cancel is a wrapper around g_cancellable_cancel().
 func (v *Cancellable) Cancel() {
 	C.g_cancellable_cancel(v.native())
 }
+
+/*
+ * GFileInfo
+ */
 
 // FileInfo is a representation of GFileInfo.
 type FileInfo struct {
@@ -87,6 +176,10 @@ func wrapFileInfo(obj *Object) *FileInfo {
 	return &FileInfo{obj}
 }
 
+/*
+ * GInputStream
+ */
+
 // InputStream is a representation of GInputStream.
 type InputStream struct {
 	*Object
@@ -111,7 +204,7 @@ func wrapInputStream(obj *Object) *InputStream {
 	return &InputStream{obj}
 }
 
-// gssize	g_input_stream_read ()
+// Read is a wrapper around g_input_stream_read().
 func (v *InputStream) Read(b []byte, cancel *Cancellable) (bytesRead int, e error) {
 	var err *C.GError
 	c := C.g_input_stream_read(v.native(), unsafe.Pointer(&b[0]),
@@ -123,7 +216,7 @@ func (v *InputStream) Read(b []byte, cancel *Cancellable) (bytesRead int, e erro
 	return int(c), nil
 }
 
-// gboolean	g_input_stream_read_all ()
+// ReadAll is a wrapper around g_input_stream_read_all().
 func (v *InputStream) ReadAll(b []byte, cancel *Cancellable) (bytesRead int, e error) {
 	var err *C.GError
 	var br C.gsize
@@ -136,7 +229,7 @@ func (v *InputStream) ReadAll(b []byte, cancel *Cancellable) (bytesRead int, e e
 	return int(br), nil
 }
 
-// gssize	g_input_stream_skip ()
+// Skip is a wrapper around g_input_stream_skip().
 func (v *InputStream) Skip(count int, cancel *Cancellable) (bytesSkipped int, e error) {
 	var err *C.GError
 	c := C.g_input_stream_skip(v.native(), C.gsize(count), cancel.native(), &err)
@@ -147,7 +240,7 @@ func (v *InputStream) Skip(count int, cancel *Cancellable) (bytesSkipped int, e 
 	return int(c), nil
 }
 
-// gboolean	g_input_stream_close ()
+// Close is a wrapper around g_input_stream_close().
 func (v *InputStream) Close(cancel *Cancellable) error {
 	var err *C.GError
 	c := C.g_input_stream_close(v.native(), cancel.native(), &err)
@@ -158,13 +251,84 @@ func (v *InputStream) Close(cancel *Cancellable) error {
 	return nil
 }
 
-// gboolean	g_input_stream_is_closed ()
+// IsClosed is a wrapper around g_input_stream_is_closed().
 func (v *InputStream) IsClosed() bool {
 	c := C.g_input_stream_is_closed(v.native())
 	return gobool(c)
 }
 
-// InputStream is a representation of GInputStream.
+// ReadBytes is a wrapper around g_input_stream_read_bytes().
+func (v *InputStream) ReadBytes(count int, cancel *Cancellable) (*Bytes, error) {
+	var err *C.GError
+	c := C.g_input_stream_read_bytes(v.native(), C.gsize(count), cancel.native(), &err)
+	if err != nil {
+		defer C.g_error_free(err)
+		return nil, errors.New(goString(err.message))
+	}
+	b := newBytes(c)
+	return b, nil
+}
+
+/*
+ * GMemoryInputStream
+ */
+
+// MemoryInputStream is a representation of GMemoryInputStream.
+type MemoryInputStream struct {
+	InputStream
+}
+
+// native() returns a pointer to the underlying GMemoryInputStream.
+func (v *MemoryInputStream) native() *C.GMemoryInputStream {
+	if v == nil {
+		return nil
+	}
+	ptr := unsafe.Pointer(v.Object.Native())
+	return C.toGMemoryInputStream(ptr)
+}
+
+func marshalMemoryInputStream(p uintptr) (interface{}, error) {
+	c := C.g_value_get_object((*C.GValue)(unsafe.Pointer(p)))
+	obj := Take(unsafe.Pointer(c))
+	return wrapMemoryInputStream(obj), nil
+}
+
+func wrapMemoryInputStream(obj *Object) *MemoryInputStream {
+	return &MemoryInputStream{InputStream{obj}}
+}
+
+// MemoryInputStreamNew is a wrapper around g_memory_input_stream_new().
+func MemoryInputStreamNew() (*MemoryInputStream, error) {
+	c := C.g_memory_input_stream_new()
+	if c == nil {
+		return nil, errNilPtr
+	}
+
+	obj := Take(unsafe.Pointer(c))
+	return wrapMemoryInputStream(obj), nil
+}
+
+// MemoryInputStreamFromBytesNew is a wrapper around g_memory_input_stream_new_from_bytes().
+func MemoryInputStreamFromBytesNew(bytes *Bytes) (*MemoryInputStream, error) {
+	c := C.g_memory_input_stream_new_from_bytes(bytes.native())
+	if c == nil {
+		return nil, errNilPtr
+	}
+
+	obj := Take(unsafe.Pointer(c))
+	return wrapMemoryInputStream(obj), nil
+}
+
+// AddBytes is a wrapper around g_memory_input_stream_add_bytes().
+func (v *MemoryInputStream) AddBytes(bytes *Bytes) {
+	C.g_memory_input_stream_add_bytes(v.native(), bytes.native())
+}
+
+/*
+ * GFileInputStream
+ */
+
+// FileInputStream is a representation of GFileInputStream.
 type FileInputStream struct {
 	InputStream
 }
@@ -188,8 +352,23 @@ func wrapFileInputStream(obj *Object) *FileInputStream {
 	return &FileInputStream{InputStream{obj}}
 }
 
-// OutputStreamSpliceFlags is a representation of GLib's GOutputStreamSpliceFlags.
+// QueryInfo is a wrapper around g_file_input_stream_query_info().
+func (v *FileInputStream) QueryInfo(attributes string, cancel *Cancellable) (*FileInfo, error) {
+	cstr := C.CString(attributes)
+	defer C.free(unsafe.Pointer(cstr))
 
+	var err *C.GError
+	c := C.g_file_input_stream_query_info(v.native(), cstr, cancel.native(), &err)
+	if c == nil {
+		defer C.g_error_free(err)
+		return nil, errors.New(goString(err.message))
+	}
+
+	obj := Take(unsafe.Pointer(c))
+	return wrapFileInfo(obj), nil
+}
+
+// OutputStreamSpliceFlags is a representation of GLib's GOutputStreamSpliceFlags.
 type OutputStreamSpliceFlags int
 
 const (
@@ -197,6 +376,10 @@ const (
 	OUTPUT_STREAM_SPLICE_CLOSE_SOURCE OutputStreamSpliceFlags = C.G_OUTPUT_STREAM_SPLICE_CLOSE_SOURCE
 	OUTPUT_STREAM_SPLICE_CLOSE_TARGET OutputStreamSpliceFlags = C.G_OUTPUT_STREAM_SPLICE_CLOSE_TARGET
 )
+
+/*
+ * GOutputStream
+ */
 
 // OutputStream is a representation of GOutputStream.
 type OutputStream struct {
@@ -222,7 +405,7 @@ func wrapOutputStream(obj *Object) *OutputStream {
 	return &OutputStream{obj}
 }
 
-// gssize	g_output_stream_write ()
+// Write is a wrapper around g_output_stream_write().
 func (v *OutputStream) Write(b []byte, cancel *Cancellable) (bytesWritten int, e error) {
 	var err *C.GError
 	c := C.g_output_stream_write(v.native(), unsafe.Pointer(&b[0]),
@@ -234,7 +417,7 @@ func (v *OutputStream) Write(b []byte, cancel *Cancellable) (bytesWritten int, e
 	return int(c), nil
 }
 
-// gssize	g_output_stream_write_all ()
+// WriteAll is a wrapper around g_output_stream_write_all().
 func (v *OutputStream) WriteAll(b []byte, cancel *Cancellable) (bytesWritten int, e error) {
 	var err *C.GError
 	var bw C.gsize
@@ -247,7 +430,7 @@ func (v *OutputStream) WriteAll(b []byte, cancel *Cancellable) (bytesWritten int
 	return int(bw), nil
 }
 
-// gssize	g_output_stream_splice ()
+// Splice is a wrapper around g_output_stream_splice().
 func (v *OutputStream) Splice(source *InputStream, flags OutputStreamSpliceFlags,
 	cancel *Cancellable) (dataSpliced int, e error) {
 	var err *C.GError
@@ -260,7 +443,7 @@ func (v *OutputStream) Splice(source *InputStream, flags OutputStreamSpliceFlags
 	return int(c), nil
 }
 
-// gboolean	g_output_stream_flush ()
+// Flush is a wrapper around g_output_stream_flush().
 func (v *OutputStream) Flush(cancel *Cancellable) error {
 	var err *C.GError
 	c := C.g_output_stream_flush(v.native(), cancel.native(), &err)
@@ -271,7 +454,7 @@ func (v *OutputStream) Flush(cancel *Cancellable) error {
 	return nil
 }
 
-// gboolean	g_output_stream_close ()
+// Close is a wrapper around g_output_stream_close().
 func (v *OutputStream) Close(cancel *Cancellable) error {
 	var err *C.GError
 	c := C.g_output_stream_close(v.native(), cancel.native(), &err)
@@ -282,24 +465,95 @@ func (v *OutputStream) Close(cancel *Cancellable) error {
 	return nil
 }
 
-// gboolean	g_output_stream_is_closing ()
+// IsClosing is a wrapper around g_output_stream_is_closing().
 func (v *OutputStream) IsClosing() bool {
 	c := C.g_output_stream_is_closing(v.native())
 	return gobool(c)
 }
 
-// gboolean	g_output_stream_is_closed ()
+// IsClosed is a wrapper around g_output_stream_is_closed().
 func (v *OutputStream) IsClosed() bool {
 	c := C.g_output_stream_is_closed(v.native())
 	return gobool(c)
 }
+
+// WriteBytes is a wrapper around g_input_stream_read_bytes().
+func (v *OutputStream) WriteBytes(bytes *Bytes, cancel *Cancellable) (int, error) {
+	var err *C.GError
+	c := C.g_output_stream_write_bytes(v.native(), bytes.native(), cancel.native(), &err)
+	if c == -1 {
+		defer C.g_error_free(err)
+		return -1, errors.New(goString(err.message))
+	}
+	return int(c), nil
+}
+
+/*
+ * GMemoryOutputStream
+ */
+
+// MemoryOutputStream is a representation of GMemoryOutputStream.
+type MemoryOutputStream struct {
+	OutputStream
+}
+
+// native() returns a pointer to the underlying GMemoryOutputStream.
+func (v *MemoryOutputStream) native() *C.GMemoryOutputStream {
+	if v == nil {
+		return nil
+	}
+	ptr := unsafe.Pointer(v.Object.Native())
+	return C.toGMemoryOutputStream(ptr)
+}
+
+func marshalMemoryOutputStream(p uintptr) (interface{}, error) {
+	c := C.g_value_get_object((*C.GValue)(unsafe.Pointer(p)))
+	obj := Take(unsafe.Pointer(c))
+	return wrapMemoryOutputStream(obj), nil
+}
+
+func wrapMemoryOutputStream(obj *Object) *MemoryOutputStream {
+	return &MemoryOutputStream{OutputStream{obj}}
+}
+
+// MemoryOutputStreamResizableNew is a wrapper around g_memory_output_stream_new_resizable().
+func MemoryOutputStreamResizableNew() (*MemoryOutputStream, error) {
+	c := C.g_memory_output_stream_new_resizable()
+	if c == nil {
+		return nil, errNilPtr
+	}
+
+	obj := Take(unsafe.Pointer(c))
+	return wrapMemoryOutputStream(obj), nil
+}
+
+// GetSize is a wrapper around g_bytes_get_size().
+func (v *MemoryOutputStream) GetDataSize() int {
+	c := C.g_memory_output_stream_get_data_size(v.native())
+	return int(c)
+}
+
+// StealAsBytes is a wrapper around g_input_stream_read_bytes().
+func (v *MemoryOutputStream) StealAsBytes() (*Bytes, error) {
+	c := C.g_memory_output_stream_steal_as_bytes(v.native())
+	if c == nil {
+		return nil, errNilPtr
+	}
+
+	b := newBytes(c)
+	return b, nil
+}
+
+/*
+ * GFileOutputStream
+ */
 
 // FileOutputStream is a representation of GFileOutputStream.
 type FileOutputStream struct {
 	OutputStream
 }
 
-// native() returns a pointer to the underlying GFileInputStream.
+// native() returns a pointer to the underlying GFileOutputStream.
 func (v *FileOutputStream) native() *C.GFileOutputStream {
 	if v == nil {
 		return nil
@@ -318,12 +572,32 @@ func wrapFileOutputStream(obj *Object) *FileOutputStream {
 	return &FileOutputStream{OutputStream{obj}}
 }
 
+// QueryInfo is a wrapper around g_file_output_stream_query_info().
+func (v *FileOutputStream) QueryInfo(attributes string, cancel *Cancellable) (*FileInfo, error) {
+	cstr := C.CString(attributes)
+	defer C.free(unsafe.Pointer(cstr))
+
+	var err *C.GError
+	c := C.g_file_output_stream_query_info(v.native(), cstr, cancel.native(), &err)
+	if c == nil {
+		defer C.g_error_free(err)
+		return nil, errors.New(goString(err.message))
+	}
+
+	obj := Take(unsafe.Pointer(c))
+	return wrapFileInfo(obj), nil
+}
+
+/*
+ * GFileEnumerator
+ */
+
 // FileEnumerator is a representation of GFileEnumerator.
 type FileEnumerator struct {
 	*Object
 }
 
-// native() returns a pointer to the underlying GFileInputStream.
+// native() returns a pointer to the underlying GFileEnumerator.
 func (v *FileEnumerator) native() *C.GFileEnumerator {
 	if v == nil {
 		return nil
@@ -367,7 +641,7 @@ func (v *FileEnumerator) Iterate(cancel *Cancellable) (*FileInfo, *File, error) 
 }
 */
 
-// GFileInfo *	g_file_enumerator_next_file ()
+// NextFile is a wrapper around g_file_enumerator_next_file().
 func (v *FileEnumerator) NextFile(cancel *Cancellable) (*FileInfo, error) {
 	var err *C.GError
 	c := C.g_file_enumerator_next_file(v.native(), cancel.native(), &err)
@@ -379,7 +653,7 @@ func (v *FileEnumerator) NextFile(cancel *Cancellable) (*FileInfo, error) {
 	return wrapFileInfo(obj), nil
 }
 
-// gboolean	g_file_enumerator_close ()
+// Close is a wrapper around g_file_enumerator_close().
 func (v *FileEnumerator) Close(cancel *Cancellable) error {
 	var err *C.GError
 	c := C.g_file_enumerator_close(v.native(), cancel.native(), &err)
@@ -390,43 +664,47 @@ func (v *FileEnumerator) Close(cancel *Cancellable) error {
 	return nil
 }
 
-// gboolean	g_file_enumerator_is_closed ()
+// IsClosed is a wrapper around g_file_enumerator_is_closed().
 func (v *FileEnumerator) IsClosed() bool {
 	c := C.g_file_enumerator_is_closed(v.native())
 	return gobool(c)
 }
 
-// gboolean	g_file_enumerator_has_pending ()
+// HasPending is a wrapper around g_file_enumerator_has_pending().
 func (v *FileEnumerator) HasPending() bool {
 	c := C.g_file_enumerator_has_pending(v.native())
 	return gobool(c)
 }
 
-// void	g_file_enumerator_set_pending ()
+// SetPending is a wrapper around g_file_enumerator_set_pending().
 func (v *FileEnumerator) SetPending(pending bool) {
 	C.g_file_enumerator_set_pending(v.native(), gbool(pending))
 }
 
-// GFile *	g_file_enumerator_get_container ()
+// GetContainer is a wrapper around g_file_enumerator_get_container().
 func (v *FileEnumerator) GetContainer() *File {
 	c := C.g_file_enumerator_get_container(v.native())
 	intf := SetFinOnInterface(unsafe.Pointer(c))
 	return wrapFile(intf)
 }
 
-// GFile *	g_file_enumerator_get_child ()
+// GetChild is a wrapper around g_file_enumerator_get_child().
 func (v *FileEnumerator) GetChild(info *FileInfo) *File {
 	c := C.g_file_enumerator_get_child(v.native(), info.native())
 	intf := SetFinOnInterface(unsafe.Pointer(c))
 	return wrapFile(intf)
 }
 
+/*
+ * GIOStream
+ */
+
 // IOStream is a representation of GIOStream.
 type IOStream struct {
 	*Object
 }
 
-// native() returns a pointer to the underlying GFileInputStream.
+// native() returns a pointer to the underlying GIOStream.
 func (v *IOStream) native() *C.GIOStream {
 	if v == nil {
 		return nil
@@ -445,7 +723,7 @@ func wrapIOStream(obj *Object) *IOStream {
 	return &IOStream{obj}
 }
 
-// GInputStream *	g_io_stream_get_input_stream ()
+// GetInputStream is a wrapper around g_io_stream_get_input_stream().
 func (v *IOStream) GetInputStream() (*InputStream, error) {
 	c := C.g_io_stream_get_input_stream(v.native())
 	if c == nil {
@@ -456,7 +734,7 @@ func (v *IOStream) GetInputStream() (*InputStream, error) {
 	return wrapInputStream(obj), nil
 }
 
-// GOutputStream *	g_io_stream_get_output_stream ()
+// GetOutputStream is a wrapper around g_io_stream_get_output_stream().
 func (v *IOStream) GetOutputStream() (*OutputStream, error) {
 	c := C.g_io_stream_get_output_stream(v.native())
 	if c == nil {
@@ -467,7 +745,7 @@ func (v *IOStream) GetOutputStream() (*OutputStream, error) {
 	return wrapOutputStream(obj), nil
 }
 
-// gboolean	g_io_stream_close ()
+// Close is a wrapper around g_io_stream_close().
 func (v *IOStream) Close(cancel *Cancellable) error {
 	var err *C.GError
 	c := C.g_io_stream_close(v.native(), cancel.native(), &err)
@@ -478,19 +756,19 @@ func (v *IOStream) Close(cancel *Cancellable) error {
 	return nil
 }
 
-// gboolean	g_io_stream_is_closed ()
+// IsClosed is a wrapper around g_io_stream_is_closed().
 func (v *IOStream) IsClosed() bool {
 	c := C.g_io_stream_is_closed(v.native())
 	return gobool(c)
 }
 
-// gboolean	g_io_stream_has_pending ()
+// HasPending is a wrapper around g_io_stream_has_pending().
 func (v *IOStream) HasPending() bool {
 	c := C.g_io_stream_has_pending(v.native())
 	return gobool(c)
 }
 
-// gboolean	g_io_stream_set_pending ()
+// SetPending is a wrapper around g_io_stream_set_pending().
 func (v *IOStream) SetPending() error {
 	var err *C.GError
 	c := C.g_io_stream_set_pending(v.native(), &err)
@@ -501,7 +779,7 @@ func (v *IOStream) SetPending() error {
 	return nil
 }
 
-// void	g_io_stream_clear_pending ()
+// ClearPending is a wrapper around g_io_stream_clear_pending().
 func (v *IOStream) ClearPending() {
 	C.g_io_stream_clear_pending(v.native())
 }
@@ -515,12 +793,16 @@ const (
 	SEEK_END SeekType = C.G_SEEK_END
 )
 
+/*
+ * GSeekable
+ */
+
 // Seekable is a representation of GSeekable.
 type Seekable struct {
 	Interface
 }
 
-// native() returns a pointer to the underlying GAction.
+// native() returns a pointer to the underlying GSeekable.
 func (v *Seekable) native() *C.GSeekable {
 	return C.toGSeekable(unsafe.Pointer(v.Native()))
 }
@@ -536,19 +818,19 @@ func wrapSeekable(intf Interface) *Seekable {
 	return &Seekable{intf}
 }
 
-// goffset	g_seekable_tell ()
+// Tell is a wrapper around g_seekable_tell().
 func (v *Seekable) Tell() int64 {
 	c := C.g_seekable_tell(v.native())
 	return int64(c)
 }
 
-// gboolean	g_seekable_can_seek ()
+// CanSeek is a wrapper around g_seekable_can_seek().
 func (v *Seekable) CanSeek() bool {
 	c := C.g_seekable_can_seek(v.native())
 	return gobool(c)
 }
 
-// gboolean	g_seekable_seek ()
+// Seek is a wrapper around g_seekable_seek().
 func (v *Seekable) Seek(offset int64, seekType SeekType, cancel *Cancellable) error {
 	var err *C.GError
 	c := C.g_seekable_seek(v.native(), C.goffset(offset),
@@ -560,13 +842,13 @@ func (v *Seekable) Seek(offset int64, seekType SeekType, cancel *Cancellable) er
 	return nil
 }
 
-// gboolean	g_seekable_can_truncate ()
+// CanTruncate is a wrapper around g_seekable_can_truncate().
 func (v *Seekable) CanTruncate() bool {
 	c := C.g_seekable_can_truncate(v.native())
 	return gobool(c)
 }
 
-// gboolean	g_seekable_truncate ()
+// Truncate is a wrapper around g_seekable_truncate().
 func (v *Seekable) Truncate(offset int64, cancel *Cancellable) error {
 	var err *C.GError
 	c := C.g_seekable_truncate(v.native(), C.goffset(offset),
@@ -578,6 +860,10 @@ func (v *Seekable) Truncate(offset int64, cancel *Cancellable) error {
 	return nil
 }
 
+/*
+ * GFileIOStream
+ */
+
 // FileIOStream is a representation of GFileIOStream.
 type FileIOStream struct {
 	IOStream
@@ -585,7 +871,7 @@ type FileIOStream struct {
 	Seekable
 }
 
-// native() returns a pointer to the underlying GFileInputStream.
+// native() returns a pointer to the underlying GFileIOStream.
 func (v *FileIOStream) native() *C.GFileIOStream {
 	if v == nil {
 		return nil
@@ -637,6 +923,10 @@ const (
 	FILE_TYPE_MOUNTABLE     FileType = C.G_FILE_TYPE_MOUNTABLE
 )
 
+/*
+ * GFile
+ */
+
 // File is a representation of GFile.
 type File struct {
 	// Since GFile is based on GInterface, but require
@@ -648,7 +938,7 @@ type File struct {
 	*Interface
 }
 
-// native() returns a pointer to the underlying GThemedIcon.
+// native() returns a pointer to the underlying GFile.
 func (v *File) native() *C.GFile {
 	if v == nil {
 		return nil
