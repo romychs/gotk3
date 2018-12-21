@@ -64,15 +64,15 @@ http://localhost:6060/pkg/github.com/d2r2/gotk3
 Installation
 ------------
 
-GOTK3 currently requires GTK 3.6-3.16, GLib 2.36-2.40, and
+GOTK3 currently requires GTK 3.6-3.24, GLib 2.36-2.58, and
 Cairo 1.10 or 1.12. A recent Go (1.6 or newer) is also required.
 
 GOTK3 installation and build process support existing GLIB, GTK+3 API variations which might
 significantly depend on minor version. For instance, some noticeable changes in API was
 made starting from 3.12. So library support next tags
 based on [golang build constraints approach](https://golang.org/pkg/go/build/#hdr-Build_Constraints):
-* GLIB: glib_2_40, glib_2_42, glib_2_44, glib_2_46.
-* GTK: gtk_3_6, gtk_3_8, gtk_3_10, gtk_3_12, gtk_3_14, gtk_3_16, gtk_3_18, gtk_3_20.
+* GLIB: glib_2_40, glib_2_42, glib_2_44, glib_2_46, glib_2_48, glib_2_50, glib_2_52, glib_2_54, glib_2_56, glib_2_58.
+* GTK: gtk_3_6, gtk_3_8, gtk_3_10, gtk_3_12, gtk_3_14, gtk_3_16, gtk_3_18, gtk_3_20, gtk_3_22, gtk_3_24.
 
 Thus, when you trying to get or build library you should specify GTK build tag which correspond
 to your current GTK+3 version installed on computer. So, it should be:
