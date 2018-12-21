@@ -71,8 +71,8 @@ GOTK3 installation and build process support existing GLIB, GTK+3 API variations
 significantly depend on minor version. For instance, some noticeable changes in API was
 made starting from 3.12. So library support next tags
 based on [golang build constraints approach](https://golang.org/pkg/go/build/#hdr-Build_Constraints):
-* GLIB: glib_2_40, glib_2_42, glib_2_44, glib_2_46, glib_2_48, glib_2_50, glib_2_52, glib_2_54, glib_2_56, glib_2_58.
-* GTK: gtk_3_6, gtk_3_8, gtk_3_10, gtk_3_12, gtk_3_14, gtk_3_16, gtk_3_18, gtk_3_20, gtk_3_22, gtk_3_24.
+* List of supported GLIB tags: glib_2_40, glib_2_42, glib_2_44, glib_2_46, glib_2_48, glib_2_50, glib_2_52, glib_2_54, glib_2_56, glib_2_58.
+* List of supported GTK tags: gtk_3_6, gtk_3_8, gtk_3_10, gtk_3_12, gtk_3_14, gtk_3_16, gtk_3_18, gtk_3_20, gtk_3_22, gtk_3_24.
 
 Thus, when you trying to get or build library you should specify GTK build tag which correspond
 to your current GTK+3 version installed on computer. So, it should be:
