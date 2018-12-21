@@ -357,6 +357,17 @@ func ImageNewFromPixbuf(pixbuf *gdk.Pixbuf) (*Image, error) {
 	return wrapImage(obj), nil
 }
 
+// ImageNewFromPixbuf is a wrapper around gtk_image_new_from_pixbuf().
+func ImageNewFromAnimation(animation *gdk.PixbufAnimation) (*Image, error) {
+	ptr := (*C.GdkPixbufAnimation)(unsafe.Pointer(animation.Native()))
+	c := C.gtk_image_new_from_animation(ptr)
+	if c == nil {
+		return nil, nilPtrErr
+	}
+	obj := glib.Take(unsafe.Pointer(c))
+	return wrapImage(obj), nil
+}
+
 // TODO(jrick) GtkIconSet
 /*
 func ImageNewFromIconSet() {

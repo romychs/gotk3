@@ -17,7 +17,7 @@
 // Go bindings for GDK 3.  Supports version 3.6 and later.
 package gdk
 
-// #cgo pkg-config: gdk-3.0
+// #cgo pkg-config: gdk-3.0 gio-2.0
 // #include <gdk/gdk.h>
 // #include "gdk.go.h"
 // #include "gdk_atom.go.h"
@@ -1316,6 +1316,23 @@ func PixbufNewFromFile(filename string) (*Pixbuf, error) {
 	return &Pixbuf{glib.Take(unsafe.Pointer(res))}, nil
 }
 
+// PixbufNewFromFile is a wrapper around gdk_pixbuf_new_from_file().
+func PixbufNewFromStream(stream *glib.InputStream, cancellable *glib.Cancellable) (*Pixbuf, error) {
+	var err *C.GError
+	var cancell *C.GCancellable
+	if cancellable != nil {
+		cancell = C.toGCancellable(unsafe.Pointer(cancellable.Native()))
+	}
+	res := C.gdk_pixbuf_new_from_stream(C.toGInputStream(unsafe.Pointer(stream.Native())),
+		cancell, &err)
+	if res == nil {
+		defer C.g_error_free(err)
+		return nil, errors.New(goString(err.message))
+	}
+
+	return &Pixbuf{glib.Take(unsafe.Pointer(res))}, nil
+}
+
 // PixbufNewFromFileAtSize is a wrapper around gdk_pixbuf_new_from_file_at_size().
 func PixbufNewFromFileAtSize(filename string, width, height int) (*Pixbuf, error) {
 	cstr := C.CString(filename)
@@ -1440,6 +1457,47 @@ func PixbufGetFileInfo(filename string) (format interface{}, width, height int) 
 	format = C.gdk_pixbuf_get_file_info((*C.gchar)(cstr), &cw, &ch)
 	// TODO: need to wrap the returned format to GdkPixbufFormat.
 	return format, int(cw), int(ch)
+}
+
+/*
+ * GdkPixbufAnimation
+ */
+
+// PixbufAnimation is a representation of GDK's GdkPixbufAnimation.
+type PixbufAnimation struct {
+	*glib.Object
+}
+
+// native returns a pointer to the underlying GdkPixbuf.
+func (v *PixbufAnimation) native() *C.GdkPixbufAnimation {
+	if v == nil {
+		return nil
+	}
+	ptr := unsafe.Pointer(v.Object.Native())
+	return C.toGdkPixbufAnimation(ptr)
+}
+
+func marshalPixbufAnimation(p uintptr) (interface{}, error) {
+	c := C.g_value_get_object((*C.GValue)(unsafe.Pointer(p)))
+	obj := glib.ToObject(unsafe.Pointer(c))
+	return &Pixbuf{obj}, nil
+}
+
+// PixbufNewFromFile is a wrapper around gdk_pixbuf_new_from_file().
+func PixbufAnimationNewFromStream(stream *glib.InputStream, cancellable *glib.Cancellable) (*PixbufAnimation, error) {
+	var err *C.GError
+	var cancell *C.GCancellable
+	if cancellable != nil {
+		cancell = C.toGCancellable(unsafe.Pointer(cancellable.Native()))
+	}
+	res := C.gdk_pixbuf_animation_new_from_stream(C.toGInputStream(unsafe.Pointer(stream.Native())),
+		cancell, &err)
+	if res == nil {
+		defer C.g_error_free(err)
+		return nil, errors.New(goString(err.message))
+	}
+
+	return &PixbufAnimation{glib.Take(unsafe.Pointer(res))}, nil
 }
 
 /*

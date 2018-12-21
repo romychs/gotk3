@@ -45,6 +45,7 @@ func gbool(b bool) C.gboolean {
 	}
 	return C.gboolean(0)
 }
+
 func gobool(b C.gboolean) bool {
 	if b != 0 {
 		return true
@@ -72,8 +73,9 @@ func goStringArray(c **C.gchar) []string {
  */
 
 type closureContext struct {
-	rf       reflect.Value
-	userData reflect.Value
+	rf reflect.Value
+	// allow arbitrary number of user extra args
+	userData []reflect.Value
 }
 
 var (
@@ -188,9 +190,7 @@ func goMarshal(closure *C.GClosure, retValue *C.GValue,
 	// closure context, increment the total number of parameters.
 	nGLibParams := int(nParams)
 	nTotalParams := nGLibParams
-	if cc.userData.IsValid() {
-		nTotalParams++
-	}
+	nTotalParams += len(cc.userData)
 
 	// Get number of parameters from the callback closure.  If this exceeds
 	// the total number of marshaled parameters, a warning will be printed
@@ -223,8 +223,11 @@ func goMarshal(closure *C.GClosure, retValue *C.GValue,
 
 	// If non-nil user data was passed in and not all args have been set,
 	// get and set the reflect.Value directly from the GValue.
-	if cc.userData.IsValid() && len(args) < cap(args) {
-		args = append(args, cc.userData.Convert(cc.rf.Type().In(nCbParams-1)))
+	//if cc.userData.IsValid() && len(args) < cap(args) {
+	if len(cc.userData) > 0 && len(args) < cap(args) {
+		for i, v := range cc.userData {
+			args = append(args, v.Convert(cc.rf.Type().In(nCbParams-len(cc.userData)+i)))
+		}
 	}
 
 	// Call closure with args. If the callback returns one or more

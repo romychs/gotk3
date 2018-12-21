@@ -1499,17 +1499,6 @@ func (v *CssProvider) ToString() string {
 	return goString((*C.gchar)(c))
 }
 
-// CssProviderGetDefault is a wrapper around gtk_css_provider_get_default().
-func CssProviderGetDefault() (*CssProvider, error) {
-	c := C.gtk_css_provider_get_default()
-	if c == nil {
-		return nil, nilPtrErr
-	}
-
-	obj := glib.Take(unsafe.Pointer(c))
-	return wrapCssProvider(obj), nil
-}
-
 // GetNamed is a wrapper around gtk_css_provider_get_named().
 func CssProviderGetNamed(name string, variant string) (*CssProvider, error) {
 	cname := C.CString(name)

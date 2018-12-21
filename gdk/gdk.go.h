@@ -73,6 +73,12 @@ toGdkPixbuf(void *p)
 	return (GDK_PIXBUF(p));
 }
 
+static GdkPixbufAnimation *
+toGdkPixbufAnimation(void *p)
+{
+	return (GDK_PIXBUF_ANIMATION(p));
+}
+
 static gboolean
 _gdk_pixbuf_save_png(GdkPixbuf *pixbuf,
 const char *filename, GError ** err, const char *compression)
@@ -139,6 +145,18 @@ static GdkEventWindowState *
 toGdkEventWindowState(GdkEvent *e)
 {
 	return (GdkEventWindowState *)e;
+}
+
+static GCancellable*
+toGCancellable(void *p)
+{
+	return (G_CANCELLABLE(p));
+}
+
+static GInputStream*
+toGInputStream(void *p)
+{
+	return (G_INPUT_STREAM(p));
 }
 
 #endif
