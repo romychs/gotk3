@@ -33,6 +33,8 @@ func (v BuildVersion) String() string {
 		return "2.56"
 	case GLIB_2_58:
 		return "2.58"
+	case GLIB_2_60:
+		return "2.60"
 	default:
 		return "< undefined >"
 	}
@@ -49,7 +51,8 @@ const (
 	GLIB_2_52
 	GLIB_2_54
 	GLIB_2_56
-	GLIB_2_58 // released September 2018
+	GLIB_2_58 // released in September 2018
+	GLIB_2_60 // released in March 2019
 )
 
 // Save here version of GTK used to compile the library.

@@ -23,6 +23,8 @@
 #include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
+#include <gtk/gtk.h>
+#include <gdk/gdk.h>
 
 static GtkAboutDialog *
 toGtkAboutDialog(void *p)
@@ -815,6 +817,13 @@ toGdkPixbufAnimation(void *p)
 {
 	return (GDK_PIXBUF_ANIMATION(p));
 }
+
+static GdkScreen *
+toGdkScreen(void *p)
+{
+	return (GDK_SCREEN(p));
+}
+
 
 static GtkTreeViewColumn *
 _gtk_tree_view_column_new_with_attributes_one(const gchar *title,
