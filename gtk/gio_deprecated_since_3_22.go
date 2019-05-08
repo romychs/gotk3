@@ -5,6 +5,8 @@ package gtk
 // #cgo pkg-config: gtk+-3.0
 // #include <stdlib.h>
 // #include <gtk/gtk.h>
+// #include <gdk/gdk.h>
+// #include "gtk.go.h"
 import "C"
 import (
 	"errors"
@@ -20,7 +22,7 @@ func ShowUri(screen *gdk.Screen, uri string) error {
 
 	var err *C.GError
 
-	c := C.gtk_show_uri(C.toGdkScreen(screen.Native()),
+	c := C.gtk_show_uri(C.toGdkScreen(unsafe.Pointer(screen.Native())),
 		cstr, C.gtk_get_current_event_time(), &err)
 	if !gobool(c) {
 		defer C.g_error_free(err)
