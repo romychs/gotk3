@@ -816,6 +816,13 @@ toGdkPixbufAnimation(void *p)
 	return (GDK_PIXBUF_ANIMATION(p));
 }
 
+static GdkScreen *
+toGdkScreen(void *p)
+{
+	return (GDK_SCREEN(p));
+}
+
+
 static GtkTreeViewColumn *
 _gtk_tree_view_column_new_with_attributes_one(const gchar *title,
     GtkCellRenderer *renderer, const gchar *attribute, gint column)

@@ -126,8 +126,8 @@ func (v *StyleContext) LookupColor(colorName string) (*gdk.RGBA, bool) {
 }
 
 // StyleContextResetWidgets is a wrapper around gtk_style_context_reset_widgets().
-func StyleContextResetWidgets(v *gdk.Screen) {
-	C.gtk_style_context_reset_widgets((*C.GdkScreen)(unsafe.Pointer(v.Native())))
+func StyleContextResetWidgets(screen *gdk.Screen) {
+	C.gtk_style_context_reset_widgets(C.toGdkScreen(unsafe.Pointer(screen.Native())))
 }
 
 // Restore is a wrapper around gtk_style_context_restore().
@@ -154,8 +154,8 @@ func (v *StyleContext) HasClass(className string) bool {
 }
 
 // SetScreen is a wrapper around gtk_style_context_set_screen().
-func (v *StyleContext) SetScreen(s *gdk.Screen) {
-	C.gtk_style_context_set_screen(v.native(), (*C.GdkScreen)(unsafe.Pointer(s.Native())))
+func (v *StyleContext) SetScreen(screen *gdk.Screen) {
+	C.gtk_style_context_set_screen(v.native(), C.toGdkScreen(unsafe.Pointer(screen.Native())))
 }
 
 // SetState is a wrapper around gtk_style_context_set_state().
@@ -173,8 +173,9 @@ func (v *StyleContext) AddProvider(provider IStyleProvider, prio uint) {
 }
 
 // AddProviderForScreen is a wrapper around gtk_style_context_add_provider_for_screen().
-func AddProviderForScreen(s *gdk.Screen, provider IStyleProvider, prio uint) {
-	C.gtk_style_context_add_provider_for_screen((*C.GdkScreen)(unsafe.Pointer(s.Native())), provider.toStyleProvider(), C.guint(prio))
+func AddProviderForScreen(screen *gdk.Screen, provider IStyleProvider, prio uint) {
+	C.gtk_style_context_add_provider_for_screen(C.toGdkScreen(unsafe.Pointer(screen.Native())),
+		provider.toStyleProvider(), C.guint(prio))
 }
 
 // RemoveProvider is a wrapper around gtk_style_context_remove_provider().
@@ -183,8 +184,9 @@ func (v *StyleContext) RemoveProvider(provider IStyleProvider) {
 }
 
 // RemoveProviderForScreen is a wrapper around gtk_style_context_remove_provider_for_screen().
-func RemoveProviderForScreen(s *gdk.Screen, provider IStyleProvider) {
-	C.gtk_style_context_remove_provider_for_screen((*C.GdkScreen)(unsafe.Pointer(s.Native())), provider.toStyleProvider())
+func RemoveProviderForScreen(screen *gdk.Screen, provider IStyleProvider) {
+	C.gtk_style_context_remove_provider_for_screen(C.toGdkScreen(unsafe.Pointer(screen.Native())),
+		provider.toStyleProvider())
 }
 
 // GtkStyleContext * 	gtk_style_context_new ()

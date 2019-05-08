@@ -930,7 +930,7 @@ func wrapExpander(obj *glib.Object) *Expander {
 func ExpanderNew(label string) (*Expander, error) {
 	var cstr *C.gchar
 	if label != "" {
-		cstr := C.CString(label)
+		cstr = C.CString(label)
 		defer C.free(unsafe.Pointer(cstr))
 	}
 	c := C.gtk_expander_new((*C.gchar)(cstr))
@@ -971,6 +971,60 @@ func (v *Expander) GetLabel() string {
 // SetLabelWidget is a wrapper around gtk_expander_set_label_widget().
 func (v *Expander) SetLabelWidget(widget IWidget) {
 	C.gtk_expander_set_label_widget(v.native(), widget.toWidget())
+}
+
+// GetLabelWidget is a wrapper around gtk_expander_get_label_widget().
+func (v *Expander) GetLabelWidget() (*Widget, error) {
+	c := C.gtk_expander_get_label_widget(v.native())
+	if c == nil {
+		return nil, nilPtrErr
+	}
+	obj := glib.Take(unsafe.Pointer(c))
+	return wrapWidget(obj), nil
+}
+
+// SetUseUnderline is a wrapper around gtk_expander_set_use_underline().
+func (v *Expander) SetUseUnderline(useUnderline bool) {
+	C.gtk_expander_set_use_underline(v.native(), gbool(useUnderline))
+}
+
+// GetUseUnderline is a wrapper around gtk_expander_get_use_underline().
+func (v *Expander) GetUseUnderline() bool {
+	c := C.gtk_expander_get_use_underline(v.native())
+	return gobool(c)
+}
+
+// SetUseUnderline is a wrapper around gtk_expander_set_use_markup().
+func (v *Expander) SetUseMarkup(useMarkup bool) {
+	C.gtk_expander_set_use_markup(v.native(), gbool(useMarkup))
+}
+
+// GetUseMarkup is a wrapper around gtk_expander_get_use_markup().
+func (v *Expander) GetUseMarkup() bool {
+	c := C.gtk_expander_get_use_markup(v.native())
+	return gobool(c)
+}
+
+// SetLabelFill is a wrapper around gtk_expander_set_label_fill().
+func (v *Expander) SetLabelFill(labelFill bool) {
+	C.gtk_expander_set_label_fill(v.native(), gbool(labelFill))
+}
+
+// GetLabelFill is a wrapper around gtk_expander_get_label_fill().
+func (v *Expander) GetLabelFill() bool {
+	c := C.gtk_expander_get_label_fill(v.native())
+	return gobool(c)
+}
+
+// SetResizeToplevel is a wrapper around gtk_expander_set_resize_toplevel().
+func (v *Expander) SetResizeToplevel(resizeToplevel bool) {
+	C.gtk_expander_set_resize_toplevel(v.native(), gbool(resizeToplevel))
+}
+
+// GetResizeToplevel is a wrapper around gtk_expander_get_resize_toplevel().
+func (v *Expander) GetResizeToplevel() bool {
+	c := C.gtk_expander_get_resize_toplevel(v.native())
+	return gobool(c)
 }
 
 // TODO: implement GtkAspectFrame

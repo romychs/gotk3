@@ -42,6 +42,10 @@ func toScreen(s *C.GdkScreen) (*Screen, error) {
 	return &Screen{obj}, nil
 }
 
+func (v *Screen) Native() uintptr {
+	return uintptr(unsafe.Pointer(v.native()))
+}
+
 // GetRGBAVisual is a wrapper around gdk_screen_get_rgba_visual().
 func (v *Screen) GetRGBAVisual() (*Visual, error) {
 	c := C.gdk_screen_get_rgba_visual(v.native())

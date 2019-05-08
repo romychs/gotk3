@@ -1750,9 +1750,9 @@ func IconThemeGetDefault() (*IconTheme, error) {
 }
 
 // IconThemeGetForScreen is a wrapper around gtk_icon_theme_get_for_screen().
-func IconThemeGetForScreen(screen gdk.Screen) (*IconTheme, error) {
-	cScreen := (*C.GdkScreen)(unsafe.Pointer(screen.Native()))
-	c := C.gtk_icon_theme_get_for_screen(cScreen)
+func IconThemeGetForScreen(screen *gdk.Screen) (*IconTheme, error) {
+	c := C.gtk_icon_theme_get_for_screen(
+		C.toGdkScreen(unsafe.Pointer(screen.Native())))
 	if c == nil {
 		return nil, nilPtrErr
 	}
