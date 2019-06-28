@@ -72,7 +72,7 @@ func (v *Bytes) Unref() {
 // BytesNew is a wrapper around g_bytes_new().
 func BytesNew(bytes []byte) (*Bytes, error) {
 	b := (C.gconstpointer)(unsafe.Pointer(&bytes[0]))
-	c := C.g_bytes_new(b, C.ulong(len(bytes)))
+	c := C.g_bytes_new(b, C.gsize(len(bytes)))
 	if c == nil {
 		return nil, errNilPtr
 	}
