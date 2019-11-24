@@ -465,28 +465,6 @@ func (v *ListBoxRow) GetIndex() int {
 	return int(c)
 }
 
-// SetActivatable is a wrapper around gtk_list_box_row_set_activatable().
-func (v *ListBoxRow) SetActivatable(activatable bool) {
-	C.gtk_list_box_row_set_activatable(v.native(), gbool(activatable))
-}
-
-// GetActivatable is a wrapper around gtk_list_box_row_get_activatable().
-func (v *ListBoxRow) GetActivatable() bool {
-	c := C.gtk_list_box_row_get_activatable(v.native())
-	return gobool(c)
-}
-
-// SetSelectable is a wrapper around gtk_list_box_row_set_selectable().
-func (v *ListBoxRow) SetSelectable(selectable bool) {
-	C.gtk_list_box_row_set_selectable(v.native(), gbool(selectable))
-}
-
-// GetSelectable is a wrapper around gtk_list_box_row_get_selectable().
-func (v *ListBoxRow) GetSelectable() bool {
-	c := C.gtk_list_box_row_get_selectable(v.native())
-	return gobool(c)
-}
-
 /*
  * GtkGrid
  */
