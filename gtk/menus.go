@@ -140,7 +140,7 @@ func wrapMenu(obj *glib.Object) *Menu {
 	return &Menu{MenuShell{*container}}
 }
 
-// MenuNew() is a wrapper around gtk_menu_new().
+// MenuNew is a wrapper around gtk_menu_new().
 func MenuNew() (*Menu, error) {
 	c := C.gtk_menu_new()
 	if c == nil {
@@ -160,12 +160,12 @@ func MenuFromModelNew(model glib.IMenuModel) (*Menu, error) {
 	return wrapMenu(obj), nil
 }
 
-// Popdown() is a wrapper around gtk_menu_popdown().
+// Popdown is a wrapper around gtk_menu_popdown().
 func (v *Menu) Popdown() {
 	C.gtk_menu_popdown(v.native())
 }
 
-// ReorderChild() is a wrapper around gtk_menu_reorder_child().
+// ReorderChild is a wrapper around gtk_menu_reorder_child().
 func (v *Menu) ReorderChild(child IWidget, position int) {
 	C.gtk_menu_reorder_child(v.native(), child.toWidget(), C.gint(position))
 }
@@ -228,7 +228,7 @@ func wrapMenuBar(obj *glib.Object) *MenuBar {
 	return &MenuBar{MenuShell{*container}}
 }
 
-// MenuBarNew() is a wrapper around gtk_menu_bar_new().
+// MenuBarNew is a wrapper around gtk_menu_bar_new().
 func MenuBarNew() (*MenuBar, error) {
 	c := C.gtk_menu_bar_new()
 	if c == nil {
@@ -297,7 +297,7 @@ func wrapMenuItem(obj *glib.Object) *MenuItem {
 	return &MenuItem{*bin, *actionable}
 }
 
-// MenuItemNew() is a wrapper around gtk_menu_item_new().
+// MenuItemNew is a wrapper around gtk_menu_item_new().
 func MenuItemNew() (*MenuItem, error) {
 	c := C.gtk_menu_item_new()
 	if c == nil {
@@ -307,7 +307,7 @@ func MenuItemNew() (*MenuItem, error) {
 	return wrapMenuItem(obj), nil
 }
 
-// MenuItemNewWithLabel() is a wrapper around gtk_menu_item_new_with_label().
+// MenuItemNewWithLabel is a wrapper around gtk_menu_item_new_with_label().
 func MenuItemNewWithLabel(label string) (*MenuItem, error) {
 	cstr := C.CString(label)
 	defer C.free(unsafe.Pointer(cstr))
@@ -319,7 +319,7 @@ func MenuItemNewWithLabel(label string) (*MenuItem, error) {
 	return wrapMenuItem(obj), nil
 }
 
-// MenuItemNewWithMnemonic() is a wrapper around
+// MenuItemNewWithMnemonic is a wrapper around
 // gtk_menu_item_new_with_mnemonic().
 func MenuItemNewWithMnemonic(label string) (*MenuItem, error) {
 	cstr := C.CString(label)
@@ -332,7 +332,7 @@ func MenuItemNewWithMnemonic(label string) (*MenuItem, error) {
 	return wrapMenuItem(obj), nil
 }
 
-// SetSubmenu() is a wrapper around gtk_menu_item_set_submenu().
+// SetSubmenu is a wrapper around gtk_menu_item_set_submenu().
 func (v *MenuItem) SetSubmenu(submenu IWidget) {
 	C.gtk_menu_item_set_submenu(v.native(), submenu.toWidget())
 }
@@ -902,7 +902,7 @@ func (v *ToolItem) GetOrientation() Orientation {
 }
 
 // GetToolbarStyle is a wrapper around gtk_tool_item_get_toolbar_style().
-func (v *ToolItem) gtk_tool_item_get_toolbar_style() ToolbarStyle {
+func (v *ToolItem) GetToolbarStyle() ToolbarStyle {
 	c := C.gtk_tool_item_get_toolbar_style(v.native())
 	return ToolbarStyle(c)
 }
@@ -937,9 +937,10 @@ func (v *ToolItem) RetrieveProxyMenuItem() *MenuItem {
 }
 
 // SetProxyMenuItem is a wrapper around gtk_tool_item_set_proxy_menu_item().
-func (v *ToolItem) SetProxyMenuItem(menuItemId string, menuItem IMenuItem) {
-	cstr := C.CString(menuItemId)
+func (v *ToolItem) SetProxyMenuItem(menuItemID string, menuItem IMenuItem) {
+	cstr := C.CString(menuItemID)
 	defer C.free(unsafe.Pointer(cstr))
+
 	C.gtk_tool_item_set_proxy_menu_item(v.native(), (*C.gchar)(cstr),
 		C.toGtkWidget(unsafe.Pointer(menuItem.toMenuItem())))
 }
@@ -1016,19 +1017,19 @@ func (v *ToolButton) SetLabel(label string) {
 	C.gtk_tool_button_set_label(v.native(), (*C.gchar)(cstr))
 }
 
-// GetLabel is a wrapper aroud gtk_tool_button_get_label().
+// GetLabel is a wrapper around gtk_tool_button_get_label().
 func (v *ToolButton) GetLabel() string {
 	c := C.gtk_tool_button_get_label(v.native())
 	return goString(c)
 }
 
 // SetUseUnderline is a wrapper around gtk_tool_button_set_use_underline().
-func (v *ToolButton) SetGetUnderline(useUnderline bool) {
+func (v *ToolButton) SetUseUnderline(useUnderline bool) {
 	C.gtk_tool_button_set_use_underline(v.native(), gbool(useUnderline))
 }
 
 // GetUseUnderline is a wrapper around gtk_tool_button_get_use_underline().
-func (v *ToolButton) GetuseUnderline() bool {
+func (v *ToolButton) GetUseUnderline() bool {
 	c := C.gtk_tool_button_get_use_underline(v.native())
 	return gobool(c)
 }

@@ -52,9 +52,9 @@ func (v *List) native() *C.GList {
 	return v.list
 }
 
-// DataWapper sets wrap functions, which is called during NthDataWrapped()
+// DataWrapper sets wrap functions, which is called during NthDataWrapped()
 // and DataWrapped(). It's used to cast raw C data into appropriate
-// Go structures and types every time that data is retreived.
+// Go structures and types every time that data is retrieved.
 func (v *List) DataWrapper(fn func(unsafe.Pointer) interface{}) {
 	if v == nil {
 		return
@@ -90,14 +90,14 @@ func (v *List) nthDataRaw(n uint) unsafe.Pointer {
 	return unsafe.Pointer(C.g_list_nth_data(v.native(), C.guint(n)))
 }
 
-// Nth() is a wrapper around g_list_nth().
+// Nth is a wrapper around g_list_nth().
 func (v *List) Nth(n uint) *List {
 	list := wrapList(C.g_list_nth(v.native(), C.guint(n)))
 	list.DataWrapper(v.dataWrap)
 	return list
 }
 
-// NthDataWrapped acts the same as g_list_nth_data(), but passes
+// NthData acts the same as g_list_nth_data(), but passes
 // retrieved value before returning through wrap function, set by DataWrapper().
 // If no wrap function is set, it returns raw unsafe.Pointer.
 func (v *List) NthData(n uint) interface{} {
@@ -128,7 +128,7 @@ func (v *List) dataRaw() unsafe.Pointer {
 	return unsafe.Pointer(v.native().data)
 }
 
-// DataWrapped acts the same as data struct field, but passes
+// Data acts the same as data struct field, but passes
 // retrieved value before returning through wrap function, set by DataWrapper().
 // If no wrap function is set, it returns raw unsafe.Pointer.
 func (v *List) Data() interface{} {
@@ -140,7 +140,7 @@ func (v *List) Data() interface{} {
 }
 
 // Foreach acts the same as g_list_foreach().
-// No user_data arguement is implemented because of Go clojure capabilities.
+// No user_data argument is implemented because of Go clojure capabilities.
 func (v *List) Foreach(fn func(item interface{})) {
 	for l := v; l != nil; l = l.Next() {
 		fn(l.Data())

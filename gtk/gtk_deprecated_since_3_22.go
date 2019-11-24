@@ -11,7 +11,7 @@ import (
 	"unsafe"
 )
 
-// PopupAtMouse() is a wrapper for gtk_menu_popup(), without the option for a custom positioning function.
+// PopupAtMouse is a wrapper for gtk_menu_popup(), without the option for a custom positioning function.
 func (v *Menu) PopupAtMouseCursor(parentMenuShell IMenu, parentMenuItem IMenuItem, button int, activateTime uint32) {
 	C.gtk_menu_popup(v.native(), parentMenuShell.toWidget(), parentMenuItem.toWidget(),
 		nil, nil, C.guint(button), C.guint32(activateTime))

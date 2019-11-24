@@ -13,7 +13,7 @@ import (
 	"unsafe"
 )
 
-// PaperSizeNewFromIpp is a wrapper around gtk_paper_size_new_from_ipp().
+// PaperSizeNewFromIPP is a wrapper around gtk_paper_size_new_from_ipp().
 func PaperSizeNewFromIPP(name string, width, height float64) (*PaperSize, error) {
 	cstr := C.CString(name)
 	defer C.free(unsafe.Pointer(cstr))
@@ -28,7 +28,7 @@ func PaperSizeNewFromIPP(name string, width, height float64) (*PaperSize, error)
 	return ps, nil
 }
 
-// IsIPP() is a wrapper around gtk_paper_size_is_ipp().
+// IsIPP is a wrapper around gtk_paper_size_is_ipp().
 func (v *PaperSize) IsIPP() bool {
 	c := C.gtk_paper_size_is_ipp(v.native())
 	return gobool(c)

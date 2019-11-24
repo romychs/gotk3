@@ -98,13 +98,13 @@ func ButtonNewFromIconName(iconName string, size IconSize) (*Button, error) {
  * GtkLabel
  */
 
-// GetLines() is a wrapper around gtk_label_get_lines().
+// GetLines is a wrapper around gtk_label_get_lines().
 func (v *Label) GetLines() int {
 	c := C.gtk_label_get_lines(v.native())
 	return int(c)
 }
 
-// SetLines() is a wrapper around gtk_label_set_lines().
+// SetLines is a wrapper around gtk_label_set_lines().
 func (v *Label) SetLines(lines int) {
 	C.gtk_label_set_lines(v.native(), C.gint(lines))
 }

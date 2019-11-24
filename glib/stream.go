@@ -21,7 +21,7 @@ type Bytes struct {
 	gbytes *C.GBytes
 }
 
-// Cast underlying GBytes to uintptr with protection from nil.
+// Native cast underlying GBytes to uintptr with protection from nil.
 // No need to check for nil in successor code.
 // Export this method for all other modules and successors
 func (v *Bytes) Native() uintptr {
@@ -333,7 +333,7 @@ type FileInputStream struct {
 	InputStream
 }
 
-// native() returns a pointer to the underlying GFileInputStream.
+// native returns a pointer to the underlying GFileInputStream.
 func (v *FileInputStream) native() *C.GFileInputStream {
 	if v == nil {
 		return nil
@@ -386,7 +386,7 @@ type OutputStream struct {
 	*Object
 }
 
-// native() returns a pointer to the underlying GOutputStream.
+// native returns a pointer to the underlying GOutputStream.
 func (v *OutputStream) native() *C.GOutputStream {
 	if v == nil {
 		return nil
@@ -527,7 +527,7 @@ func MemoryOutputStreamResizableNew() (*MemoryOutputStream, error) {
 	return wrapMemoryOutputStream(obj), nil
 }
 
-// GetSize is a wrapper around g_bytes_get_size().
+// GetDataSize is a wrapper around g_memory_output_stream_get_data_size().
 func (v *MemoryOutputStream) GetDataSize() int {
 	c := C.g_memory_output_stream_get_data_size(v.native())
 	return int(c)

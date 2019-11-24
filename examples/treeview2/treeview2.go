@@ -2,11 +2,12 @@ package main
 
 import (
 	"fmt"
+	"log"
+	"os"
+
 	"github.com/d2r2/gotk3/gdk"
 	"github.com/d2r2/gotk3/glib"
 	"github.com/d2r2/gotk3/gtk"
-	"log"
-	"os"
 )
 
 // IDs to access the tree view columns by
@@ -29,7 +30,8 @@ var (
 func initIcons() error {
 	iconPath := os.Getenv(envIconPathKey)
 	if len(iconPath) == 0 {
-		log.Fatal("Missing Environment variable ", envIconPathKey)
+		log.Fatal("Missing Environment variable ", envIconPathKey, ". ",
+			"Run app as \"", envIconPathKey, "=$PWD go run ./treeview2.go\"")
 	}
 	var err error
 	imageOK, err = gdk.PixbufNewFromFile(fmt.Sprintf("%s/green.png", iconPath))

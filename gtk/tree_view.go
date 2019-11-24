@@ -46,7 +46,7 @@ func (v *TreeIter) free() {
 	C.gtk_tree_iter_free(v.native())
 }
 
-// Copy() is a wrapper around gtk_tree_iter_copy().
+// Copy is a wrapper around gtk_tree_iter_copy().
 func (v *TreeIter) Copy() (*TreeIter, error) {
 	c := C.gtk_tree_iter_copy(v.native())
 	if c == nil {
@@ -96,25 +96,25 @@ func wrapTreeModel(intf glib.Interface) *TreeModel {
 	return &TreeModel{intf}
 }
 
-// GetFlags() is a wrapper around gtk_tree_model_get_flags().
+// GetFlags is a wrapper around gtk_tree_model_get_flags().
 func (v *TreeModel) GetFlags() TreeModelFlags {
 	c := C.gtk_tree_model_get_flags(v.native())
 	return TreeModelFlags(c)
 }
 
-// GetNColumns() is a wrapper around gtk_tree_model_get_n_columns().
+// GetNColumns is a wrapper around gtk_tree_model_get_n_columns().
 func (v *TreeModel) GetNColumns() int {
 	c := C.gtk_tree_model_get_n_columns(v.native())
 	return int(c)
 }
 
-// GetColumnType() is a wrapper around gtk_tree_model_get_column_type().
+// GetColumnType is a wrapper around gtk_tree_model_get_column_type().
 func (v *TreeModel) GetColumnType(index int) glib.Type {
 	c := C.gtk_tree_model_get_column_type(v.native(), C.gint(index))
 	return glib.Type(c)
 }
 
-// GetIter() is a wrapper around gtk_tree_model_get_iter().
+// GetIter is a wrapper around gtk_tree_model_get_iter().
 func (v *TreeModel) GetIter(path *TreePath) (*TreeIter, error) {
 	var iter C.GtkTreeIter
 	c := C.gtk_tree_model_get_iter(v.native(), &iter, path.native())
@@ -125,7 +125,7 @@ func (v *TreeModel) GetIter(path *TreePath) (*TreeIter, error) {
 	return t, nil
 }
 
-// GetIterFromString() is a wrapper around
+// GetIterFromString is a wrapper around
 // gtk_tree_model_get_iter_from_string().
 func (v *TreeModel) GetIterFromString(path string) (*TreeIter, error) {
 	var iter C.GtkTreeIter
@@ -140,7 +140,7 @@ func (v *TreeModel) GetIterFromString(path string) (*TreeIter, error) {
 	return t, nil
 }
 
-// GetIterFirst() is a wrapper around gtk_tree_model_get_iter_first().
+// GetIterFirst is a wrapper around gtk_tree_model_get_iter_first().
 func (v *TreeModel) GetIterFirst() (*TreeIter, bool) {
 	var iter C.GtkTreeIter
 	c := C.gtk_tree_model_get_iter_first(v.native(), &iter)
@@ -151,7 +151,7 @@ func (v *TreeModel) GetIterFirst() (*TreeIter, bool) {
 	return t, true
 }
 
-// GetPath() is a wrapper around gtk_tree_model_get_path().
+// GetPath is a wrapper around gtk_tree_model_get_path().
 func (v *TreeModel) GetPath(iter *TreeIter) (*TreePath, error) {
 	c := C.gtk_tree_model_get_path(v.native(), iter.native())
 	if c == nil {
@@ -162,7 +162,7 @@ func (v *TreeModel) GetPath(iter *TreeIter) (*TreePath, error) {
 	return p, nil
 }
 
-// GetValue() is a wrapper around gtk_tree_model_get_value().
+// GetValue is a wrapper around gtk_tree_model_get_value().
 func (v *TreeModel) GetValue(iter *TreeIter, column int) (*glib.Value, error) {
 	val, err := glib.ValueAlloc()
 	if err != nil {
@@ -176,7 +176,7 @@ func (v *TreeModel) GetValue(iter *TreeIter, column int) (*glib.Value, error) {
 	return val, nil
 }
 
-// IterNext() is a wrapper around gtk_tree_model_iter_next().
+// IterNext is a wrapper around gtk_tree_model_iter_next().
 func (v *TreeModel) IterNext(iter *TreeIter) bool {
 	c := C.gtk_tree_model_iter_next(v.native(), iter.native())
 	return gobool(c)
@@ -276,7 +276,7 @@ type TreePath struct {
 	gtkTreePath *C.GtkTreePath
 }
 
-// Return a TreePath from the GList
+// TreePathFromList return a TreePath from the GList
 func TreePathFromList(list *glib.List) *TreePath {
 	if list == nil {
 		return nil
@@ -373,7 +373,7 @@ func wrapTreeSelection(obj *glib.Object) *TreeSelection {
 	return &TreeSelection{obj}
 }
 
-// GetSelected() is a wrapper around gtk_tree_selection_get_selected().
+// GetSelected is a wrapper around gtk_tree_selection_get_selected().
 func (v *TreeSelection) GetSelected() (model ITreeModel, iter *TreeIter, ok bool) {
 	var cmodel *C.GtkTreeModel
 	var citer C.GtkTreeIter
@@ -419,17 +419,20 @@ func (v *TreeSelection) GetSelectedRows(model ITreeModel) *glib.List {
 		p := wrapTreePath((*C.GtkTreePath)(ptr))
 		return p
 	})
-	runtime.SetFinalizer(glist, func(glist *glib.List) {
-		glist.FreeFull(func(item interface{}) {
-			path := item.(*TreePath)
-			C.gtk_tree_path_free(path.native())
+
+	if glist != nil {
+		runtime.SetFinalizer(glist, func(glist *glib.List) {
+			glist.FreeFull(func(item interface{}) {
+				path := item.(*TreePath)
+				path.free()
+			})
 		})
-	})
+	}
 
 	return glist
 }
 
-// CountSelectedRows() is a wrapper around gtk_tree_selection_count_selected_rows().
+// CountSelectedRows is a wrapper around gtk_tree_selection_count_selected_rows().
 func (v *TreeSelection) CountSelectedRows() int {
 	return int(C.gtk_tree_selection_count_selected_rows(v.native()))
 }
@@ -439,12 +442,12 @@ func (v *TreeSelection) SelectIter(iter *TreeIter) {
 	C.gtk_tree_selection_select_iter(v.native(), iter.native())
 }
 
-// SetMode() is a wrapper around gtk_tree_selection_set_mode().
+// SetMode is a wrapper around gtk_tree_selection_set_mode().
 func (v *TreeSelection) SetMode(m SelectionMode) {
 	C.gtk_tree_selection_set_mode(v.native(), C.GtkSelectionMode(m))
 }
 
-// GetMode() is a wrapper around gtk_tree_selection_get_mode().
+// GetMode is a wrapper around gtk_tree_selection_get_mode().
 func (v *TreeSelection) GetMode() SelectionMode {
 	return SelectionMode(C.gtk_tree_selection_get_mode(v.native()))
 }
@@ -596,13 +599,13 @@ func (v *CellLayout) toCellLayout() *C.GtkCellLayout {
 	return v.native()
 }
 
-// PackStart() is a wrapper around gtk_cell_layout_pack_start().
+// PackStart is a wrapper around gtk_cell_layout_pack_start().
 func (v *CellLayout) PackStart(cell ICellRenderer, expand bool) {
 	C.gtk_cell_layout_pack_start(v.native(), cell.toCellRenderer(),
 		gbool(expand))
 }
 
-// AddAttribute() is a wrapper around gtk_cell_layout_add_attribute().
+// AddAttribute is a wrapper around gtk_cell_layout_add_attribute().
 func (v *CellLayout) AddAttribute(cell ICellRenderer, attribute string, column int) {
 	cstr := C.CString(attribute)
 	defer C.free(unsafe.Pointer(cstr))
@@ -839,7 +842,7 @@ func (v *CellRendererToggle) GetRadio() bool {
 	return gobool(c)
 }
 
-// SetActive is a wrapper arround gtk_cell_renderer_toggle_set_active().
+// SetActive is a wrapper around gtk_cell_renderer_toggle_set_active().
 func (v *CellRendererToggle) SetActive(active bool) {
 	C.gtk_cell_renderer_toggle_set_active(v.native(), gbool(active))
 }
@@ -1049,7 +1052,7 @@ func (v *ListStore) SetValue(iter *TreeIter, column int, value interface{}) erro
 //	v.TreeModel = *wrapTreeModel(obj)
 //}
 
-// SetSortColumnId() is a wrapper around gtk_tree_sortable_set_sort_column_id().
+// SetSortColumnId is a wrapper around gtk_tree_sortable_set_sort_column_id().
 func (v *ListStore) SetSortColumnId(column int, order SortType) {
 	sort := C.toGtkTreeSortable(unsafe.Pointer(v.Native()))
 	C.gtk_tree_sortable_set_sort_column_id(sort, C.gint(column), C.GtkSortType(order))
@@ -1079,7 +1082,7 @@ func (v *ListStore) InsertWithValues(iter *TreeIter, position int, columns []int
 }
 */
 
-// InsertBefore() is a wrapper around gtk_list_store_insert_before().
+// InsertBefore is a wrapper around gtk_list_store_insert_before().
 func (v *ListStore) InsertBefore(sibling *TreeIter) *TreeIter {
 	var ti C.GtkTreeIter
 	C.gtk_list_store_insert_before(v.native(), &ti, sibling.native())
@@ -1087,7 +1090,7 @@ func (v *ListStore) InsertBefore(sibling *TreeIter) *TreeIter {
 	return iter
 }
 
-// InsertAfter() is a wrapper around gtk_list_store_insert_after().
+// InsertAfter is a wrapper around gtk_list_store_insert_after().
 func (v *ListStore) InsertAfter(sibling *TreeIter) *TreeIter {
 	var ti C.GtkTreeIter
 	C.gtk_list_store_insert_after(v.native(), &ti, sibling.native())
@@ -1095,7 +1098,7 @@ func (v *ListStore) InsertAfter(sibling *TreeIter) *TreeIter {
 	return iter
 }
 
-// Prepend() is a wrapper around gtk_list_store_prepend().
+// Prepend is a wrapper around gtk_list_store_prepend().
 func (v *ListStore) Prepend() *TreeIter {
 	var ti C.GtkTreeIter
 	C.gtk_list_store_prepend(v.native(), &ti)
@@ -1103,7 +1106,7 @@ func (v *ListStore) Prepend() *TreeIter {
 	return iter
 }
 
-// Append() is a wrapper around gtk_list_store_append().
+// Append is a wrapper around gtk_list_store_append().
 func (v *ListStore) Append() *TreeIter {
 	var ti C.GtkTreeIter
 	C.gtk_list_store_append(v.native(), &ti)
@@ -1111,12 +1114,12 @@ func (v *ListStore) Append() *TreeIter {
 	return iter
 }
 
-// Clear() is a wrapper around gtk_list_store_clear().
+// Clear is a wrapper around gtk_list_store_clear().
 func (v *ListStore) Clear() {
 	C.gtk_list_store_clear(v.native())
 }
 
-// IterIsValid() is a wrapper around gtk_list_store_iter_is_valid().
+// IterIsValid is a wrapper around gtk_list_store_iter_is_valid().
 func (v *ListStore) IterIsValid(iter *TreeIter) bool {
 	c := C.gtk_list_store_iter_is_valid(v.native(), iter.native())
 	return gobool(c)
@@ -1128,18 +1131,18 @@ func (v *ListStore) Reorder(newOrder []int) {
 }
 */
 
-// Swap() is a wrapper around gtk_list_store_swap().
+// Swap is a wrapper around gtk_list_store_swap().
 func (v *ListStore) Swap(a, b *TreeIter) {
 	C.gtk_list_store_swap(v.native(), a.native(), b.native())
 }
 
-// MoveBefore() is a wrapper around gtk_list_store_move_before().
+// MoveBefore is a wrapper around gtk_list_store_move_before().
 func (v *ListStore) MoveBefore(iter, position *TreeIter) {
 	C.gtk_list_store_move_before(v.native(), iter.native(),
 		position.native())
 }
 
-// MoveAfter() is a wrapper around gtk_list_store_move_after().
+// MoveAfter is a wrapper around gtk_list_store_move_after().
 func (v *ListStore) MoveAfter(iter, position *TreeIter) {
 	C.gtk_list_store_move_after(v.native(), iter.native(),
 		position.native())
@@ -1149,7 +1152,7 @@ func (v *ListStore) MoveAfter(iter, position *TreeIter) {
  * GtkTreeViewColumn
  */
 
-// TreeViewColumns is a representation of GTK's GtkTreeViewColumn.
+// TreeViewColumn is a representation of GTK's GtkTreeViewColumn.
 type TreeViewColumn struct {
 	glib.InitiallyUnowned
 }
@@ -1173,7 +1176,7 @@ func wrapTreeViewColumn(obj *glib.Object) *TreeViewColumn {
 	return &TreeViewColumn{glib.InitiallyUnowned{obj}}
 }
 
-// TreeViewColumnNew() is a wrapper around gtk_tree_view_column_new().
+// TreeViewColumnNew is a wrapper around gtk_tree_view_column_new().
 func TreeViewColumnNew() (*TreeViewColumn, error) {
 	c := C.gtk_tree_view_column_new()
 	if c == nil {
@@ -1183,7 +1186,7 @@ func TreeViewColumnNew() (*TreeViewColumn, error) {
 	return wrapTreeViewColumn(obj), nil
 }
 
-// TreeViewColumnNewWithAttribute() is a wrapper around
+// TreeViewColumnNewWithAttribute is a wrapper around
 // gtk_tree_view_column_new_with_attributes() that only sets one
 // attribute for one column.
 func TreeViewColumnNewWithAttribute(title string, renderer ICellRenderer, attribute string, column int) (*TreeViewColumn, error) {
@@ -1200,7 +1203,7 @@ func TreeViewColumnNewWithAttribute(title string, renderer ICellRenderer, attrib
 	return wrapTreeViewColumn(obj), nil
 }
 
-// AddAttribute() is a wrapper around gtk_tree_view_column_add_attribute().
+// AddAttribute is a wrapper around gtk_tree_view_column_add_attribute().
 func (v *TreeViewColumn) AddAttribute(renderer ICellRenderer, attribute string, column int) {
 	cstr := C.CString(attribute)
 	defer C.free(unsafe.Pointer(cstr))
@@ -1208,176 +1211,176 @@ func (v *TreeViewColumn) AddAttribute(renderer ICellRenderer, attribute string, 
 		renderer.toCellRenderer(), (*C.gchar)(cstr), C.gint(column))
 }
 
-// SetExpand() is a wrapper around gtk_tree_view_column_set_expand().
+// SetExpand is a wrapper around gtk_tree_view_column_set_expand().
 func (v *TreeViewColumn) SetExpand(expand bool) {
 	C.gtk_tree_view_column_set_expand(v.native(), gbool(expand))
 }
 
-// GetExpand() is a wrapper around gtk_tree_view_column_get_expand().
+// GetExpand is a wrapper around gtk_tree_view_column_get_expand().
 func (v *TreeViewColumn) GetExpand() bool {
 	c := C.gtk_tree_view_column_get_expand(v.native())
 	return gobool(c)
 }
 
-// SetMinWidth() is a wrapper around gtk_tree_view_column_set_min_width().
+// SetMinWidth is a wrapper around gtk_tree_view_column_set_min_width().
 func (v *TreeViewColumn) SetMinWidth(minWidth int) {
 	C.gtk_tree_view_column_set_min_width(v.native(), C.gint(minWidth))
 }
 
-// GetMinWidth() is a wrapper around gtk_tree_view_column_get_min_width().
+// GetMinWidth is a wrapper around gtk_tree_view_column_get_min_width().
 func (v *TreeViewColumn) GetMinWidth() int {
 	c := C.gtk_tree_view_column_get_min_width(v.native())
 	return int(c)
 }
 
-// PackStart() is a wrapper around gtk_tree_view_column_pack_start().
+// PackStart is a wrapper around gtk_tree_view_column_pack_start().
 func (v *TreeViewColumn) PackStart(cell *CellRenderer, expand bool) {
 	C.gtk_tree_view_column_pack_start(v.native(), cell.native(), gbool(expand))
 }
 
-// PackEnd() is a wrapper around gtk_tree_view_column_pack_end().
+// PackEnd is a wrapper around gtk_tree_view_column_pack_end().
 func (v *TreeViewColumn) PackEnd(cell *CellRenderer, expand bool) {
 	C.gtk_tree_view_column_pack_end(v.native(), cell.native(), gbool(expand))
 }
 
-// Clear() is a wrapper around gtk_tree_view_column_clear().
+// Clear is a wrapper around gtk_tree_view_column_clear().
 func (v *TreeViewColumn) Clear() {
 	C.gtk_tree_view_column_clear(v.native())
 }
 
-// ClearAttributes() is a wrapper around gtk_tree_view_column_clear_attributes().
+// ClearAttributes is a wrapper around gtk_tree_view_column_clear_attributes().
 func (v *TreeViewColumn) ClearAttributes(cell *CellRenderer) {
 	C.gtk_tree_view_column_clear_attributes(v.native(), cell.native())
 }
 
-// SetSpacing() is a wrapper around gtk_tree_view_column_set_spacing().
+// SetSpacing is a wrapper around gtk_tree_view_column_set_spacing().
 func (v *TreeViewColumn) SetSpacing(spacing int) {
 	C.gtk_tree_view_column_set_spacing(v.native(), C.gint(spacing))
 }
 
-// GetSpacing() is a wrapper around gtk_tree_view_column_get_spacing().
+// GetSpacing is a wrapper around gtk_tree_view_column_get_spacing().
 func (v *TreeViewColumn) GetSpacing() int {
 	return int(C.gtk_tree_view_column_get_spacing(v.native()))
 }
 
-// SetVisible() is a wrapper around gtk_tree_view_column_set_visible().
+// SetVisible is a wrapper around gtk_tree_view_column_set_visible().
 func (v *TreeViewColumn) SetVisible(visible bool) {
 	C.gtk_tree_view_column_set_visible(v.native(), gbool(visible))
 }
 
-// GetVisible() is a wrapper around gtk_tree_view_column_get_visible().
+// GetVisible is a wrapper around gtk_tree_view_column_get_visible().
 func (v *TreeViewColumn) GetVisible() bool {
 	return gobool(C.gtk_tree_view_column_get_visible(v.native()))
 }
 
-// SetResizable() is a wrapper around gtk_tree_view_column_set_resizable().
+// SetResizable is a wrapper around gtk_tree_view_column_set_resizable().
 func (v *TreeViewColumn) SetResizable(resizable bool) {
 	C.gtk_tree_view_column_set_resizable(v.native(), gbool(resizable))
 }
 
-// GetResizable() is a wrapper around gtk_tree_view_column_get_resizable().
+// GetResizable is a wrapper around gtk_tree_view_column_get_resizable().
 func (v *TreeViewColumn) GetResizable() bool {
 	return gobool(C.gtk_tree_view_column_get_resizable(v.native()))
 }
 
-// GetWidth() is a wrapper around gtk_tree_view_column_get_width().
+// GetWidth is a wrapper around gtk_tree_view_column_get_width().
 func (v *TreeViewColumn) GetWidth() int {
 	return int(C.gtk_tree_view_column_get_width(v.native()))
 }
 
-// SetFixedWidth() is a wrapper around gtk_tree_view_column_set_fixed_width().
+// SetFixedWidth is a wrapper around gtk_tree_view_column_set_fixed_width().
 func (v *TreeViewColumn) SetFixedWidth(w int) {
 	C.gtk_tree_view_column_set_fixed_width(v.native(), C.gint(w))
 }
 
-// GetFixedWidth() is a wrapper around gtk_tree_view_column_get_fixed_width().
+// GetFixedWidth is a wrapper around gtk_tree_view_column_get_fixed_width().
 func (v *TreeViewColumn) GetFixedWidth() int {
 	return int(C.gtk_tree_view_column_get_fixed_width(v.native()))
 }
 
-// SetMaxWidth() is a wrapper around gtk_tree_view_column_set_max_width().
+// SetMaxWidth is a wrapper around gtk_tree_view_column_set_max_width().
 func (v *TreeViewColumn) SetMaxWidth(w int) {
 	C.gtk_tree_view_column_set_max_width(v.native(), C.gint(w))
 }
 
-// GetMaxWidth() is a wrapper around gtk_tree_view_column_get_max_width().
+// GetMaxWidth is a wrapper around gtk_tree_view_column_get_max_width().
 func (v *TreeViewColumn) GetMaxWidth() int {
 	return int(C.gtk_tree_view_column_get_max_width(v.native()))
 }
 
-// Clicked() is a wrapper around gtk_tree_view_column_clicked().
+// Clicked is a wrapper around gtk_tree_view_column_clicked().
 func (v *TreeViewColumn) Clicked() {
 	C.gtk_tree_view_column_clicked(v.native())
 }
 
-// SetTitle() is a wrapper around gtk_tree_view_column_set_title().
+// SetTitle is a wrapper around gtk_tree_view_column_set_title().
 func (v *TreeViewColumn) SetTitle(t string) {
 	cstr := C.CString(t)
 	defer C.free(unsafe.Pointer(cstr))
 	C.gtk_tree_view_column_set_title(v.native(), (*C.gchar)(cstr))
 }
 
-// GetTitle() is a wrapper around gtk_tree_view_column_get_title().
+// GetTitle is a wrapper around gtk_tree_view_column_get_title().
 func (v *TreeViewColumn) GetTitle() string {
 	return goString(C.gtk_tree_view_column_get_title(v.native()))
 }
 
-// SetClickable() is a wrapper around gtk_tree_view_column_set_clickable().
+// SetClickable is a wrapper around gtk_tree_view_column_set_clickable().
 func (v *TreeViewColumn) SetClickable(clickable bool) {
 	C.gtk_tree_view_column_set_clickable(v.native(), gbool(clickable))
 }
 
-// GetClickable() is a wrapper around gtk_tree_view_column_get_clickable().
+// GetClickable is a wrapper around gtk_tree_view_column_get_clickable().
 func (v *TreeViewColumn) GetClickable() bool {
 	return gobool(C.gtk_tree_view_column_get_clickable(v.native()))
 }
 
-// SetReorderable() is a wrapper around gtk_tree_view_column_set_reorderable().
+// SetReorderable is a wrapper around gtk_tree_view_column_set_reorderable().
 func (v *TreeViewColumn) SetReorderable(reorderable bool) {
 	C.gtk_tree_view_column_set_reorderable(v.native(), gbool(reorderable))
 }
 
-// GetReorderable() is a wrapper around gtk_tree_view_column_get_reorderable().
+// GetReorderable is a wrapper around gtk_tree_view_column_get_reorderable().
 func (v *TreeViewColumn) GetReorderable() bool {
 	return gobool(C.gtk_tree_view_column_get_reorderable(v.native()))
 }
 
-// SetSortIndicator() is a wrapper around gtk_tree_view_column_set_sort_indicator().
+// SetSortIndicator is a wrapper around gtk_tree_view_column_set_sort_indicator().
 func (v *TreeViewColumn) SetSortIndicator(reorderable bool) {
 	C.gtk_tree_view_column_set_sort_indicator(v.native(), gbool(reorderable))
 }
 
-// GetSortIndicator() is a wrapper around gtk_tree_view_column_get_sort_indicator().
+// GetSortIndicator is a wrapper around gtk_tree_view_column_get_sort_indicator().
 func (v *TreeViewColumn) GetSortIndicator() bool {
 	return gobool(C.gtk_tree_view_column_get_sort_indicator(v.native()))
 }
 
-// SetSortColumnID() is a wrapper around gtk_tree_view_column_set_sort_column_id().
+// SetSortColumnID is a wrapper around gtk_tree_view_column_set_sort_column_id().
 func (v *TreeViewColumn) SetSortColumnID(w int) {
 	C.gtk_tree_view_column_set_sort_column_id(v.native(), C.gint(w))
 }
 
-// GetSortColumnID() is a wrapper around gtk_tree_view_column_get_sort_column_id().
+// GetSortColumnID is a wrapper around gtk_tree_view_column_get_sort_column_id().
 func (v *TreeViewColumn) GetSortColumnID() int {
 	return int(C.gtk_tree_view_column_get_sort_column_id(v.native()))
 }
 
-// CellIsVisible() is a wrapper around gtk_tree_view_column_cell_is_visible().
+// CellIsVisible is a wrapper around gtk_tree_view_column_cell_is_visible().
 func (v *TreeViewColumn) CellIsVisible() bool {
 	return gobool(C.gtk_tree_view_column_cell_is_visible(v.native()))
 }
 
-// FocusCell() is a wrapper around gtk_tree_view_column_focus_cell().
+// FocusCell is a wrapper around gtk_tree_view_column_focus_cell().
 func (v *TreeViewColumn) FocusCell(cell *CellRenderer) {
 	C.gtk_tree_view_column_focus_cell(v.native(), cell.native())
 }
 
-// QueueResize() is a wrapper around gtk_tree_view_column_queue_resize().
+// QueueResize is a wrapper around gtk_tree_view_column_queue_resize().
 func (v *TreeViewColumn) QueueResize() {
 	C.gtk_tree_view_column_queue_resize(v.native())
 }
 
-// GetXOffset() is a wrapper around gtk_tree_view_column_get_x_offset().
+// GetXOffset is a wrapper around gtk_tree_view_column_get_x_offset().
 func (v *TreeViewColumn) GetXOffset() int {
 	return int(C.gtk_tree_view_column_get_x_offset(v.native()))
 }

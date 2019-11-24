@@ -890,7 +890,7 @@ func Init(args *[]string) {
 	}
 }
 
-// Main() is a wrapper around gtk_main() and runs the GTK main loop,
+// Main is a wrapper around gtk_main() and runs the GTK main loop,
 // blocking until MainQuit() is called.
 func Main() {
 	C.gtk_main()
@@ -911,7 +911,7 @@ func EventsPending() bool {
 	return gobool(C.gtk_events_pending())
 }
 
-// MainQuit() is a wrapper around gtk_main_quit() is used to terminate
+// MainQuit is a wrapper around gtk_main_quit() is used to terminate
 // the GTK main loop (started by Main()).
 func MainQuit() {
 	C.gtk_main_quit()
@@ -1101,7 +1101,7 @@ func BuilderNewFromResource(resourcePath string) (*Builder, error) {
 func (v *Builder) AddFromFile(filename string) error {
 	cstr := C.CString(filename)
 	defer C.free(unsafe.Pointer(cstr))
-	var err *C.GError = nil
+	var err *C.GError
 	res := C.gtk_builder_add_from_file(v.native(), (*C.gchar)(cstr), &err)
 	if res == 0 {
 		defer C.g_error_free(err)
@@ -1114,7 +1114,7 @@ func (v *Builder) AddFromFile(filename string) error {
 func (v *Builder) AddFromResource(path string) error {
 	cstr := C.CString(path)
 	defer C.free(unsafe.Pointer(cstr))
-	var err *C.GError = nil
+	var err *C.GError
 	res := C.gtk_builder_add_from_resource(v.native(), (*C.gchar)(cstr), &err)
 	if res == 0 {
 		defer C.g_error_free(err)
@@ -1128,7 +1128,7 @@ func (v *Builder) AddFromString(str string) error {
 	cstr := C.CString(str)
 	defer C.free(unsafe.Pointer(cstr))
 	length := (C.gsize)(len(str))
-	var err *C.GError = nil
+	var err *C.GError
 	res := C.gtk_builder_add_from_string(v.native(), (*C.gchar)(cstr), length, &err)
 	if res == 0 {
 		defer C.g_error_free(err)
@@ -1326,7 +1326,7 @@ func (v *Clipboard) Store() {
 	C.gtk_clipboard_store(v.native())
 }
 
-// ClipboardGet() is a wrapper around gtk_clipboard_get().
+// ClipboardGet is a wrapper around gtk_clipboard_get().
 func ClipboardGet(atom gdk.Atom) (*Clipboard, error) {
 	c := C.gtk_clipboard_get(C.GdkAtom(unsafe.Pointer(atom.Native())))
 	if c == nil {
@@ -1337,7 +1337,7 @@ func ClipboardGet(atom gdk.Atom) (*Clipboard, error) {
 	return cb, nil
 }
 
-// ClipboardGetForDisplay() is a wrapper around gtk_clipboard_get_for_display().
+// ClipboardGetForDisplay is a wrapper around gtk_clipboard_get_for_display().
 func ClipboardGetForDisplay(display *gdk.Display, atom gdk.Atom) (*Clipboard, error) {
 	displayPtr := (*C.GdkDisplay)(unsafe.Pointer(display.Native()))
 	c := C.gtk_clipboard_get_for_display(displayPtr,
@@ -1363,7 +1363,7 @@ func (v *Clipboard) WaitForText() string {
 	return goString(c)
 }
 
-// SetText() is a wrapper around gtk_clipboard_set_text().
+// SetText is a wrapper around gtk_clipboard_set_text().
 func (v *Clipboard) SetText(text string) {
 	cstr := C.CString(text)
 	defer C.free(unsafe.Pointer(cstr))
@@ -1499,7 +1499,7 @@ func (v *CssProvider) ToString() string {
 	return goString((*C.gchar)(c))
 }
 
-// GetNamed is a wrapper around gtk_css_provider_get_named().
+// CssProviderGetNamed is a wrapper around gtk_css_provider_get_named().
 func CssProviderGetNamed(name string, variant string) (*CssProvider, error) {
 	cname := C.CString(name)
 	defer C.free(unsafe.Pointer(cname))
@@ -1766,7 +1766,7 @@ func (v *IconTheme) LoadIcon(iconName string, size int,
 
 	cstr := C.CString(iconName)
 	defer C.free(unsafe.Pointer(cstr))
-	var err *C.GError = nil
+	var err *C.GError
 	c := C.gtk_icon_theme_load_icon(v.native(), (*C.gchar)(cstr),
 		C.gint(size), C.GtkIconLookupFlags(flags), &err)
 	if c == nil {
@@ -1816,12 +1816,12 @@ func (v *Range) SetValue(value float64) {
 	C.gtk_range_set_value(v.native(), C.gdouble(value))
 }
 
-// SetIncrements() is a wrapper around gtk_range_set_increments().
+// SetIncrements is a wrapper around gtk_range_set_increments().
 func (v *Range) SetIncrements(step, page float64) {
 	C.gtk_range_set_increments(v.native(), C.gdouble(step), C.gdouble(page))
 }
 
-// SetRange() is a wrapper around gtk_range_set_range().
+// SetRange is a wrapper around gtk_range_set_range().
 func (v *Range) SetRange(min, max float64) {
 	C.gtk_range_set_range(v.native(), C.gdouble(min), C.gdouble(max))
 }
@@ -2372,7 +2372,7 @@ func wrapTargetEntry(obj *C.GtkTargetEntry) *TargetEntry {
 	return &TargetEntry{obj}
 }
 
-// TargetEntryNew is a wrapper aroud gtk_target_entry_new().
+// TargetEntryNew is a wrapper around gtk_target_entry_new().
 func TargetEntryNew(target string, flags TargetFlags, info uint) (*TargetEntry, error) {
 	cstr := C.CString(target)
 	defer C.free(unsafe.Pointer(cstr))
@@ -2429,7 +2429,7 @@ func (v *Viewport) toViewport() *C.GtkViewport {
 	return v.native()
 }
 
-// ViewportNew() is a wrapper around gtk_viewport_new().
+// ViewportNew is a wrapper around gtk_viewport_new().
 func ViewportNew(hadjustment, vadjustment *Adjustment) (*Viewport, error) {
 	c := C.gtk_viewport_new(hadjustment.native(), vadjustment.native())
 	if c == nil {

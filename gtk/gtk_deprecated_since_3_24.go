@@ -8,22 +8,31 @@ package gtk
 import "C"
 
 import (
+	"runtime"
 	"unsafe"
 
 	"github.com/d2r2/gotk3/glib"
 )
 
 // GetFocusChain is a wrapper around gtk_container_get_focus_chain().
-func (v *Container) GetFocusChain() ([]*Widget, bool) {
-	var cwlist *C.GList
-	c := C.gtk_container_get_focus_chain(v.native(), &cwlist)
+// Returned list is wrapped to return *gtk.Widget elements.
+func (v *Container) GetFocusChain() (*glib.List, bool) {
+	var clist *C.GList
+	c := C.gtk_container_get_focus_chain(v.native(), &clist)
 
-	var widgets []*Widget
-	wlist := glib.WrapList(uintptr(unsafe.Pointer(cwlist)))
-	for ; wlist.Data() != nil; wlist = wlist.Next() {
-		widgets = append(widgets, wrapWidget(glib.Take(wlist.Data().(unsafe.Pointer))))
+	glist := glib.WrapList(uintptr(unsafe.Pointer(clist)))
+	glist.DataWrapper(func(ptr unsafe.Pointer) interface{} {
+		w := wrapWidget(glib.Take(ptr))
+		return w
+	})
+
+	if glist != nil {
+		runtime.SetFinalizer(glist, func(glist *glib.List) {
+			glist.Free()
+		})
 	}
-	return widgets, gobool(c)
+
+	return glist, gobool(c)
 }
 
 // SetFocusChain is a wrapper around gtk_container_set_focus_chain().

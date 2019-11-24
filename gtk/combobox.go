@@ -61,7 +61,7 @@ func wrapComboBox(obj *glib.Object) *ComboBox {
 	return &ComboBox{*bin, *cl}
 }
 
-// ComboBoxNew() is a wrapper around gtk_combo_box_new().
+// ComboBoxNew is a wrapper around gtk_combo_box_new().
 func ComboBoxNew() (*ComboBox, error) {
 	c := C.gtk_combo_box_new()
 	if c == nil {
@@ -71,7 +71,7 @@ func ComboBoxNew() (*ComboBox, error) {
 	return wrapComboBox(obj), nil
 }
 
-// ComboBoxNewWithEntry() is a wrapper around gtk_combo_box_new_with_entry().
+// ComboBoxNewWithEntry is a wrapper around gtk_combo_box_new_with_entry().
 func ComboBoxNewWithEntry() (*ComboBox, error) {
 	c := C.gtk_combo_box_new_with_entry()
 	if c == nil {
@@ -81,7 +81,7 @@ func ComboBoxNewWithEntry() (*ComboBox, error) {
 	return wrapComboBox(obj), nil
 }
 
-// ComboBoxNewWithModel() is a wrapper around gtk_combo_box_new_with_model().
+// ComboBoxNewWithModel is a wrapper around gtk_combo_box_new_with_model().
 func ComboBoxNewWithModel(model ITreeModel) (*ComboBox, error) {
 	c := C.gtk_combo_box_new_with_model(model.toTreeModel())
 	if c == nil {
@@ -91,13 +91,13 @@ func ComboBoxNewWithModel(model ITreeModel) (*ComboBox, error) {
 	return wrapComboBox(obj), nil
 }
 
-// GetActive() is a wrapper around gtk_combo_box_get_active().
+// GetActive is a wrapper around gtk_combo_box_get_active().
 func (v *ComboBox) GetActive() int {
 	c := C.gtk_combo_box_get_active(v.native())
 	return int(c)
 }
 
-// SetActive() is a wrapper around gtk_combo_box_set_active().
+// SetActive is a wrapper around gtk_combo_box_set_active().
 func (v *ComboBox) SetActive(index int) {
 	C.gtk_combo_box_set_active(v.native(), C.gint(index))
 }

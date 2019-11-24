@@ -25,7 +25,7 @@ func (v *Window) IsMaximized() bool {
  * GtkDialog
  */
 
-// GetHeaderBar() is a wrapper around gtk_dialog_get_header_bar().
+// GetHeaderBar is a wrapper around gtk_dialog_get_header_bar().
 func (v *Dialog) GetHeaderBar() (*HeaderBar, error) {
 	c := C.gtk_dialog_get_header_bar(v.native())
 	if c == nil {

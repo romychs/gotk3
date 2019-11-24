@@ -45,7 +45,7 @@ func wrapButton(obj *glib.Object) *Button {
 	return &Button{*bin, *actionable}
 }
 
-// ButtonNew() is a wrapper around gtk_button_new().
+// ButtonNew is a wrapper around gtk_button_new().
 func ButtonNew() (*Button, error) {
 	c := C.gtk_button_new()
 	if c == nil {
@@ -55,7 +55,7 @@ func ButtonNew() (*Button, error) {
 	return wrapButton(obj), nil
 }
 
-// ButtonNewWithLabel() is a wrapper around gtk_button_new_with_label().
+// ButtonNewWithLabel is a wrapper around gtk_button_new_with_label().
 func ButtonNewWithLabel(label string) (*Button, error) {
 	cstr := C.CString(label)
 	defer C.free(unsafe.Pointer(cstr))
@@ -67,7 +67,7 @@ func ButtonNewWithLabel(label string) (*Button, error) {
 	return wrapButton(obj), nil
 }
 
-// ButtonNewWithMnemonic() is a wrapper around gtk_button_new_with_mnemonic().
+// ButtonNewWithMnemonic is a wrapper around gtk_button_new_with_mnemonic().
 func ButtonNewWithMnemonic(label string) (*Button, error) {
 	cstr := C.CString(label)
 	defer C.free(unsafe.Pointer(cstr))
@@ -79,30 +79,30 @@ func ButtonNewWithMnemonic(label string) (*Button, error) {
 	return wrapButton(obj), nil
 }
 
-// Clicked() is a wrapper around gtk_button_clicked().
+// Clicked is a wrapper around gtk_button_clicked().
 func (v *Button) Clicked() {
 	C.gtk_button_clicked(v.native())
 }
 
-// SetRelief() is a wrapper around gtk_button_set_relief().
+// SetRelief is a wrapper around gtk_button_set_relief().
 func (v *Button) SetRelief(newStyle ReliefStyle) {
 	C.gtk_button_set_relief(v.native(), C.GtkReliefStyle(newStyle))
 }
 
-// GetRelief() is a wrapper around gtk_button_get_relief().
+// GetRelief is a wrapper around gtk_button_get_relief().
 func (v *Button) GetRelief() ReliefStyle {
 	c := C.gtk_button_get_relief(v.native())
 	return ReliefStyle(c)
 }
 
-// SetLabel() is a wrapper around gtk_button_set_label().
+// SetLabel is a wrapper around gtk_button_set_label().
 func (v *Button) SetLabel(label string) {
 	cstr := C.CString(label)
 	defer C.free(unsafe.Pointer(cstr))
 	C.gtk_button_set_label(v.native(), (*C.gchar)(cstr))
 }
 
-// GetLabel() is a wrapper around gtk_button_get_label().
+// GetLabel is a wrapper around gtk_button_get_label().
 func (v *Button) GetLabel() (string, error) {
 	c := C.gtk_button_get_label(v.native())
 	if c == nil {
@@ -111,23 +111,23 @@ func (v *Button) GetLabel() (string, error) {
 	return goString(c), nil
 }
 
-// SetUseUnderline() is a wrapper around gtk_button_set_use_underline().
+// SetUseUnderline is a wrapper around gtk_button_set_use_underline().
 func (v *Button) SetUseUnderline(useUnderline bool) {
 	C.gtk_button_set_use_underline(v.native(), gbool(useUnderline))
 }
 
-// GetUseUnderline() is a wrapper around gtk_button_get_use_underline().
+// GetUseUnderline is a wrapper around gtk_button_get_use_underline().
 func (v *Button) GetUseUnderline() bool {
 	c := C.gtk_button_get_use_underline(v.native())
 	return gobool(c)
 }
 
-// SetImage() is a wrapper around gtk_button_set_image().
+// SetImage is a wrapper around gtk_button_set_image().
 func (v *Button) SetImage(image IWidget) {
 	C.gtk_button_set_image(v.native(), image.toWidget())
 }
 
-// GetImage() is a wrapper around gtk_button_get_image().
+// GetImage is a wrapper around gtk_button_get_image().
 func (v *Button) GetImage() (*Widget, error) {
 	c := C.gtk_button_get_image(v.native())
 	if c == nil {
@@ -137,29 +137,29 @@ func (v *Button) GetImage() (*Widget, error) {
 	return wrapWidget(obj), nil
 }
 
-// SetImagePosition() is a wrapper around gtk_button_set_image_position().
+// SetImagePosition is a wrapper around gtk_button_set_image_position().
 func (v *Button) SetImagePosition(position PositionType) {
 	C.gtk_button_set_image_position(v.native(), C.GtkPositionType(position))
 }
 
-// GetImagePosition() is a wrapper around gtk_button_get_image_position().
+// GetImagePosition is a wrapper around gtk_button_get_image_position().
 func (v *Button) GetImagePosition() PositionType {
 	c := C.gtk_button_get_image_position(v.native())
 	return PositionType(c)
 }
 
-// SetAlwaysShowImage() is a wrapper around gtk_button_set_always_show_image().
+// SetAlwaysShowImage is a wrapper around gtk_button_set_always_show_image().
 func (v *Button) SetAlwaysShowImage(alwaysShow bool) {
 	C.gtk_button_set_always_show_image(v.native(), gbool(alwaysShow))
 }
 
-// GetAlwaysShowImage() is a wrapper around gtk_button_get_always_show_image().
+// GetAlwaysShowImage is a wrapper around gtk_button_get_always_show_image().
 func (v *Button) GetAlwaysShowImage() bool {
 	c := C.gtk_button_get_always_show_image(v.native())
 	return gobool(c)
 }
 
-// GetEventWindow() is a wrapper around gtk_button_get_event_window().
+// GetEventWindow is a wrapper around gtk_button_get_event_window().
 func (v *Button) GetEventWindow() (*gdk.Window, error) {
 	c := C.gtk_button_get_event_window(v.native())
 	if c == nil {
@@ -434,6 +434,17 @@ func ToggleButtonNewWithMnemonic(label string) (*ToggleButton, error) {
 	return wrapToggleButton(obj), nil
 }
 
+// GetMode is a wrapper around gtk_toggle_button_get_mode().
+func (v *ToggleButton) GetMode() bool {
+	c := C.gtk_toggle_button_get_mode(v.native())
+	return gobool(c)
+}
+
+// SetMode is a wrapper around gtk_toggle_button_set_mode().
+func (v *ToggleButton) SetMode(drawIndicator bool) {
+	C.gtk_toggle_button_set_mode(v.native(), gbool(drawIndicator))
+}
+
 // GetActive is a wrapper around gtk_toggle_button_get_active().
 func (v *ToggleButton) GetActive() bool {
 	c := C.gtk_toggle_button_get_active(v.native())
@@ -443,6 +454,17 @@ func (v *ToggleButton) GetActive() bool {
 // SetActive is a wrapper around gtk_toggle_button_set_active().
 func (v *ToggleButton) SetActive(isActive bool) {
 	C.gtk_toggle_button_set_active(v.native(), gbool(isActive))
+}
+
+// GetInconsistent is a wrapper around gtk_toggle_button_get_inconsistent().
+func (v *ToggleButton) GetInconsistent() bool {
+	c := C.gtk_toggle_button_get_inconsistent(v.native())
+	return gobool(c)
+}
+
+// SetInconsistent is a wrapper around gtk_toggle_button_set_inconsistent().
+func (v *ToggleButton) SetInconsistent(setting bool) {
+	C.gtk_toggle_button_set_inconsistent(v.native(), gbool(setting))
 }
 
 /*
@@ -682,7 +704,7 @@ func wrapScaleButton(obj *glib.Object) *ScaleButton {
 	return &ScaleButton{*button}
 }
 
-// ScaleButtonNew() is a wrapper around gtk_scale_button_new().
+// ScaleButtonNew(is a wrapper around gtk_scale_button_new().
 func ScaleButtonNew(size IconSize, min, max, step float64, icons []string) (*ScaleButton, error) {
 	cicons := make([]*C.gchar, len(icons))
 	for i, icon := range icons {
@@ -703,7 +725,7 @@ func ScaleButtonNew(size IconSize, min, max, step float64, icons []string) (*Sca
 	return wrapScaleButton(obj), nil
 }
 
-// GetAdjustment() is a wrapper around gtk_scale_button_get_adjustment().
+// GetAdjustment is a wrapper around gtk_scale_button_get_adjustment().
 func (v *ScaleButton) GetAdjustment() (*Adjustment, error) {
 	c := C.gtk_scale_button_get_adjustment(v.native())
 	if c == nil {
@@ -713,7 +735,7 @@ func (v *ScaleButton) GetAdjustment() (*Adjustment, error) {
 	return wrapAdjustment(obj), nil
 }
 
-// GetPopup() is a wrapper around gtk_scale_button_get_popup().
+// GetPopup is a wrapper around gtk_scale_button_get_popup().
 func (v *ScaleButton) GetPopup() (*Widget, error) {
 	c := C.gtk_scale_button_get_popup(v.native())
 	if c == nil {
@@ -723,17 +745,17 @@ func (v *ScaleButton) GetPopup() (*Widget, error) {
 	return wrapWidget(obj), nil
 }
 
-// GetValue() is a wrapper around gtk_scale_button_get_value().
+// GetValue is a wrapper around gtk_scale_button_get_value().
 func (v *ScaleButton) GetValue() float64 {
 	return float64(C.gtk_scale_button_get_value(v.native()))
 }
 
-// SetAdjustment() is a wrapper around gtk_scale_button_set_adjustment().
+// SetAdjustment is a wrapper around gtk_scale_button_set_adjustment().
 func (v *ScaleButton) SetAdjustment(adjustment *Adjustment) {
 	C.gtk_scale_button_set_adjustment(v.native(), adjustment.native())
 }
 
-// SetValue() is a wrapper around gtk_scale_button_set_value().
+// SetValue is a wrapper around gtk_scale_button_set_value().
 func (v *ScaleButton) SetValue(value float64) {
 	C.gtk_scale_button_set_value(v.native(), C.gdouble(value))
 }
@@ -767,7 +789,7 @@ func wrapVolumeButton(obj *glib.Object) *VolumeButton {
 	return &VolumeButton{*scaleButton}
 }
 
-// VolumeButtonNew() is a wrapper around gtk_button_new().
+// VolumeButtonNew is a wrapper around gtk_button_new().
 func VolumeButtonNew() (*VolumeButton, error) {
 	c := C.gtk_volume_button_new()
 	if c == nil {

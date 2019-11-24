@@ -1,8 +1,8 @@
 Feature-rich GTK+3 app demo written in go
-=================================================
+=========================================
 
 Aim of this application is to interconnect GLIB/GTK+ components and widgets together
-with use of helpfull code patterns, meet the real needs of developers.
+with use of helpful code patterns, meet the real needs of developers.
 
 It's obligatory to have GTK+ 3.12 and high installed, otherwise app will not compile
 (GtkPopover, GtkHeaderBar require more recent GTK+3 installation).
@@ -14,7 +14,7 @@ for any activity in application. Advanced use of GAction utilize
 with seamless integration of such actions to UI menus.
 2) New widgets such as GtkHeaderBar, GtkPopover and others are used.
 3) Good example of preference dialog with save/restore functionality.
-4) Helpfull code pattern are present: dialogs and message boxes demo
+4) Helpful code pattern are present: dialogs and message boxes demo
 working with save/restore settings (via GSettings),
 fullscreen mode on/off, actions with states or stateless and others.
 
@@ -41,14 +41,14 @@ Installation
 ------------
 
 Almost no action needed, the main requirement is to have the GOTK3 library preliminary installed.
-Still, to make a "preference dialog" function properly scripts `install_schema.sh`/`uninstall_schema.sh`
+Still, to make a "preference dialog" function properly scripts `gs_install_schema.sh`/`gs_uninstall_schema.sh`
 must be used, to install/compile [GLIB setting's schema](https://developer.gnome.org/GSettings/).
 
-To run application type in console `go run ./cool_app.go`.
+To run application, type in console `go run ./cool_app.go`.
 
 Additional recommendations
 -------------------------
-- Use GNOME application `gtk3-icon-browser` to find themed icons available at your linux desktop.
+- Use GNOME application `gtk3-icon-browser` to find themed icons available at your linux desktop installation.
 
 Contact
 -------

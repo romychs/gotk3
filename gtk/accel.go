@@ -96,7 +96,7 @@ func wrapAccelGroup(obj *glib.Object) *AccelGroup {
 	return &AccelGroup{obj}
 }
 
-// AccelGroup is a wrapper around gtk_accel_group_new().
+// AccelGroupNew is a wrapper around gtk_accel_group_new().
 func AccelGroupNew() (*AccelGroup, error) {
 	c := C.gtk_accel_group_new()
 	if c == nil {

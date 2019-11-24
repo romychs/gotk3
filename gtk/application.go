@@ -131,8 +131,8 @@ func wrapApplication(obj *glib.Object) *Application {
 }
 
 // ApplicationNew is a wrapper around gtk_application_new().
-func ApplicationNew(appId string, flags glib.ApplicationFlags) (*Application, error) {
-	cstr := C.CString(appId)
+func ApplicationNew(appID string, flags glib.ApplicationFlags) (*Application, error) {
+	cstr := C.CString(appID)
 	defer C.free(unsafe.Pointer(cstr))
 
 	c := C.gtk_application_new((*C.gchar)(cstr), C.GApplicationFlags(flags))
@@ -229,15 +229,21 @@ func (v *Application) Inhibited(w *Window, flags ApplicationInhibitFlags, reason
 // GetWindows is a wrapper around gtk_application_get_windows().
 // Returned list is wrapped to return *gtk.Window elements.
 func (v *Application) GetWindows() *glib.List {
-	glist := C.gtk_application_get_windows(v.native())
-	list := glib.WrapList(uintptr(unsafe.Pointer(glist)))
-	list.DataWrapper(func(ptr unsafe.Pointer) interface{} {
-		return wrapWindow(glib.Take(ptr))
+	clist := C.gtk_application_get_windows(v.native())
+
+	glist := glib.WrapList(uintptr(unsafe.Pointer(clist)))
+	glist.DataWrapper(func(ptr unsafe.Pointer) interface{} {
+		w := wrapWindow(glib.Take(ptr))
+		return w
 	})
-	runtime.SetFinalizer(list, func(l *glib.List) {
-		l.Free()
-	})
-	return list
+
+	if glist != nil {
+		runtime.SetFinalizer(glist, func(glist *glib.List) {
+			glist.Free()
+		})
+	}
+
+	return glist
 }
 
 /*

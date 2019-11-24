@@ -55,7 +55,7 @@ func (v *Window) GetHasResizeGrip() bool {
 	return gobool(c)
 }
 
-// Reparent() is a wrapper around gtk_widget_reparent().
+// Reparent is a wrapper around gtk_widget_reparent().
 func (v *Widget) Reparent(newParent IWidget) {
 	C.gtk_widget_reparent(v.native(), newParent.toWidget())
 }
@@ -116,13 +116,13 @@ func (v *Arrow) Set(arrowType ArrowType, shadowType ShadowType) {
 	C.gtk_arrow_set(v.native(), C.GtkArrowType(arrowType), C.GtkShadowType(shadowType))
 }
 
-// SetAlignment() is a wrapper around gtk_button_set_alignment().
+// SetAlignment is a wrapper around gtk_button_set_alignment().
 func (v *Button) SetAlignment(xalign, yalign float32) {
 	C.gtk_button_set_alignment(v.native(), (C.gfloat)(xalign),
 		(C.gfloat)(yalign))
 }
 
-// GetAlignment() is a wrapper around gtk_button_get_alignment().
+// GetAlignment is a wrapper around gtk_button_get_alignment().
 func (v *Button) GetAlignment() (xalign, yalign float32) {
 	var x, y C.gfloat
 	C.gtk_button_get_alignment(v.native(), &x, &y)

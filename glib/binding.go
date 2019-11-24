@@ -35,7 +35,7 @@ func marshalBinding(p uintptr) (interface{}, error) {
 	return &Binding{wrapObject(unsafe.Pointer(c))}, nil
 }
 
-// Creates a binding between source property on source and target property on
+// BindProperty creates a binding between source property on source and target property on
 // target . Whenever the source property is changed the target_property is
 // updated using the same value.
 func BindProperty(source *Object, sourceProperty string,
@@ -56,13 +56,13 @@ func BindProperty(source *Object, sourceProperty string,
 	return &Binding{wrapObject(unsafe.Pointer(obj))}
 }
 
-// Explicitly releases the binding between the source and the target property
+// Unbind explicitly releases the binding between the source and the target property
 // expressed by Binding
 func (v *Binding) Unbind() {
 	C.g_binding_unbind(v.native())
 }
 
-// Retrieves the GObject instance used as the source of the binding
+// GetSource retrieves the GObject instance used as the source of the binding
 func (v *Binding) GetSource() *Object {
 	obj := C.g_binding_get_source(v.native())
 	if obj == nil {
@@ -71,14 +71,14 @@ func (v *Binding) GetSource() *Object {
 	return wrapObject(unsafe.Pointer(obj))
 }
 
-// Retrieves the name of the property of “source” used as the source of
+// GetSourceProperty retrieves the name of the property of “source” used as the source of
 // the binding.
 func (v *Binding) GetSourceProperty() string {
 	c := C.g_binding_get_source_property(v.native())
 	return goString(c)
 }
 
-// Retrieves the GObject instance used as the target of the binding.
+// GetTarget retrieves the GObject instance used as the target of the binding.
 func (v *Binding) GetTarget() *Object {
 	obj := C.g_binding_get_target(v.native())
 	if obj == nil {
@@ -87,14 +87,14 @@ func (v *Binding) GetTarget() *Object {
 	return wrapObject(unsafe.Pointer(obj))
 }
 
-// Retrieves the name of the property of “target” used as the target of
+// GetTargetProperty retrieves the name of the property of “target” used as the target of
 // the binding.
 func (v *Binding) GetTargetProperty() string {
 	c := C.g_binding_get_target_property(v.native())
 	return goString(c)
 }
 
-// Retrieves the flags passed when constructing the GBinding.
+// GetFlags retrieves the flags passed when constructing the GBinding.
 func (v *Binding) GetFlags() BindingFlags {
 	flags := C.g_binding_get_flags(v.native())
 	return BindingFlags(flags)

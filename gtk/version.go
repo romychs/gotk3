@@ -46,7 +46,7 @@ const (
 	GTK_3_18
 	GTK_3_20
 	GTK_3_22
-	GTK_3_24 // released September 2018
+	GTK_3_24 // released in September 2018
 )
 
 // Save here version of GTK used to compile the library.

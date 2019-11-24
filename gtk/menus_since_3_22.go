@@ -12,7 +12,7 @@ import (
 	"github.com/d2r2/gotk3/gdk"
 )
 
-// PopupAtPointer() is a wrapper for gtk_menu_popup_at_pointer(), on older versions it uses PopupAtMouseCursor
+// PopupAtPointer is a wrapper for gtk_menu_popup_at_pointer(), on older versions it uses PopupAtMouseCursor
 func (v *Menu) PopupAtPointer(triggerEvent *gdk.Event) {
 	e := (*C.GdkEvent)(unsafe.Pointer(triggerEvent.Native()))
 	C.gtk_menu_popup_at_pointer(v.native(), e)

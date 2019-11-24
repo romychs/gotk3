@@ -1,4 +1,4 @@
-// This file includes wrapers for symbols included since GTK 3.12, and
+// This file includes wrappers for symbols included since GTK 3.12, and
 // and should not be included in a build intended to target any older GTK
 // versions.  To target an older build, such as 3.10, use
 // 'go build -tags gtk_3_10'.  Otherwise, if no build tags are used, GTK 3.12
@@ -15,6 +15,7 @@ import (
 	"os"
 	"runtime"
 	"strconv"
+	"sync"
 	"time"
 
 	"github.com/d2r2/gotk3/gdk"
@@ -25,11 +26,33 @@ import (
 )
 
 // ========================================================================================
-// ************************* GTK GUI UTILITIES SECTION START ******************************
+// ************************* GTK+ UI UTILITIES SECTION START ******************************
 // ========================================================================================
-//	In real application copy this section to separate file as utilities functions to simplify
-//	creation of GLIB/GTK+ components and widgets, including menus, dialog boxes, messages,
+//	In real application use this code section as utilities to simplify creation
+//	of GLIB/GTK+ components and widgets, including menus, dialog boxes, messages,
 //	application settings and so on...
+
+// SetupLabelJustifyRight create GtkLabel with justification to the right by default.
+func SetupLabelJustifyRight(caption string) (*gtk.Label, error) {
+	lbl, err := gtk.LabelNew(caption)
+	if err != nil {
+		return nil, err
+	}
+	lbl.SetHAlign(gtk.ALIGN_END)
+	lbl.SetJustify(gtk.JUSTIFY_RIGHT)
+	return lbl, nil
+}
+
+// SetupLabelJustifyLeft create GtkLabel with justification to the left by default.
+func SetupLabelJustifyLeft(caption string) (*gtk.Label, error) {
+	lbl, err := gtk.LabelNew(caption)
+	if err != nil {
+		return nil, err
+	}
+	lbl.SetHAlign(gtk.ALIGN_START)
+	lbl.SetJustify(gtk.JUSTIFY_LEFT)
+	return lbl, nil
+}
 
 // SetupHeader construct Header widget with standard initialization.
 func SetupHeader(title, subtitle string, showCloseButton bool) (*gtk.HeaderBar, error) {
@@ -108,39 +131,115 @@ func SetupButtonWithThemedImage(themedIconName string) (*gtk.Button, error) {
 	return btn, nil
 }
 
+// getPixbufFromBytes create gdk.PixBuf loaded from raw bytes buffer
 func getPixbufFromBytes(bytes []byte) (*gdk.Pixbuf, error) {
 	b2, err := glib.BytesNew(bytes)
 	if err != nil {
 		return nil, err
 	}
-	ms, err := glib.MemoryInputStreamFromBytesNew(b2)
+	pbl, err := gdk.PixbufLoaderNew()
 	if err != nil {
 		return nil, err
 	}
-	pb, err := gdk.PixbufNewFromStream(&ms.InputStream, nil)
+	err = pbl.WriteBytes(b2)
+	if err != nil {
+		return nil, err
+	}
+	err = pbl.Close()
+	if err != nil {
+		return nil, err
+	}
+
+	pb, err := pbl.GetPixbuf()
 	if err != nil {
 		return nil, err
 	}
 	return pb, nil
 }
 
+// getPixbufFromBytesWithResize create gdk.PixBuf loaded from raw bytes buffer, applying resize
+func getPixbufFromBytesWithResize(bytes []byte, resizeToWidth, resizeToHeight int) (*gdk.Pixbuf, error) {
+	b2, err := glib.BytesNew(bytes)
+	if err != nil {
+		return nil, err
+	}
+	pbl, err := gdk.PixbufLoaderNew()
+	if err != nil {
+		return nil, err
+	}
+	pbl.SetSize(resizeToWidth, resizeToHeight)
+	err = pbl.WriteBytes(b2)
+	if err != nil {
+		return nil, err
+	}
+	err = pbl.Close()
+	if err != nil {
+		return nil, err
+	}
+
+	pb, err := pbl.GetPixbuf()
+	if err != nil {
+		return nil, err
+	}
+	return pb, nil
+}
+
+// getPixbufFromBytes create gdk.PixbufAnimation loaded from raw bytes buffer
 func getPixbufAnimationFromBytes(bytes []byte) (*gdk.PixbufAnimation, error) {
 	b2, err := glib.BytesNew(bytes)
 	if err != nil {
 		return nil, err
 	}
-	ms, err := glib.MemoryInputStreamFromBytesNew(b2)
+	pbl, err := gdk.PixbufLoaderNew()
 	if err != nil {
 		return nil, err
 	}
-	pba, err := gdk.PixbufAnimationNewFromStream(&ms.InputStream, nil)
+	err = pbl.WriteBytes(b2)
+	if err != nil {
+		return nil, err
+	}
+	err = pbl.Close()
+	if err != nil {
+		return nil, err
+	}
+
+	pba, err := pbl.GetPixbufAnimation()
 	if err != nil {
 		return nil, err
 	}
 	return pba, nil
 }
 
-// SetupMenuButtonWithThemedImage construct MenuButton widget with image
+// getPixbufFromBytesWithResize create gdk.PixbufAnimation loaded from raw bytes buffer, applying resize
+func getPixbufAnimationFromBytesWithResize(bytes []byte, resizeToWidth,
+	resizeToHeight int) (*gdk.PixbufAnimation, error) {
+
+	b2, err := glib.BytesNew(bytes)
+	if err != nil {
+		return nil, err
+	}
+	pbl, err := gdk.PixbufLoaderNew()
+	if err != nil {
+		return nil, err
+	}
+	pbl.SetSize(resizeToWidth, resizeToHeight)
+	err = pbl.WriteBytes(b2)
+	if err != nil {
+		return nil, err
+	}
+	err = pbl.Close()
+	if err != nil {
+		return nil, err
+	}
+
+	pba, err := pbl.GetPixbufAnimation()
+	if err != nil {
+		return nil, err
+	}
+	return pba, nil
+}
+
+// SetupMenuButtonWithThemedImage construct gtk.MenuButton widget with image
 // taken by themedIconName from themed icons image lib.
 func SetupMenuButtonWithThemedImage(themedIconName string) (*gtk.MenuButton, error) {
 	img, err := gtk.ImageNewFromIconName(themedIconName, gtk.ICON_SIZE_BUTTON)
@@ -158,7 +257,7 @@ func SetupMenuButtonWithThemedImage(themedIconName string) (*gtk.MenuButton, err
 	return btn, nil
 }
 
-// AppendSectionAsHorzButtons used for Popover widget menu
+// AppendSectionAsHorzButtons used for gtk.Popover widget menu
 // as a hint to display items as a horizontal buttons.
 func AppendSectionAsHorzButtons(main, section *glib.Menu) error {
 	val1, err := glib.VariantStringNew("horizontal-buttons")
@@ -176,7 +275,7 @@ func AppendSectionAsHorzButtons(main, section *glib.Menu) error {
 	return nil
 }
 
-// DialogButton simplify Dialog window initialization.
+// DialogButton simplify dialog window initialization.
 // Keep all necessary information about how attached
 // dialog button should look and act.
 type DialogButton struct {
@@ -243,27 +342,6 @@ func IsResponseDeleteEvent(response gtk.ResponseType) bool {
 	return response == gtk.RESPONSE_DELETE_EVENT
 }
 
-// PrintDialogResponse print and debug dialog responce.
-func PrintDialogResponse(response gtk.ResponseType) {
-	if IsResponseNo(response) {
-		log.Println("Dialog result = NO")
-	} else if IsResponseYes(response) {
-		log.Println("Dialog result = YES")
-	} else if IsResponseNone(response) {
-		log.Println("Dialog result = NONE")
-	} else if IsResponseOk(response) {
-		log.Println("Dialog result = OK")
-	} else if IsResponseReject(response) {
-		log.Println("Dialog result = REJECT")
-	} else if IsResponseCancel(response) {
-		log.Println("Dialog result = CANCEL")
-	} else if IsResponseClose(response) {
-		log.Println("Dialog result = CLOSE")
-	} else if IsResponseDeleteEvent(response) {
-		log.Println("Dialog result = DELETE_EVENT")
-	}
-}
-
 // DialogParagraph is an object which keep text paragraph added
 // to dialog window, complemented with all necessary format options.
 type DialogParagraph struct {
@@ -275,38 +353,45 @@ type DialogParagraph struct {
 	MaxWidthChars int
 }
 
+// NewDialogParagraph create new text paragraph instance,
+// with default align, justification and so on.
 func NewDialogParagraph(text string) *DialogParagraph {
 	v := &DialogParagraph{Text: text, HorizAlign: gtk.Align(-1), Justify: gtk.Justification(-1),
 		Ellipsize: pango.EllipsizeMode(-1), MaxWidthChars: -1}
 	return v
 }
 
-func NewMarkupDialogParagraph(text string) *DialogParagraph {
-	v := &DialogParagraph{Text: text, Markup: true, HorizAlign: gtk.Align(-1), Justify: gtk.Justification(-1),
-		Ellipsize: pango.EllipsizeMode(-1), MaxWidthChars: -1}
+// SetMarkup update Markup flag.
+func (v *DialogParagraph) SetMarkup(markup bool) *DialogParagraph {
+	v.Markup = markup
 	return v
 }
 
+// SetHorizAlign set horizontal alignment of text paragraph.
 func (v *DialogParagraph) SetHorizAlign(align gtk.Align) *DialogParagraph {
 	v.HorizAlign = align
 	return v
 }
 
+// SetJustify set text justification.
 func (v *DialogParagraph) SetJustify(justify gtk.Justification) *DialogParagraph {
 	v.Justify = justify
 	return v
 }
 
+// SetEllipsize set text ellipsis mode.
 func (v *DialogParagraph) SetEllipsize(ellipsize pango.EllipsizeMode) *DialogParagraph {
 	v.Ellipsize = ellipsize
 	return v
 }
 
+// SetMaxWidthChars set maximum number of chars in one line.
 func (v *DialogParagraph) SetMaxWidthChars(maxWidthChars int) *DialogParagraph {
 	v.MaxWidthChars = maxWidthChars
 	return v
 }
 
+// createLabel create gtk.Label widget to put paragraph text in.
 func (v *DialogParagraph) createLabel() (*gtk.Label, error) {
 	lbl, err := gtk.LabelNew("")
 	if err != nil {
@@ -332,6 +417,7 @@ func (v *DialogParagraph) createLabel() (*gtk.Label, error) {
 	return lbl, nil
 }
 
+// TextToDialogParagraphs multi-line text to DialogParagraph instance.
 func TextToDialogParagraphs(lines []string) []*DialogParagraph {
 	var msgs []*DialogParagraph
 	for _, line := range lines {
@@ -340,18 +426,23 @@ func TextToDialogParagraphs(lines []string) []*DialogParagraph {
 	return msgs
 }
 
-func TextToMarkupDialogParagraphs(lines []string) []*DialogParagraph {
+// TextToMarkupDialogParagraphs multi-line markup text to DialogParagraph instance.
+func TextToMarkupDialogParagraphs(makrupLines []string) []*DialogParagraph {
 	var msgs []*DialogParagraph
-	for _, line := range lines {
-		msgs = append(msgs, NewMarkupDialogParagraph(line))
+	for _, markupLine := range makrupLines {
+		msgs = append(msgs, NewDialogParagraph(markupLine).SetMarkup(true))
 	}
 	return msgs
+}
+
+type MessageDialog struct {
+	dialog *gtk.MessageDialog
 }
 
 // SetupMessageDialog construct MessageDialog widget with customized settings.
 func SetupMessageDialog(parent *gtk.Window, markupTitle string, secondaryMarkupTitle string,
 	paragraphs []*DialogParagraph, addButtons []DialogButton,
-	addExtraControls func(area *gtk.Box) error) (*gtk.MessageDialog, error) {
+	addExtraControls func(area *gtk.Box) error) (*MessageDialog, error) {
 
 	var active *gtk.Window
 	var err error
@@ -438,27 +529,22 @@ func SetupMessageDialog(parent *gtk.Window, markupTitle string, secondaryMarkupT
 
 	box.ShowAll()
 
-	return dlg, nil
+	v := &MessageDialog{dialog: dlg}
+	return v, nil
 }
 
-// RunMessageDialog construct and run MessageDialog widget with customized settings.
-func RunMessageDialog(parent *gtk.Window, markupTitle string, secondaryMarkupTitle string,
-	paragraphs []*DialogParagraph, ignoreCloseBox bool, addButtons []DialogButton,
-	addExtraControls func(area *gtk.Box) error) (gtk.ResponseType, error) {
+// Run run MessageDialog widget with customized settings.
+func (v *MessageDialog) Run(ignoreCloseBox bool) gtk.ResponseType {
 
-	dlg, err := SetupMessageDialog(parent, markupTitle, secondaryMarkupTitle,
-		paragraphs, addButtons, addExtraControls)
-	if err != nil {
-		return 0, err
-	}
-	defer dlg.Destroy()
+	defer v.dialog.Destroy()
 
-	dlg.ShowAll()
-	res := dlg.Run()
+	v.dialog.ShowAll()
+	var res gtk.ResponseType
+	res = v.dialog.Run()
 	for gtk.ResponseType(res) == gtk.RESPONSE_NONE || gtk.ResponseType(res) == gtk.RESPONSE_DELETE_EVENT && ignoreCloseBox {
-		res = dlg.Run()
+		res = v.dialog.Run()
 	}
-	return gtk.ResponseType(res), nil
+	return gtk.ResponseType(res)
 }
 
 // SetupDialog construct Dialog widget with customized settings.
@@ -613,17 +699,20 @@ func RunDialog(parent *gtk.Window, messageType gtk.MessageType, userHeaderbar bo
 	return gtk.ResponseType(res), nil
 }
 
+// ErrorMessage build and run error message dialog.
 func ErrorMessage(parent *gtk.Window, titleMarkup string, text []*DialogParagraph) error {
 	buttons := []DialogButton{
 		{"_OK", gtk.RESPONSE_OK, false, nil},
 	}
-	_, err := RunMessageDialog(parent, titleMarkup, "", text, false, buttons, nil)
+	dialog, err := SetupMessageDialog(parent, titleMarkup, "", text, buttons, nil)
 	if err != nil {
 		return err
 	}
+	dialog.Run(false)
 	return nil
 }
 
+// QuestionDialog build and run question message dialog with Yes/No choice.
 func QuestionDialog(parent *gtk.Window, title string,
 	messages []*DialogParagraph, defaultYes bool) (bool, error) {
 
@@ -637,7 +726,6 @@ func QuestionDialog(parent *gtk.Window, title string,
 	if err != nil {
 		return false, err
 	}
-	PrintDialogResponse(response)
 	return IsResponseYes(response), nil
 }
 
@@ -766,21 +854,16 @@ func GetGlibVersion() (magor, minor, micro uint) {
 	return
 }
 
-// GetSchema obtains glib.SettingsSchema from glib.Settings.
-func GetSchema(v *glib.Settings) (*glib.SettingsSchema, error) {
-	val, err := v.GetProperty("settings-schema")
-	if err != nil {
-		return nil, err
-	}
-	if schema, ok := val.(*glib.SettingsSchema); ok {
-		return schema, nil
-	} else {
-		return nil, errors.New("GLib settings-schema property is not convertible to SettingsSchema")
-	}
+// GetGdkVersion return actually installed GDK version.
+func GetGdkVersion() (magor, minor, micro uint) {
+	magor = gdk.GetMajorVersion()
+	minor = gdk.GetMinorVersion()
+	micro = gdk.GetMicroVersion()
+	return
 }
 
-// FixProgressBarCSS eliminate issue with default GtkProgressBar control formating.
-func applyStyleCSS(widget *gtk.Widget, css string) error {
+// ApplyStyleCSS apply custom CSS to specific widget.
+func ApplyStyleCSS(widget *gtk.Widget, css string) error {
 	//	provider, err := gtk.CssProviderNew()
 	provider, err := gtk.CssProviderNew()
 	if err != nil {
@@ -795,12 +878,215 @@ func applyStyleCSS(widget *gtk.Widget, css string) error {
 		return err
 	}
 	sc.AddProvider(provider, gtk.STYLE_PROVIDER_PRIORITY_USER)
-	//sc.AddClass("osd")
 	return nil
 }
 
+// AddStyleClasses apply specific CSS style classes to the widget.
+func AddStyleClasses(widget *gtk.Widget, cssClasses []string) error {
+	sc, err := widget.GetStyleContext()
+	if err != nil {
+		return err
+	}
+	for _, className := range cssClasses {
+		sc.AddClass(className)
+	}
+	return nil
+}
+
+// AddStyleClass apply specific CSS style class to the widget.
+func AddStyleClass(widget *gtk.Widget, cssClass string) error {
+	sc, err := widget.GetStyleContext()
+	if err != nil {
+		return err
+	}
+	sc.AddClass(cssClass)
+	return nil
+}
+
+// RemoveStyleClass remove specific CSS style class from the widget.
+func RemoveStyleClass(widget *gtk.Widget, cssClass string) error {
+	sc, err := widget.GetStyleContext()
+	if err != nil {
+		return err
+	}
+	sc.RemoveClass(cssClass)
+	return nil
+}
+
+// RemoveStyleClasses remove specific CSS style classes from the widget.
+func RemoveStyleClasses(widget *gtk.Widget, cssClasses []string) error {
+	sc, err := widget.GetStyleContext()
+	if err != nil {
+		return err
+	}
+	for _, className := range cssClasses {
+		sc.RemoveClass(className)
+	}
+	return nil
+}
+
+// RemoveStyleClassesAll remove all style classes from the widget.
+func RemoveStyleClassesAll(widget *gtk.Widget) error {
+	sc, err := widget.GetStyleContext()
+	if err != nil {
+		return err
+	}
+	list := sc.ListClasses()
+	list.Foreach(func(item interface{}) {
+		cssClass := item.(string)
+		sc.RemoveClass(cssClass)
+	})
+	return nil
+}
+
+// ========================================================================================
+// ************************* GTK+ UI UTILITIES SECTION END ********************************
+// ========================================================================================
+
+// ==========================================================================================
+// ************************* GLIB SETTINGS UTILITIES SECTION START **************************
+// ==========================================================================================
+//	In real application use this code section as utilities to simplify creation
+//	of GLIB/GTK+ components and widgets, including menus, dialog boxes, messages,
+//	application settings and so on...
+
+// SettingsStore simplify work with glib.Settings.
+type SettingsStore struct {
+	settings *glib.Settings
+	schemaID string
+	path     string
+}
+
+// removeExcessSlashChars normalize path and remove excess path divider in glib.Settings schema path.
+func removeExcessSlashChars(path string) string {
+	var buf bytes.Buffer
+	lastCharIsSlash := false
+	for _, ch := range path {
+		if ch == '/' {
+			if lastCharIsSlash {
+				continue
+			}
+			lastCharIsSlash = true
+		} else {
+			lastCharIsSlash = false
+		}
+		buf.WriteRune(ch)
+	}
+
+	path = buf.String()
+
+	return path
+}
+
+// NewSettingsStore create new SettingsStore object - wrapper on glib.Settings.
+func NewSettingsStore(schemaID string, path string, changed func()) (*SettingsStore, error) {
+	path = removeExcessSlashChars(path)
+	gs, err := glib.SettingsNewWithPath(schemaID, path)
+	if err != nil {
+		return nil, err
+	}
+	_, err = gs.Connect("changed", func() {
+		if changed != nil {
+			changed()
+		}
+	})
+	if err != nil {
+		return nil, err
+	}
+	v := &SettingsStore{settings: gs, schemaID: schemaID, path: path}
+	return v, nil
+}
+
+// GetChildSettingsStore generate child glib.Settings object to manipulate with nested scheme.
+func (v *SettingsStore) GetChildSettingsStore(suffixSchemaID string, suffixPath string,
+	changed func()) (*SettingsStore, error) {
+
+	newSchemaID := v.schemaID + "." + suffixSchemaID
+	newPath := v.path + "/" + suffixPath + "/"
+	settings, err := NewSettingsStore(newSchemaID, newPath, changed)
+	return settings, err
+}
+
+// GetSchema obtains glib.SettingsSchema from glib.Settings.
+func (v *SettingsStore) GetSchema() (*glib.SettingsSchema, error) {
+	val, err := v.settings.GetProperty("settings-schema")
+	if err != nil {
+		return nil, err
+	}
+	if schema, ok := val.(*glib.SettingsSchema); ok {
+		return schema, nil
+	} else {
+		return nil, errors.New("GLib settings-schema property is not convertible to SettingsSchema")
+	}
+}
+
+// SettingsArray is a way how to create multiple (indexed) GLib setting's group
+// based on single schema. For instance, multiple backup profiles with identical
+// settings inside of each profile.
+type SettingsArray struct {
+	store   *SettingsStore
+	arrayID string
+}
+
+// NewSettingsArray creates new SettingsArray, to keep/add/delete new
+// indexed glib.Settings object based on single schema.
+func (v *SettingsStore) NewSettingsArray(arrayID string) *SettingsArray {
+	sa := &SettingsArray{store: v, arrayID: arrayID}
+	return sa
+}
+
+// DeleteNode delete specific indexed glib.Settings defined by nodeID.
+func (v *SettingsArray) DeleteNode(childStore *SettingsStore, nodeID string) error {
+	// Delete/reset whole child settings object.
+	schema, err := childStore.GetSchema()
+	if err != nil {
+		return err
+	}
+	keys := schema.ListKeys()
+	for _, key := range keys {
+		childStore.settings.Reset(key)
+	}
+
+	// Delete index from the array, which identify
+	// child object settings.
+	original := v.store.settings.GetStrv(v.arrayID)
+	var updated []string
+	for _, id := range original {
+		if id != nodeID {
+			updated = append(updated, id)
+		}
+	}
+	v.store.settings.SetStrv(v.arrayID, updated)
+	return nil
+}
+
+// AddNode add specific indexed glib.Settings identified by returned nodeID.
+func (v *SettingsArray) AddNode() (nodeID string, err error) {
+	list := v.store.settings.GetStrv(v.arrayID)
+	// Append index to the end of array, which reference to the list
+	// of child settings based on single settings schema.
+	var ni int
+	if len(list) > 0 {
+		ni, err = strconv.Atoi(list[len(list)-1])
+		if err != nil {
+			return "", err
+		}
+		ni++
+	}
+	list = append(list, strconv.Itoa(ni))
+	v.store.settings.SetStrv(v.arrayID, list)
+	return list[len(list)-1], nil
+}
+
+// GetArrayIDs return identifiers of glib.Settings with common schema,
+// which can be accessed using id from the list.
+func (v *SettingsArray) GetArrayIDs() []string {
+	list := v.store.settings.GetStrv(v.arrayID)
+	return list
+}
+
 // Binding cache link between Key string identifier and GLIB object property.
-// Code taken from https://github.com/gnunn1/tilix project.
+// Code partially taken from https://github.com/gnunn1/tilix project.
 type Binding struct {
 	Key      string
 	Object   glib.IObject
@@ -815,18 +1101,18 @@ type Binding struct {
 // until one is set.
 type BindingHelper struct {
 	bindings []Binding
-	settings *glib.Settings
+	settings *SettingsStore
 }
 
-// BindingHelperNew creates new BindingHelper object.
-func BindingHelperNew(settings *glib.Settings) *BindingHelper {
-	bh := &BindingHelper{settings: settings}
+// NewBindingHelper creates new BindingHelper object.
+func (v *SettingsStore) NewBindingHelper() *BindingHelper {
+	bh := &BindingHelper{settings: v}
 	return bh
 }
 
 // SetSettings will replace underlying GLIB Settings object to unbind
 // previously set bindings and re-bind to the new settings automatically.
-func (v *BindingHelper) SetSettings(value *glib.Settings) {
+func (v *BindingHelper) SetSettings(value *SettingsStore) {
 	if value != v.settings {
 		if v.settings != nil {
 			v.Unbind()
@@ -841,7 +1127,7 @@ func (v *BindingHelper) SetSettings(value *glib.Settings) {
 func (v *BindingHelper) bindAll() {
 	if v.settings != nil {
 		for _, b := range v.bindings {
-			v.settings.Bind(b.Key, b.Object, b.Property, b.Flags)
+			v.settings.settings.Bind(b.Key, b.Object, b.Property, b.Flags)
 		}
 	}
 }
@@ -855,14 +1141,14 @@ func (v *BindingHelper) addBind(key string, object glib.IObject, property string
 func (v *BindingHelper) Bind(key string, object glib.IObject, property string, flags glib.SettingsBindFlags) {
 	v.addBind(key, object, property, flags)
 	if v.settings != nil {
-		v.settings.Bind(key, object, property, flags)
+		v.settings.settings.Bind(key, object, property, flags)
 	}
 }
 
 // Unbind all added binds from settings object.
 func (v *BindingHelper) Unbind() {
 	for _, b := range v.bindings {
-		v.settings.Unbind(b.Object, b.Property)
+		v.settings.settings.Unbind(b.Object, b.Property)
 	}
 }
 
@@ -872,120 +1158,70 @@ func (v *BindingHelper) Clear() {
 	v.bindings = nil
 }
 
-// SettingsArray is a way how to create multiple (indexed) GLib setting's group.
-// For instance, multiple backup profiles with identical
-// settings inside of each profile. Either each backup profile may
-// contain more than one data source for backup.
-type SettingsArray struct {
-	settings *glib.Settings
-	arrayID  string
-}
-
-func NewSettingsArray(settings *glib.Settings, arrayID string) *SettingsArray {
-	v := &SettingsArray{settings: settings, arrayID: arrayID}
-	return v
-}
-
-func (v *SettingsArray) DeleteNode(childSettings *glib.Settings, nodeID string) error {
-	schema, err := GetSchema(childSettings)
-	if err != nil {
-		return err
-	}
-	keys := schema.ListKeys()
-	for _, key := range keys {
-		childSettings.Reset(key)
-	}
-
-	sources := v.settings.GetStrv(v.arrayID)
-	var newSources []string
-	for _, id := range sources {
-		if id != nodeID {
-			newSources = append(newSources, id)
-		}
-	}
-	v.settings.SetStrv(v.arrayID, newSources)
-	return nil
-}
-
-func (v *SettingsArray) AddNode() (nodeID string, err error) {
-	sources := v.settings.GetStrv(v.arrayID)
-	var ni int
-	if len(sources) > 0 {
-		ni, err = strconv.Atoi(sources[len(sources)-1])
-		if err != nil {
-			return "", err
-		}
-		ni++
-	}
-	//lg.Println(spew.Sprintf("New node id: %+v", ni))
-	sources = append(sources, strconv.Itoa(ni))
-	v.settings.SetStrv(v.arrayID, sources)
-	return sources[len(sources)-1], nil
-}
-
-func (v *SettingsArray) GetArrayIDs() []string {
-	sources := v.settings.GetStrv(v.arrayID)
-	return sources
-}
-
-// ========================================================================================
-// ************************* GTK GUI UTILITIES SECTION END ********************************
-// ========================================================================================
+// ==========================================================================================
+// ************************* GLIB SETTINGS UTILITIES SECTION END ****************************
+// ==========================================================================================
 
 // String constants used as titles/identifiers
 var (
-	APP_ID string = "org.d2r2.gotk3.cool_app_1"
-
-	APP_TITLE string = "Cool App (GTK+ 3 UI adaptation for golang based on imporved GOTK3)"
+	APP_TITLE = "Cool App (GTK+ 3 UI adaptation for golang based on imporved GOTK3)"
 
 	//Preference Constants
-	SETTINGS_ID string = APP_ID + ".Settings"
+	APP_SCHEMA_ID              = "org.d2r2.gotk3.cool_app_1"
+	SETTINGS_SCHEMA_ID         = APP_SCHEMA_ID + "." + "Settings"
+	SETTINGS_SCHEMA_PATH       = "/org/gtk/gotk3/cool_app_1/"
+	PROFILE_SCHEMA_SUFFIX_ID   = "Profile"
+	PROFILE_SCHEMA_SUFFIX_PATH = "profiles/%s"
 
-	SETTINGS_AUTO_HIDE_MOUSE_KEY                   string = "auto-hide-mouse"
-	SETTINGS_DONT_SHOW_ABOUT_ON_STARTUP_KEY        string = "dont-show-about-dialog-on-startup"
-	SETTINGS_PROMPT_ON_NEW_SESSION_KEY             string = "prompt-on-new-session"
-	SETTINGS_ENABLE_TRANSPARENCY_KEY               string = "enable-transparency"
-	SETTINGS_CLOSE_WITH_LAST_SESSION_KEY           string = "close-with-last-session"
-	SETTINGS_APP_TITLE_KEY                         string = "app-title"
-	SETTINGS_CONTROL_CLICK_TITLE_KEY               string = "control-click-titlebar"
-	SETTINGS_INHERIT_WINDOW_STATE_KEY              string = "new-window-inherit-state"
-	SETTINGS_USE_OVERLAY_SCROLLBAR_KEY             string = "use-overlay-scrollbar"
-	SETTINGS_TERMINAL_FOCUS_FOLLOWS_MOUSE_KEY      string = "focus-follow-mouse"
-	SETTINGS_MIDDLE_CLICK_CLOSE_KEY                string = "middle-click-close"
-	SETTINGS_CONTROL_SCROLL_ZOOM_KEY               string = "control-scroll-zoom"
-	SETTINGS_WINDOW_SAVE_STATE_KEY                 string = "window-save-state"
-	SETTINGS_NOTIFY_ON_PROCESS_COMPLETE_KEY        string = "notify-on-process-complete"
-	SETTINGS_PASTE_ADVANCED_DEFAULT_KEY            string = "paste-advanced-default"
-	SETTINGS_UNSAFE_PASTE_ALERT_KEY                string = "unsafe-paste-alert"
-	SETTINGS_STRIP_FIRST_COMMENT_CHAR_ON_PASTE_KEY string = "paste-strip-first-char"
-	SETTINGS_COPY_ON_SELECT_KEY                    string = "copy-on-select"
-	SETTINGS_WINDOW_STYLE_KEY                      string = "window-style"
+	CFG_AUTO_HIDE_MOUSE_KEY                   = "auto-hide-mouse"
+	CFG_DONT_SHOW_ABOUT_ON_STARTUP_KEY        = "dont-show-about-dialog-on-startup"
+	CFG_PROMPT_ON_NEW_SESSION_KEY             = "prompt-on-new-session"
+	CFG_ENABLE_TRANSPARENCY_KEY               = "enable-transparency"
+	CFG_CLOSE_WITH_LAST_SESSION_KEY           = "close-with-last-session"
+	CFG_APP_TITLE_KEY                         = "app-title"
+	CFG_CONTROL_CLICK_TITLE_KEY               = "control-click-titlebar"
+	CFG_INHERIT_WINDOW_STATE_KEY              = "new-window-inherit-state"
+	CFG_USE_OVERLAY_SCROLLBAR_KEY             = "use-overlay-scrollbar"
+	CFG_TERMINAL_FOCUS_FOLLOWS_MOUSE_KEY      = "focus-follow-mouse"
+	CFG_MIDDLE_CLICK_CLOSE_KEY                = "middle-click-close"
+	CFG_CONTROL_SCROLL_ZOOM_KEY               = "control-scroll-zoom"
+	CFG_WINDOW_SAVE_STATE_KEY                 = "window-save-state"
+	CFG_NOTIFY_ON_PROCESS_COMPLETE_KEY        = "notify-on-process-complete"
+	CFG_PASTE_ADVANCED_DEFAULT_KEY            = "paste-advanced-default"
+	CFG_UNSAFE_PASTE_ALERT_KEY                = "unsafe-paste-alert"
+	CFG_STRIP_FIRST_COMMENT_CHAR_ON_PASTE_KEY = "paste-strip-first-char"
+	CFG_COPY_ON_SELECT_KEY                    = "copy-on-select"
+	CFG_WINDOW_STYLE_KEY                      = "window-style"
 
-	SETTINGS_TERMINAL_TITLE_STYLE_KEY          string = "terminal-title-style"
-	SETTINGS_TERMINAL_TITLE_STYLE_VALUE_NORMAL string = "normal"
-	SETTINGS_TERMINAL_TITLE_STYLE_VALUE_SMALL  string = "small"
-	SETTINGS_TERMINAL_TITLE_STYLE_VALUE_NONE   string = "none"
+	CFG_TERMINAL_TITLE_STYLE_KEY          = "terminal-title-style"
+	CFG_TERMINAL_TITLE_STYLE_VALUE_NORMAL = "normal"
+	CFG_TERMINAL_TITLE_STYLE_VALUE_SMALL  = "small"
+	CFG_TERMINAL_TITLE_STYLE_VALUE_NONE   = "none"
 
-	SETTINGS_TAB_POSITION_KEY string = "tab-position"
+	CFG_TAB_POSITION_KEY = "tab-position"
 
 	// Theme Settings
-	SETTINGS_THEME_VARIANT_KEY          string = "theme-variant"
-	SETTINGS_THEME_VARIANT_SYSTEM_VALUE string = "system"
-	SETTINGS_THEME_VARIANT_LIGHT_VALUE  string = "light"
-	SETTINGS_THEME_VARIANT_DARK_VALUE   string = "dark"
+	CFG_THEME_VARIANT_KEY          = "theme-variant"
+	CFG_THEME_VARIANT_SYSTEM_VALUE = "system"
+	CFG_THEME_VARIANT_LIGHT_VALUE  = "light"
+	CFG_THEME_VARIANT_DARK_VALUE   = "dark"
 
-	SETTINGS_BACKGROUND_IMAGE_KEY                string = "background-image"
-	SETTINGS_BACKGROUND_IMAGE_MODE_KEY           string = "background-image-mode"
-	SETTINGS_BACKGROUND_IMAGE_MODE_SCALE_VALUE   string = "scale"
-	SETTINGS_BACKGROUND_IMAGE_MODE_TILE_VALUE    string = "tile"
-	SETTINGS_BACKGROUND_IMAGE_MODE_CENTER_VALUE  string = "center"
-	SETTINGS_BACKGROUND_IMAGE_MODE_STRETCH_VALUE string = "stretch"
+	CFG_BACKGROUND_IMAGE_KEY                = "background-image"
+	CFG_BACKGROUND_IMAGE_MODE_KEY           = "background-image-mode"
+	CFG_BACKGROUND_IMAGE_MODE_SCALE_VALUE   = "scale"
+	CFG_BACKGROUND_IMAGE_MODE_TILE_VALUE    = "tile"
+	CFG_BACKGROUND_IMAGE_MODE_CENTER_VALUE  = "center"
+	CFG_BACKGROUND_IMAGE_MODE_STRETCH_VALUE = "stretch"
 
-	SETTINGS_SIDEBAR_RIGHT string = "sidebar-on-right"
+	CFG_SIDEBAR_RIGHT = "sidebar-on-right"
 
-	SETTINGS_TERMINAL_TITLE_SHOW_WHEN_SINGLE_KEY string = "terminal-title-show-when-single"
+	CFG_TERMINAL_TITLE_SHOW_WHEN_SINGLE_KEY = "terminal-title-show-when-single"
 
-	SETTINGS_USE_TABS_KEY string = "use-tabs"
+	CFG_USE_TABS_KEY = "use-tabs"
+
+	CFG_BACKUP_LIST         = "profile-list"
+	CFG_PROFILE_NAME        = "profile-name"
+	CFG_PROFILE_DESCRIPTION = "profile-description"
 )
 
 // Keeps here global fullscreen data, which available throughout the application.
@@ -1472,7 +1708,7 @@ func createQuitAction(win *gtk.Window) (glib.IAction, error) {
 
 // Create regular "about dialog" action.
 // Action trigger is included.
-func createAboutAction(win *gtk.Window, gsSettings *glib.Settings) (glib.IAction, error) {
+func createAboutAction(win *gtk.Window, appSettings *SettingsStore) (glib.IAction, error) {
 	act, err := glib.SimpleActionNew("AboutAction", nil)
 	if err != nil {
 		return nil, err
@@ -1494,15 +1730,15 @@ func createAboutAction(win *gtk.Window, gsSettings *glib.Settings) (glib.IAction
 		dlg.SetAuthors([]string{"Written by Denis Dyakov <denis.dyakov@gmail.com>"})
 		dlg.SetProgramName("Cool App")
 		dlg.SetLogoIconName("face-cool-symbolic")
-		dlg.SetVersion("v0.1")
+		dlg.SetVersion("v0.2")
 
-		bh := BindingHelperNew(gsSettings)
+		bh := appSettings.NewBindingHelper()
 		// Show about dialog on application startup
 		cbAboutInfo, err := gtk.CheckButtonNewWithLabel("Do not show about information on app startup")
 		if err != nil {
 			log.Fatal(err)
 		}
-		bh.Bind(SETTINGS_DONT_SHOW_ABOUT_ON_STARTUP_KEY, cbAboutInfo, "active", glib.SETTINGS_BIND_DEFAULT)
+		bh.Bind(CFG_DONT_SHOW_ABOUT_ON_STARTUP_KEY, cbAboutInfo, "active", glib.SETTINGS_BIND_DEFAULT)
 
 		content, err := dlg.GetContentArea()
 		if err != nil {
@@ -1517,20 +1753,34 @@ func createAboutAction(win *gtk.Window, gsSettings *glib.Settings) (glib.IAction
 		gtkMajor, gtkMinor, gtkMicro := GetGtkVersion()
 		gtkBuildVersion := gtk.GetBuildVersion()
 		buf.WriteString(fmt.Sprintln("This application built for education purpose and compose"))
-		buf.WriteString(fmt.Sprintln("practices to write GTK+3 user interface in Go language."))
+		buf.WriteString(fmt.Sprintln("code patterns to write GTK+3 user interface in Go language."))
 		buf.WriteString(fmt.Sprintln())
 		buf.WriteString(fmt.Sprintln("Environment:"))
-		buf.WriteString(fmt.Sprintln(fmt.Sprintf("GLIB compiled version %s, detected version %d.%d.%d",
+		buf.WriteString(fmt.Sprintln(fmt.Sprintf("GLIB compiled version %s, detected version %d.%d.%d.",
 			glibBuildVersion, glibMajor, glibMinor, glibMicro)))
-		buf.WriteString(fmt.Sprintln(fmt.Sprintf("GTK+ compiled version %s, detected version %d.%d.%d",
+		buf.WriteString(fmt.Sprintln(fmt.Sprintf("GTK+ compiled version %s, detected version %d.%d.%d.",
 			gtkBuildVersion, gtkMajor, gtkMinor, gtkMicro)))
-		buf.WriteString(fmt.Sprintln(fmt.Sprintf("Application compiled with %s %s",
+
+		display, err := gdk.DisplayGetDefault()
+		if err != nil {
+			log.Fatal(err)
+		}
+		if gdk.IsWaylandDisplay(display) {
+			buf.WriteString("WAYLAND display detected.")
+			buf.WriteString(fmt.Sprintln())
+		} else if gdk.IsX11Display(display) {
+			buf.WriteString("X11 display detected.")
+			buf.WriteString(fmt.Sprintln())
+		}
+
+		buf.WriteString(fmt.Sprintln(fmt.Sprintf("Application compiled with %s %s.",
 			runtime.Version(), runtime.GOARCH)))
 		buf.WriteString(fmt.Sprintln())
 		buf.WriteString(fmt.Sprintln("Features:"))
 		buf.WriteString(fmt.Sprintln("- Actions as code entry points with states and stateless."))
 		buf.WriteString(fmt.Sprintln("- Fullscreen mode code pattern out-of-the-box."))
 		buf.WriteString(fmt.Sprintln("- Preference dialog demo with save/restore functionality out-of-the-box."))
+		buf.WriteString(fmt.Sprintln("  Multi-profile settings option implemented."))
 		buf.WriteString(fmt.Sprintln("- Modern popover menu functionality (right upper corner button)."))
 		buf.WriteString(fmt.Sprintln("- Various dialog's windows demonstations."))
 		buf.WriteString(fmt.Sprintln())
@@ -1582,7 +1832,7 @@ func createDialogAction1(win *gtk.Window) (glib.IAction, error) {
 			{"_OK", gtk.RESPONSE_OK, false, nil},
 		}
 
-		response, err := RunMessageDialog(win, title, "", paragraphs, false, buttons,
+		dialog, err := SetupMessageDialog(win, title, "", paragraphs, buttons,
 			func(area *gtk.Box) error {
 				lbl, err := gtk.LabelNew("Click the link below for more information, if still not clear:")
 				if err != nil {
@@ -1608,8 +1858,7 @@ func createDialogAction1(win *gtk.Window) (glib.IAction, error) {
 		if err != nil {
 			log.Fatal(err)
 		}
-
-		PrintDialogResponse(response)
+		dialog.Run(false)
 	})
 	if err != nil {
 		return nil, err
@@ -1646,7 +1895,7 @@ func createDialogAction2(win *gtk.Window) (glib.IAction, error) {
 			{"_OK", gtk.RESPONSE_OK, false, nil},
 		}
 
-		response, err := RunDialog(win, gtk.MESSAGE_WARNING, true, title, paragraphs, false, buttons,
+		_, err = RunDialog(win, gtk.MESSAGE_WARNING, true, title, paragraphs, false, buttons,
 			func(area *gtk.Box) error {
 				lbl, err := gtk.LabelNew("Click the link below for more information, if still not clear:")
 				if err != nil {
@@ -1672,8 +1921,6 @@ func createDialogAction2(win *gtk.Window) (glib.IAction, error) {
 		if err != nil {
 			log.Fatal(err)
 		}
-
-		PrintDialogResponse(response)
 	})
 	if err != nil {
 		return nil, err
@@ -1723,7 +1970,7 @@ func createDialogAction3(win *gtk.Window) (glib.IAction, error) {
 			{"_No", gtk.RESPONSE_NO, true, nil},
 		}
 
-		response, err := RunMessageDialog(win, title, "", paragraphs, true, buttons,
+		dialog, err := SetupMessageDialog(win, title, "", paragraphs, buttons,
 			func(area *gtk.Box) error {
 				lbl, err := gtk.LabelNew("Click the link below for more information, if still not clear:")
 				if err != nil {
@@ -1743,8 +1990,7 @@ func createDialogAction3(win *gtk.Window) (glib.IAction, error) {
 		if err != nil {
 			log.Fatal(err)
 		}
-
-		PrintDialogResponse(response)
+		dialog.Run(true)
 	})
 	if err != nil {
 		return nil, err
@@ -1792,13 +2038,11 @@ func createDialogAction4(win *gtk.Window) (glib.IAction, error) {
 			{"_No", gtk.RESPONSE_NO, false, nil},
 		}
 
-		response, err := RunDialog(win, gtk.MESSAGE_QUESTION, true, title, paragraphs, true, buttons,
+		_, err = RunDialog(win, gtk.MESSAGE_QUESTION, true, title, paragraphs, true, buttons,
 			nil)
 		if err != nil {
 			log.Fatal(err)
 		}
-
-		PrintDialogResponse(response)
 	})
 	if err != nil {
 		return nil, err
@@ -1842,13 +2086,11 @@ func createDialogAction5(win *gtk.Window) (glib.IAction, error) {
 			{"_No", gtk.RESPONSE_NO, true, nil},
 		}
 
-		response, err := RunDialog(win, gtk.MESSAGE_QUESTION, false, title, paragraphs, true, buttons,
+		_, err = RunDialog(win, gtk.MESSAGE_QUESTION, false, title, paragraphs, true, buttons,
 			nil)
 		if err != nil {
 			log.Fatal(err)
 		}
-
-		PrintDialogResponse(response)
 	})
 	if err != nil {
 		return nil, err
@@ -1858,9 +2100,9 @@ func createDialogAction5(win *gtk.Window) (glib.IAction, error) {
 }
 
 // Create sophisticated multi-page preference dialog
-// with save/restore functionallity to/from the GLib Setting object.
+// with save/restore functionality to/from the GLib Setting object.
 // Action activation require to have GLib Setting Schema
-// prliminary installed, otherwise will not work raising message.
+// preliminary installed, otherwise will not work raising message.
 // Installation bash script from app folder must be performed in advance.
 func createPreferenceAction(win *gtk.Window) (glib.IAction, error) {
 	act, err := glib.SimpleActionNew("PreferenceAction", nil)
@@ -1888,7 +2130,7 @@ func createPreferenceAction(win *gtk.Window) (glib.IAction, error) {
 
 		if found {
 
-			win, err := createPreferenceDialog(app)
+			win, err := createPreferenceDialog(SETTINGS_SCHEMA_ID, SETTINGS_SCHEMA_PATH, app)
 			if err != nil {
 				log.Fatal(err)
 			}
@@ -2037,6 +2279,138 @@ func createEventBox(data *FullscreenGlobalData) (*gtk.EventBox, error) {
 	return eb, nil
 }
 
+// PreferenceRow keeps here extra data for each page of multi-page preference dialog.
+type PreferenceRow struct {
+	sync.RWMutex
+	ID        string
+	name      string
+	Title     string
+	Row       *gtk.ListBoxRow
+	Container *gtk.Box
+	Label     *gtk.Label
+	Icon      *gtk.Image
+	Page      *gtk.Container
+	Profile   bool
+}
+
+// PreferenceRowNew instantiate new PreferenceRow object.
+func PreferenceRowNew(id, title string, page *gtk.Container,
+	profile bool) (*PreferenceRow, error) {
+
+	box, err := gtk.BoxNew(gtk.ORIENTATION_HORIZONTAL, 0)
+	if err != nil {
+		return nil, err
+	}
+	SetAllMargins(box, 6)
+	box.SetSpacing(6)
+
+	lbl, err := gtk.LabelNew("")
+	if err != nil {
+		return nil, err
+	}
+	lbl.SetHAlign(gtk.ALIGN_START)
+	box.PackStart(lbl, false, true, 0)
+
+	row, err := gtk.ListBoxRowNew()
+	if err != nil {
+		return nil, err
+	}
+	row.Add(box)
+
+	pr := &PreferenceRow{ID: id, Title: title, Row: row,
+		Container: box, Label: lbl, Page: page,
+		Profile: profile}
+
+	pr.SetName(title)
+
+	return pr, nil
+}
+
+// SetName set profile name as a template "Profile(<name>)"
+func (v *PreferenceRow) SetName(name string) {
+	v.Lock()
+	defer v.Unlock()
+
+	v.name = name
+	if v.Profile {
+		publicName := fmt.Sprintf("Profile (%s)", name)
+		v.Label.SetText(publicName)
+	} else {
+		v.Label.SetText(name)
+	}
+}
+
+// GetName get name.
+func (v *PreferenceRow) GetName() string {
+	v.RLock()
+	defer v.RUnlock()
+
+	return v.name
+}
+
+// PreferenceRowList keeps a link between GtkListBoxRow
+// and specific PreferenceRow object.
+type PreferenceRowList struct {
+	m      map[uintptr]*PreferenceRow
+	sorted []uintptr
+}
+
+func PreferenceRowListNew() *PreferenceRowList {
+	var m = make(map[uintptr]*PreferenceRow)
+	v := &PreferenceRowList{m: m}
+	return v
+}
+
+func (v *PreferenceRowList) Append(row *PreferenceRow) {
+	v.m[row.Row.Native()] = row
+	v.sorted = append(v.sorted, row.Row.Native())
+}
+
+func (v *PreferenceRowList) Delete(rowID uintptr) {
+	delete(v.m, rowID)
+	for ind, val := range v.sorted {
+		if val == rowID {
+			v.sorted = append(v.sorted[:ind], v.sorted[ind+1:]...)
+			break
+		}
+	}
+}
+
+func (v *PreferenceRowList) Get(rowID uintptr) *PreferenceRow {
+	return v.m[rowID]
+}
+
+func (v *PreferenceRowList) GetLastProfileListIndex() int {
+	lastIndex := -1
+	for _, rowID := range v.sorted {
+		if v.m[rowID].Profile && v.m[rowID].Row.GetIndex() > lastIndex {
+			lastIndex = v.m[rowID].Row.GetIndex()
+		}
+	}
+	return lastIndex
+}
+
+func (v *PreferenceRowList) GetProfileCount() int {
+	count := 0
+	for _, rowID := range v.sorted {
+		if v.m[rowID].Profile {
+			count++
+		}
+	}
+	return count
+}
+
+func (v *PreferenceRowList) GetProfiles() []*PreferenceRow {
+	var rows []*PreferenceRow
+	for _, rowID := range v.sorted {
+		if v.m[rowID].Profile {
+			rows = append(rows, v.m[rowID])
+		}
+	}
+	return rows
+}
+
+/*
 // Keeps here extra data for each page of multi-page preference dialog.
 type PreferenceRow struct {
 	Name  string
@@ -2060,10 +2434,11 @@ func PreferenceRowNew(name, title string) (*PreferenceRow, *gtk.ListBoxRow, erro
 
 	return pr, lbr, nil
 }
+*/
 
 // Create preference dialog with "Global" page, where controls
 // being bound to GLib Setting object to save/restore functionality.
-func GlobalPreferencesNew(gsSettings *glib.Settings) (*gtk.Box, error) {
+func GlobalPreferencesNew(appSettings *SettingsStore) (*gtk.Container, error) {
 	box, err := gtk.BoxNew(gtk.ORIENTATION_VERTICAL, 6)
 	if err != nil {
 		return nil, err
@@ -2071,7 +2446,7 @@ func GlobalPreferencesNew(gsSettings *glib.Settings) (*gtk.Box, error) {
 
 	SetAllMargins(box, 18)
 
-	bh := BindingHelperNew(gsSettings)
+	bh := appSettings.NewBindingHelper()
 
 	lblBehavior, err := gtk.LabelNew(fmt.Sprintf("<b>%s</b>", "Behavior"))
 	if err != nil {
@@ -2086,7 +2461,7 @@ func GlobalPreferencesNew(gsSettings *glib.Settings) (*gtk.Box, error) {
 	if err != nil {
 		return nil, err
 	}
-	bh.Bind(SETTINGS_DONT_SHOW_ABOUT_ON_STARTUP_KEY, cbAboutInfo, "active", glib.SETTINGS_BIND_DEFAULT)
+	bh.Bind(CFG_DONT_SHOW_ABOUT_ON_STARTUP_KEY, cbAboutInfo, "active", glib.SETTINGS_BIND_DEFAULT)
 	box.Add(cbAboutInfo)
 
 	//Prompt on new session
@@ -2094,7 +2469,7 @@ func GlobalPreferencesNew(gsSettings *glib.Settings) (*gtk.Box, error) {
 	if err != nil {
 		return nil, err
 	}
-	bh.Bind(SETTINGS_PROMPT_ON_NEW_SESSION_KEY, cbPrompt, "active", glib.SETTINGS_BIND_DEFAULT)
+	bh.Bind(CFG_PROMPT_ON_NEW_SESSION_KEY, cbPrompt, "active", glib.SETTINGS_BIND_DEFAULT)
 	box.Add(cbPrompt)
 
 	//Focus follows the mouse
@@ -2102,7 +2477,7 @@ func GlobalPreferencesNew(gsSettings *glib.Settings) (*gtk.Box, error) {
 	if err != nil {
 		return nil, err
 	}
-	bh.Bind(SETTINGS_TERMINAL_FOCUS_FOLLOWS_MOUSE_KEY, cbFocusMouse, "active", glib.SETTINGS_BIND_DEFAULT)
+	bh.Bind(CFG_TERMINAL_FOCUS_FOLLOWS_MOUSE_KEY, cbFocusMouse, "active", glib.SETTINGS_BIND_DEFAULT)
 	box.Add(cbFocusMouse)
 
 	//Auto hide the mouse
@@ -2110,7 +2485,7 @@ func GlobalPreferencesNew(gsSettings *glib.Settings) (*gtk.Box, error) {
 	if err != nil {
 		return nil, err
 	}
-	bh.Bind(SETTINGS_AUTO_HIDE_MOUSE_KEY, cbAutoHideMouse, "active", glib.SETTINGS_BIND_DEFAULT)
+	bh.Bind(CFG_AUTO_HIDE_MOUSE_KEY, cbAutoHideMouse, "active", glib.SETTINGS_BIND_DEFAULT)
 	box.Add(cbAutoHideMouse)
 
 	//middle click closes the terminal
@@ -2118,7 +2493,7 @@ func GlobalPreferencesNew(gsSettings *glib.Settings) (*gtk.Box, error) {
 	if err != nil {
 		return nil, err
 	}
-	bh.Bind(SETTINGS_MIDDLE_CLICK_CLOSE_KEY, cbMiddleClickClose, "active", glib.SETTINGS_BIND_DEFAULT)
+	bh.Bind(CFG_MIDDLE_CLICK_CLOSE_KEY, cbMiddleClickClose, "active", glib.SETTINGS_BIND_DEFAULT)
 	box.Add(cbMiddleClickClose)
 
 	//zoom in/out terminal with scroll wheel
@@ -2126,7 +2501,7 @@ func GlobalPreferencesNew(gsSettings *glib.Settings) (*gtk.Box, error) {
 	if err != nil {
 		return nil, err
 	}
-	bh.Bind(SETTINGS_CONTROL_SCROLL_ZOOM_KEY, cbControlScrollZoom, "active", glib.SETTINGS_BIND_DEFAULT)
+	bh.Bind(CFG_CONTROL_SCROLL_ZOOM_KEY, cbControlScrollZoom, "active", glib.SETTINGS_BIND_DEFAULT)
 	box.Add(cbControlScrollZoom)
 
 	//require control modifier when clicking title
@@ -2134,7 +2509,7 @@ func GlobalPreferencesNew(gsSettings *glib.Settings) (*gtk.Box, error) {
 	if err != nil {
 		return nil, err
 	}
-	bh.Bind(SETTINGS_CONTROL_CLICK_TITLE_KEY, cbControlClickTitle, "active", glib.SETTINGS_BIND_DEFAULT)
+	bh.Bind(CFG_CONTROL_CLICK_TITLE_KEY, cbControlClickTitle, "active", glib.SETTINGS_BIND_DEFAULT)
 	box.Add(cbControlClickTitle)
 
 	//Closing of last session closes window
@@ -2142,14 +2517,14 @@ func GlobalPreferencesNew(gsSettings *glib.Settings) (*gtk.Box, error) {
 	if err != nil {
 		return nil, err
 	}
-	bh.Bind(SETTINGS_CLOSE_WITH_LAST_SESSION_KEY, cbCloseWithLastSession, "active", glib.SETTINGS_BIND_DEFAULT)
+	bh.Bind(CFG_CLOSE_WITH_LAST_SESSION_KEY, cbCloseWithLastSession, "active", glib.SETTINGS_BIND_DEFAULT)
 	box.Add(cbCloseWithLastSession)
 
 	cbNewWindowInheritState, err := gtk.CheckButtonNewWithLabel("New window inherits directory and profile from active terminal")
 	if err != nil {
 		return nil, err
 	}
-	bh.Bind(SETTINGS_INHERIT_WINDOW_STATE_KEY, cbNewWindowInheritState, "active", glib.SETTINGS_BIND_DEFAULT)
+	bh.Bind(CFG_INHERIT_WINDOW_STATE_KEY, cbNewWindowInheritState, "active", glib.SETTINGS_BIND_DEFAULT)
 	box.Add(cbNewWindowInheritState)
 
 	// Save window state (maximized, minimized, fullscreen) between invocations
@@ -2157,7 +2532,7 @@ func GlobalPreferencesNew(gsSettings *glib.Settings) (*gtk.Box, error) {
 	if err != nil {
 		return nil, err
 	}
-	bh.Bind(SETTINGS_WINDOW_SAVE_STATE_KEY, cbWindowSaveState, "active", glib.SETTINGS_BIND_DEFAULT)
+	bh.Bind(CFG_WINDOW_SAVE_STATE_KEY, cbWindowSaveState, "active", glib.SETTINGS_BIND_DEFAULT)
 	box.Add(cbWindowSaveState)
 
 	// *********** Clipboard Options
@@ -2174,7 +2549,7 @@ func GlobalPreferencesNew(gsSettings *glib.Settings) (*gtk.Box, error) {
 	if err != nil {
 		return nil, err
 	}
-	bh.Bind(SETTINGS_PASTE_ADVANCED_DEFAULT_KEY, cbAdvDefault, "active", glib.SETTINGS_BIND_DEFAULT)
+	bh.Bind(CFG_PASTE_ADVANCED_DEFAULT_KEY, cbAdvDefault, "active", glib.SETTINGS_BIND_DEFAULT)
 	box.Add(cbAdvDefault)
 
 	//Unsafe Paste Warning
@@ -2182,7 +2557,7 @@ func GlobalPreferencesNew(gsSettings *glib.Settings) (*gtk.Box, error) {
 	if err != nil {
 		return nil, err
 	}
-	bh.Bind(SETTINGS_UNSAFE_PASTE_ALERT_KEY, cbUnsafe, "active", glib.SETTINGS_BIND_DEFAULT)
+	bh.Bind(CFG_UNSAFE_PASTE_ALERT_KEY, cbUnsafe, "active", glib.SETTINGS_BIND_DEFAULT)
 	box.Add(cbUnsafe)
 
 	//Strip Paste
@@ -2190,7 +2565,7 @@ func GlobalPreferencesNew(gsSettings *glib.Settings) (*gtk.Box, error) {
 	if err != nil {
 		return nil, err
 	}
-	bh.Bind(SETTINGS_STRIP_FIRST_COMMENT_CHAR_ON_PASTE_KEY, cbStrip, "active", glib.SETTINGS_BIND_DEFAULT)
+	bh.Bind(CFG_STRIP_FIRST_COMMENT_CHAR_ON_PASTE_KEY, cbStrip, "active", glib.SETTINGS_BIND_DEFAULT)
 	box.Add(cbStrip)
 
 	//Copy on Select
@@ -2198,7 +2573,7 @@ func GlobalPreferencesNew(gsSettings *glib.Settings) (*gtk.Box, error) {
 	if err != nil {
 		return nil, err
 	}
-	bh.Bind(SETTINGS_COPY_ON_SELECT_KEY, cbCopyOnSelect, "active", glib.SETTINGS_BIND_DEFAULT)
+	bh.Bind(CFG_COPY_ON_SELECT_KEY, cbCopyOnSelect, "active", glib.SETTINGS_BIND_DEFAULT)
 	box.Add(cbCopyOnSelect)
 
 	// Disclaimer
@@ -2209,9 +2584,10 @@ func GlobalPreferencesNew(gsSettings *glib.Settings) (*gtk.Box, error) {
 	box.Add(wdg)
 	var buf bytes.Buffer
 	buf.WriteString(fmt.Sprintln("******************************************************"))
-	buf.WriteString(fmt.Sprintln("Design of this preference page taken from <a href=\"https://github.com/gnunn1/tilix\">Tilix</a> project."))
-	buf.WriteString(fmt.Sprintln("Settings here mainly for demonstration purpose and have"))
-	buf.WriteString(fmt.Sprintln("minimal impact to application, or none at all."))
+	buf.WriteString(fmt.Sprintln("Design of this preference page taken from " +
+		"<a href=\"https://github.com/gnunn1/tilix\">Tilix</a> project."))
+	buf.WriteString(fmt.Sprintln("Settings here mainly for demonstration purpose and"))
+	buf.WriteString(fmt.Sprintln("have minimal impact to application."))
 	buf.WriteString(fmt.Sprintln("******************************************************"))
 	lbl, err := gtk.LabelNew("")
 	if err != nil {
@@ -2229,12 +2605,12 @@ func GlobalPreferencesNew(gsSettings *glib.Settings) (*gtk.Box, error) {
 		return nil, err
 	}
 
-	return box, nil
+	return &box.Container, nil
 }
 
 // Create preference dialog with "Appearance" page, where controls
 // being bound to GLib Setting object to save/restore functionality.
-func AppearancePreferencesNew(gsSettings *glib.Settings) (*gtk.Box, error) {
+func AppearancePreferencesNew(appSettings *SettingsStore) (*gtk.Container, error) {
 	box, err := gtk.BoxNew(gtk.ORIENTATION_VERTICAL, 6)
 	if err != nil {
 		return nil, err
@@ -2242,7 +2618,7 @@ func AppearancePreferencesNew(gsSettings *glib.Settings) (*gtk.Box, error) {
 
 	SetAllMargins(box, 18)
 
-	bh := BindingHelperNew(gsSettings)
+	bh := appSettings.NewBindingHelper()
 
 	grid, err := gtk.GridNew()
 	grid.SetColumnSpacing(12)
@@ -2267,7 +2643,7 @@ func AppearancePreferencesNew(gsSettings *glib.Settings) (*gtk.Box, error) {
 	if err != nil {
 		return nil, err
 	}
-	bh.Bind(SETTINGS_WINDOW_STYLE_KEY, cbWindowStyle, "active-id", glib.SETTINGS_BIND_DEFAULT)
+	bh.Bind(CFG_WINDOW_STYLE_KEY, cbWindowStyle, "active-id", glib.SETTINGS_BIND_DEFAULT)
 	bWindowStyle.Add(cbWindowStyle)
 
 	lblRestart, err := gtk.LabelNew("Window restart required")
@@ -2289,12 +2665,12 @@ func AppearancePreferencesNew(gsSettings *glib.Settings) (*gtk.Box, error) {
 	lbl.SetHAlign(gtk.ALIGN_END)
 	grid.Attach(lbl, 0, row, 1, 1)
 	values = []struct{ value, key string }{
-		{"Normal", SETTINGS_TERMINAL_TITLE_STYLE_VALUE_NORMAL},
-		{"Small", SETTINGS_TERMINAL_TITLE_STYLE_VALUE_SMALL},
-		{"None", SETTINGS_TERMINAL_TITLE_STYLE_VALUE_NONE},
+		{"Normal", CFG_TERMINAL_TITLE_STYLE_VALUE_NORMAL},
+		{"Small", CFG_TERMINAL_TITLE_STYLE_VALUE_SMALL},
+		{"None", CFG_TERMINAL_TITLE_STYLE_VALUE_NONE},
 	}
 	cbTitleStyle, err := CreateNameValueCombo(values)
-	bh.Bind(SETTINGS_TERMINAL_TITLE_STYLE_KEY, cbTitleStyle, "active-id", glib.SETTINGS_BIND_DEFAULT)
+	bh.Bind(CFG_TERMINAL_TITLE_STYLE_KEY, cbTitleStyle, "active-id", glib.SETTINGS_BIND_DEFAULT)
 	grid.Attach(cbTitleStyle, 1, row, 1, 1)
 	row++
 
@@ -2311,7 +2687,7 @@ func AppearancePreferencesNew(gsSettings *glib.Settings) (*gtk.Box, error) {
 		{"Bottom", "bottom"},
 	}
 	cbTabPosition, err := CreateNameValueCombo(values)
-	bh.Bind(SETTINGS_TAB_POSITION_KEY, cbTabPosition, "active-id", glib.SETTINGS_BIND_DEFAULT)
+	bh.Bind(CFG_TAB_POSITION_KEY, cbTabPosition, "active-id", glib.SETTINGS_BIND_DEFAULT)
 	grid.Attach(cbTabPosition, 1, row, 1, 1)
 	row++
 
@@ -2323,12 +2699,12 @@ func AppearancePreferencesNew(gsSettings *glib.Settings) (*gtk.Box, error) {
 	lbl.SetHAlign(gtk.ALIGN_END)
 	grid.Attach(lbl, 0, row, 1, 1)
 	values = []struct{ value, key string }{
-		{"Default", SETTINGS_THEME_VARIANT_SYSTEM_VALUE},
-		{"Light", SETTINGS_THEME_VARIANT_LIGHT_VALUE},
-		{"Dark", SETTINGS_THEME_VARIANT_DARK_VALUE},
+		{"Default", CFG_THEME_VARIANT_SYSTEM_VALUE},
+		{"Light", CFG_THEME_VARIANT_LIGHT_VALUE},
+		{"Dark", CFG_THEME_VARIANT_DARK_VALUE},
 	}
 	cbThemeVariant, err := CreateNameValueCombo(values)
-	bh.Bind(SETTINGS_THEME_VARIANT_KEY, cbThemeVariant, "active-id", glib.SETTINGS_BIND_DEFAULT)
+	bh.Bind(CFG_THEME_VARIANT_KEY, cbThemeVariant, "active-id", glib.SETTINGS_BIND_DEFAULT)
 	grid.Attach(cbThemeVariant, 1, row, 1, 1)
 	row++
 
@@ -2360,7 +2736,7 @@ func AppearancePreferencesNew(gsSettings *glib.Settings) (*gtk.Box, error) {
 	ff.AddPattern("*")
 	ff.SetName("All Files")
 	fcbImage.AddFilter(ff)
-	filename := gsSettings.GetString(SETTINGS_BACKGROUND_IMAGE_KEY)
+	filename := appSettings.settings.GetString(CFG_BACKGROUND_IMAGE_KEY)
 	if _, err := os.Stat(filename); !os.IsNotExist(err) {
 		// log.Println(spew.Sprintf("File %q found", filename))
 		fcbImage.SetFilename(filename)
@@ -2368,7 +2744,7 @@ func AppearancePreferencesNew(gsSettings *glib.Settings) (*gtk.Box, error) {
 	_, err = fcbImage.Connect("file-set", func(fcb *gtk.FileChooserButton) {
 		selectedFilename := fcb.GetFilename()
 		if _, err := os.Stat(selectedFilename); !os.IsNotExist(err) {
-			gsSettings.SetString(SETTINGS_BACKGROUND_IMAGE_KEY, selectedFilename)
+			appSettings.settings.SetString(CFG_BACKGROUND_IMAGE_KEY, selectedFilename)
 		}
 	})
 	if err != nil {
@@ -2382,28 +2758,28 @@ func AppearancePreferencesNew(gsSettings *glib.Settings) (*gtk.Box, error) {
 	btnReset.SetTooltipText("Reset background image")
 	_, err = btnReset.Connect("clicked", func(btn *gtk.Button) {
 		fcbImage.UnselectAll()
-		gsSettings.Reset(SETTINGS_BACKGROUND_IMAGE_KEY)
+		appSettings.settings.Reset(CFG_BACKGROUND_IMAGE_KEY)
 	})
 	if err != nil {
 		return nil, err
 	}
 
 	values = []struct{ value, key string }{
-		{"Scale", SETTINGS_BACKGROUND_IMAGE_MODE_SCALE_VALUE},
-		{"Tile", SETTINGS_BACKGROUND_IMAGE_MODE_TILE_VALUE},
-		{"Center", SETTINGS_BACKGROUND_IMAGE_MODE_CENTER_VALUE},
-		{"Stretch", SETTINGS_BACKGROUND_IMAGE_MODE_STRETCH_VALUE},
+		{"Scale", CFG_BACKGROUND_IMAGE_MODE_SCALE_VALUE},
+		{"Tile", CFG_BACKGROUND_IMAGE_MODE_TILE_VALUE},
+		{"Center", CFG_BACKGROUND_IMAGE_MODE_CENTER_VALUE},
+		{"Stretch", CFG_BACKGROUND_IMAGE_MODE_STRETCH_VALUE},
 	}
 	cbImageMode, err := CreateNameValueCombo(values)
 	if err != nil {
 		return nil, err
 	}
-	bh.Bind(SETTINGS_BACKGROUND_IMAGE_MODE_KEY, cbImageMode, "active-id", glib.SETTINGS_BIND_DEFAULT)
+	bh.Bind(CFG_BACKGROUND_IMAGE_MODE_KEY, cbImageMode, "active-id", glib.SETTINGS_BIND_DEFAULT)
 
 	// Background image settings only enabled if transparency is enabled
-	bh.Bind(SETTINGS_ENABLE_TRANSPARENCY_KEY, fcbImage, "sensitive", glib.SETTINGS_BIND_DEFAULT)
-	bh.Bind(SETTINGS_ENABLE_TRANSPARENCY_KEY, btnReset, "sensitive", glib.SETTINGS_BIND_DEFAULT)
-	bh.Bind(SETTINGS_ENABLE_TRANSPARENCY_KEY, cbImageMode, "sensitive", glib.SETTINGS_BIND_DEFAULT)
+	bh.Bind(CFG_ENABLE_TRANSPARENCY_KEY, fcbImage, "sensitive", glib.SETTINGS_BIND_DEFAULT)
+	bh.Bind(CFG_ENABLE_TRANSPARENCY_KEY, btnReset, "sensitive", glib.SETTINGS_BIND_DEFAULT)
+	bh.Bind(CFG_ENABLE_TRANSPARENCY_KEY, cbImageMode, "sensitive", glib.SETTINGS_BIND_DEFAULT)
 
 	bChooser, err := gtk.BoxNew(gtk.ORIENTATION_HORIZONTAL, 2)
 	bChooser.Add(fcbImage)
@@ -2421,18 +2797,18 @@ func AppearancePreferencesNew(gsSettings *glib.Settings) (*gtk.Box, error) {
 	if err != nil {
 		return nil, err
 	}
-	bh.Bind(SETTINGS_SIDEBAR_RIGHT, cbRightSidebar, "active", glib.SETTINGS_BIND_DEFAULT)
+	bh.Bind(CFG_SIDEBAR_RIGHT, cbRightSidebar, "active", glib.SETTINGS_BIND_DEFAULT)
 	box.Add(cbRightSidebar)
 
 	cbTitleShowWhenSingle, err := gtk.CheckButtonNewWithLabel("Show the terminal title even if it's the only terminal")
 	if err != nil {
 		return nil, err
 	}
-	bh.Bind(SETTINGS_TERMINAL_TITLE_SHOW_WHEN_SINGLE_KEY, cbTitleShowWhenSingle, "active", glib.SETTINGS_BIND_DEFAULT)
+	bh.Bind(CFG_TERMINAL_TITLE_SHOW_WHEN_SINGLE_KEY, cbTitleShowWhenSingle, "active", glib.SETTINGS_BIND_DEFAULT)
 	box.Add(cbTitleShowWhenSingle)
 
 	cbUseTabs, err := gtk.CheckButtonNewWithLabel("Use tabs instead of sidebar (Application restart required)")
-	bh.Bind(SETTINGS_USE_TABS_KEY, cbUseTabs, "active", glib.SETTINGS_BIND_DEFAULT)
+	bh.Bind(CFG_USE_TABS_KEY, cbUseTabs, "active", glib.SETTINGS_BIND_DEFAULT)
 	box.Add(cbUseTabs)
 
 	// Disclaimer
@@ -2443,9 +2819,10 @@ func AppearancePreferencesNew(gsSettings *glib.Settings) (*gtk.Box, error) {
 	box.Add(wdg)
 	var buf bytes.Buffer
 	buf.WriteString(fmt.Sprintln("******************************************************"))
-	buf.WriteString(fmt.Sprintln("Design of this preference page taken from <a href=\"https://github.com/gnunn1/tilix\">Tilix</a> project."))
-	buf.WriteString(fmt.Sprintln("Settings here mainly for demonstration purpose and have"))
-	buf.WriteString(fmt.Sprintln("minimal impact to application, or none at all."))
+	buf.WriteString(fmt.Sprintln("Design of this preference page taken from " +
+		"<a href=\"https://github.com/gnunn1/tilix\">Tilix</a> project."))
+	buf.WriteString(fmt.Sprintln("Settings here mainly for demonstration purpose and"))
+	buf.WriteString(fmt.Sprintln("have minimal impact to application."))
 	buf.WriteString(fmt.Sprintln("******************************************************"))
 	lbl, err = gtk.LabelNew("")
 	if err != nil {
@@ -2462,7 +2839,185 @@ func AppearancePreferencesNew(gsSettings *glib.Settings) (*gtk.Box, error) {
 		return nil, err
 	}
 
-	return box, nil
+	return &box.Container, nil
+}
+
+// getProfileSettings create GlibSettings object with change event
+// connected to specific indexed profile[profileID].
+func getProfileSettings(appStore *SettingsStore, profileID string, changed func()) (*SettingsStore, error) {
+	pathSuffix := fmt.Sprintf(PROFILE_SCHEMA_SUFFIX_PATH, profileID)
+	store, err := appStore.GetChildSettingsStore(PROFILE_SCHEMA_SUFFIX_ID, pathSuffix, changed)
+	if err != nil {
+		return nil, err
+	}
+	return store, nil
+}
+
+// addProfilePage build UI on the top of profile taken from GlibSettings.
+func addProfilePage(win *gtk.ApplicationWindow, profileID string, initProfileName *string, appSettings *SettingsStore,
+	list *PreferenceRowList, lbSide *gtk.ListBox, pages *gtk.Stack, selectNew bool, profileChanged func()) error {
+
+	prefRow, err := PreferenceRowNew(profileID,
+		"Profile", nil, true)
+	if err != nil {
+		return err
+	}
+	page, profileName, err := ProfilePreferencesNew(win, appSettings, list,
+		profileID, prefRow, initProfileName, profileChanged)
+	if err != nil {
+		return err
+	}
+	prefRow.SetName(profileName)
+	prefRow.Page = page
+	pages.AddTitled(page, profileID, "Profile")
+	list.Append(prefRow)
+	index := list.GetLastProfileListIndex()
+	lbSide.Insert(prefRow.Row, index+1)
+	lbSide.ShowAll()
+	pages.ShowAll()
+	if selectNew {
+		lbSide.SelectRow(prefRow.Row)
+	}
+	return nil
+}
+
+// Create preference dialog with "Sources" page, where controls
+// being bound to GLib Setting object to save/restore functionality.
+func ProfilePreferencesNew(win *gtk.ApplicationWindow, appSettings *SettingsStore,
+	list *PreferenceRowList, profileID string, prefRow *PreferenceRow,
+	initProfileName *string, profileChanged func()) (*gtk.Container, string, error) {
+
+	sw, err := gtk.ScrolledWindowNew(nil, nil)
+	if err != nil {
+		return nil, "", err
+	}
+	sw.SetPolicy(gtk.POLICY_NEVER, gtk.POLICY_AUTOMATIC)
+	//SetScrolledWindowPropogatedHeight(sw, true)
+
+	profileSettings, err := getProfileSettings(appSettings, profileID, profileChanged)
+	if err != nil {
+		return nil, "", err
+	}
+
+	grid, err := gtk.GridNew()
+	grid.SetColumnSpacing(12)
+	grid.SetRowSpacing(6)
+	grid.SetHAlign(gtk.ALIGN_FILL)
+	row := 0
+
+	var lbl *gtk.Label
+
+	appBH := appSettings.NewBindingHelper()
+	profileBH := profileSettings.NewBindingHelper()
+
+	// Profile name
+	lbl, err = SetupLabelJustifyLeft("Profile name")
+	if err != nil {
+		return nil, "", err
+	}
+	grid.Attach(lbl, 0, row, 1, 1)
+
+	edProfileName, err := gtk.EntryNew()
+	if err != nil {
+		return nil, "", err
+	}
+	edProfileName.SetHExpand(true)
+	edProfileName.SetHAlign(gtk.ALIGN_FILL)
+	profileBH.Bind(CFG_PROFILE_NAME, edProfileName, "text", glib.SETTINGS_BIND_DEFAULT)
+	timer := time.AfterFunc(time.Millisecond*500, func() {
+		_, err := glib.IdleAdd(func() {
+			name, err := edProfileName.GetText()
+			if err != nil {
+				log.Fatal(err)
+			}
+			prefRow.SetName(name)
+		})
+		if err != nil {
+			log.Fatal(err)
+		}
+	})
+	_, err = edProfileName.Connect("changed", func(v *gtk.Entry, tmr *time.Timer) {
+		tmr.Stop()
+		tmr.Reset(time.Millisecond * 500)
+	}, timer)
+	if err != nil {
+		return nil, "", err
+	}
+	if initProfileName != nil {
+		edProfileName.SetText(*initProfileName)
+	}
+	grid.Attach(edProfileName, 1, row, 1, 1)
+	row++
+
+	// Profile name
+	lbl, err = SetupLabelJustifyLeft("Profile description")
+	if err != nil {
+		return nil, "", err
+	}
+	grid.Attach(lbl, 0, row, 1, 1)
+
+	edProfileDescription, err := gtk.EntryNew()
+	if err != nil {
+		return nil, "", err
+	}
+	edProfileDescription.SetHExpand(true)
+	edProfileDescription.SetHAlign(gtk.ALIGN_FILL)
+	profileBH.Bind(CFG_PROFILE_DESCRIPTION, edProfileDescription, "text", glib.SETTINGS_BIND_DEFAULT)
+	grid.Attach(edProfileDescription, 1, row, 1, 1)
+	row++
+
+	box2, err := gtk.BoxNew(gtk.ORIENTATION_VERTICAL, 6)
+	if err != nil {
+		return nil, "", err
+	}
+	SetAllMargins(box2, 18)
+	box2.Add(grid)
+	vp, err := gtk.ViewportNew(nil, nil)
+	if err != nil {
+		return nil, "", err
+	}
+	vp.Add(box2)
+
+	sw.Add(vp)
+	_, err = sw.Connect("destroy", func(b gtk.IWidget) {
+		appBH.Unbind()
+		profileBH.Unbind()
+	})
+	if err != nil {
+		return nil, "", err
+	}
+
+	// Disclaimer
+	wdg, err := gtk.SeparatorNew(gtk.ORIENTATION_HORIZONTAL)
+	if err != nil {
+		return nil, "", err
+	}
+	box2.Add(wdg)
+	var buf bytes.Buffer
+	buf.WriteString(fmt.Sprintln("******************************************************"))
+	buf.WriteString(fmt.Sprintln("Design of this preference page demonstrate multi-profile"))
+	buf.WriteString(fmt.Sprintln("settings dialog. Application allows to create any number"))
+	buf.WriteString(fmt.Sprintln("of profiles (based on same schema) and stores it in"))
+	buf.WriteString(fmt.Sprintln("glib.GSettings indexed with unique identifier."))
+	buf.WriteString(fmt.Sprintln("******************************************************"))
+	lbl, err = gtk.LabelNew("")
+	if err != nil {
+		return nil, "", err
+	}
+	lbl.SetMarkup(buf.String())
+	lbl.SetJustify(gtk.JUSTIFY_CENTER)
+	box2.PackEnd(lbl, true, true, 0)
+
+	_, err = box2.Connect("destroy", func(b *gtk.Box) {
+		profileBH.Unbind()
+		log.Println("Destroy box")
+	})
+	if err != nil {
+		return nil, "", err
+	}
+
+	name := profileSettings.settings.GetString(CFG_PROFILE_NAME)
+	return &sw.Container, name, nil
 }
 
 // Verify, that GLib Setting's schema is installed, otherwise return false.
@@ -2481,16 +3036,17 @@ func checkSchemaSettingsIsInstalled(app *gtk.Application) (bool, error) {
 			{"_OK", gtk.RESPONSE_OK, false, nil},
 		}
 
-		_, err := RunMessageDialog(parentWin, title, "", paragraphs, false, buttons, nil)
+		dialog, err := SetupMessageDialog(parentWin, title, "", paragraphs, buttons, nil)
 		if err != nil {
 			return false, err
 		}
+		dialog.Run(false)
 		return false, nil
 	}
-	schema := schemaSource.Lookup(SETTINGS_ID, false)
+	schema := schemaSource.Lookup(SETTINGS_SCHEMA_ID, false)
 	if schema == nil {
 		title := "<span weight='bold' size='larger'>Schema settings configuration error</span>"
-		paragraphs := []*DialogParagraph{NewDialogParagraph(fmt.Sprintf("GTK+ schema %q is not found.", SETTINGS_ID)).
+		paragraphs := []*DialogParagraph{NewDialogParagraph(fmt.Sprintf("GTK+ schema %q is not found.", SETTINGS_SCHEMA_ID)).
 			SetJustify(gtk.JUSTIFY_CENTER).SetHorizAlign(gtk.ALIGN_CENTER)}
 		paragraphs = append(paragraphs, NewDialogParagraph("Please install xml schema and repeat operation.").
 			SetJustify(gtk.JUSTIFY_CENTER).SetHorizAlign(gtk.ALIGN_CENTER))
@@ -2499,10 +3055,11 @@ func checkSchemaSettingsIsInstalled(app *gtk.Application) (bool, error) {
 			{"_OK", gtk.RESPONSE_OK, false, nil},
 		}
 
-		_, err := RunMessageDialog(parentWin, title, "", paragraphs, false, buttons, nil)
+		dialog, err := SetupMessageDialog(parentWin, title, "", paragraphs, buttons, nil)
 		if err != nil {
 			return false, err
 		}
+		dialog.Run(false)
 		return false, nil
 	}
 	return true, nil
@@ -2510,7 +3067,7 @@ func checkSchemaSettingsIsInstalled(app *gtk.Application) (bool, error) {
 
 // Create sophisticated multi-page preference dialog
 // with save/restore functionallity to/from the GLib Setting object.
-func createPreferenceDialog(app *gtk.Application) (*gtk.ApplicationWindow, error) {
+func createPreferenceDialog(settingsID, settingsPath string, app *gtk.Application) (*gtk.ApplicationWindow, error) {
 	parentWin := app.GetActiveWindow()
 	win, err := gtk.ApplicationWindowNew(app)
 	if err != nil {
@@ -2522,7 +3079,7 @@ func createPreferenceDialog(app *gtk.Application) (*gtk.ApplicationWindow, error
 	win.SetTransientFor(parentWin)
 	win.SetDestroyWithParent(true)
 	win.SetShowMenubar(false)
-	gsSettings, err := glib.SettingsNew(SETTINGS_ID)
+	appSettings, err := NewSettingsStore(settingsID, settingsPath, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -2548,7 +3105,7 @@ func createPreferenceDialog(app *gtk.Application) (*gtk.ApplicationWindow, error
 
 	win.SetTitlebar(bTitle)
 
-	var list = make(map[uintptr]interface{})
+	var list = PreferenceRowListNew()
 
 	// Create Stack and boxes
 	pages, err := gtk.StackNew()
@@ -2566,41 +3123,66 @@ func createPreferenceDialog(app *gtk.Application) (*gtk.ApplicationWindow, error
 	lbSide.SetCanFocus(true)
 	lbSide.SetSelectionMode(gtk.SELECTION_BROWSE)
 	lbSide.SetVExpand(true)
-	_, err = lbSide.Connect("row-selected", func(lb *gtk.ListBox, row *gtk.ListBoxRow) {
-		r := list[row.Native()]
-		if r1, ok := r.(*PreferenceRow); ok {
-			//log.Println(spew.Sprintf("%+v", r1))
-			pages.SetVisibleChildName(r1.Name)
-			hbMain.SetTitle(r1.Title)
-		}
-	})
-	if err != nil {
-		return nil, err
+
+	profileChanged := make(chan struct{})
+	var once sync.Once
+	changedFunc := func() {
+		once.Do(func() {
+			close(profileChanged)
+		})
 	}
 
-	gp, err := GlobalPreferencesNew(gsSettings)
+	var pr *PreferenceRow
+
+	profileSettingsArray := appSettings.NewSettingsArray(CFG_BACKUP_LIST)
+	profileList := profileSettingsArray.GetArrayIDs()
+	if len(profileList) == 0 {
+		profileID, err := profileSettingsArray.AddNode()
+		if err != nil {
+			return nil, err
+		}
+		profileName := profileID
+		if i, err := strconv.Atoi(profileID); err == nil {
+			profileName = strconv.Itoa(i + 1)
+		}
+		err = addProfilePage(win, profileID, &profileName, appSettings, list,
+			lbSide, pages, false, changedFunc)
+		if err != nil {
+			return nil, err
+		}
+	} else {
+		for _, profileID := range profileList {
+			err = addProfilePage(win, profileID, nil, appSettings, list,
+				lbSide, pages, false, changedFunc)
+			if err != nil {
+				return nil, err
+			}
+		}
+	}
+
+	gp, err := GlobalPreferencesNew(appSettings)
 	if err != nil {
 		return nil, err
 	}
 	pages.AddTitled(gp, "Global", "Global")
-	pr, row, err := PreferenceRowNew("Global", "Global")
+	pr, err = PreferenceRowNew("Global", "Global", gp, false)
 	if err != nil {
 		return nil, err
 	}
-	list[row.Native()] = pr
-	lbSide.Add(row)
+	list.Append(pr)
+	lbSide.Add(pr.Row)
 
-	ap, err := AppearancePreferencesNew(gsSettings)
+	ap, err := AppearancePreferencesNew(appSettings)
 	if err != nil {
 		return nil, err
 	}
 	pages.AddTitled(ap, "Appearance", "Appearance")
-	pr, row, err = PreferenceRowNew("Appearance", "Appearance")
+	pr, err = PreferenceRowNew("Appearance", "Appearance", gp, false)
 	if err != nil {
 		return nil, err
 	}
-	list[row.Native()] = pr
-	lbSide.Add(row)
+	list.Append(pr)
+	lbSide.Add(pr.Row)
 
 	sw, err := gtk.ScrolledWindowNew(nil, nil)
 	if err != nil {
@@ -2616,6 +3198,96 @@ func createPreferenceDialog(app *gtk.Application) (*gtk.ApplicationWindow, error
 		return nil, err
 	}
 	bSide.Add(sw)
+
+	bButtons, err := gtk.BoxNew(gtk.ORIENTATION_HORIZONTAL, 0)
+	if err != nil {
+		return nil, err
+	}
+	SetAllMargins(bButtons, 6)
+	bSide.Add(bButtons)
+	btnAddProfile, err := SetupButtonWithThemedImage("list-add-symbolic")
+	if err != nil {
+		return nil, err
+	}
+	btnAddProfile.SetTooltipText("Add profile")
+	_, err = btnAddProfile.Connect("clicked", func() {
+		profileID, err := profileSettingsArray.AddNode()
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		profileName := profileID
+		if i, err := strconv.Atoi(profileID); err == nil {
+			profileName = strconv.Itoa(i + 1)
+		}
+		err = addProfilePage(win, profileID, &profileName, appSettings, list,
+			lbSide, pages, true, changedFunc)
+		if err != nil {
+			log.Fatal(err)
+		}
+	})
+	if err != nil {
+		return nil, err
+	}
+	bButtons.PackStart(btnAddProfile, false, false, 0)
+
+	updateBtnDeleteProfileSensitive := func(deleteBtn *gtk.Button, row *gtk.ListBoxRow) {
+		var pr *PreferenceRow
+		if row != nil {
+			pr = list.Get(row.Native())
+			pages.SetVisibleChildName(pr.ID)
+			hbMain.SetTitle(pr.Title)
+		}
+		deleteBtn.SetSensitive(pr != nil && pr.Profile && list.GetProfileCount() > 1)
+	}
+
+	btnDeleteProfile, err := SetupButtonWithThemedImage("list-remove-symbolic")
+	if err != nil {
+		return nil, err
+	}
+	btnDeleteProfile.SetTooltipText("Delete profile")
+	_, err = btnDeleteProfile.Connect("clicked", func() {
+		responseYes, err := QuestionDialog(&win.Window, "Delete selected profile?",
+			[]*DialogParagraph{NewDialogParagraph("Press YES to delete profile.")}, true)
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		if responseYes {
+			sr := lbSide.GetSelectedRow()
+			sri := sr.GetIndex()
+			pr := list.Get(sr.Native())
+			if pr.Profile {
+				profileID := pr.ID
+				profileSettings, err := getProfileSettings(appSettings, profileID, changedFunc)
+				if err != nil {
+					log.Fatal(err)
+				}
+				err = profileSettingsArray.DeleteNode(profileSettings, profileID)
+				if err != nil {
+					log.Fatal(err)
+				}
+				nsr := lbSide.GetRowAtIndex(sri + 1)
+				lbSide.SelectRow(nsr)
+				pages.Remove(pr.Page)
+				list.Delete(sr.Native())
+				pr.Page.Destroy()
+				sr.Destroy()
+				updateBtnDeleteProfileSensitive(btnDeleteProfile, lbSide.GetSelectedRow())
+			}
+		}
+	})
+	if err != nil {
+		return nil, err
+	}
+	bButtons.PackStart(btnDeleteProfile, false, false, 0)
+
+	_, err = lbSide.Connect("row-selected", func(lb *gtk.ListBox, row *gtk.ListBoxRow) {
+		updateBtnDeleteProfileSensitive(btnDeleteProfile, row)
+	})
+	if err != nil {
+		return nil, err
+	}
 
 	box, err := gtk.BoxNew(gtk.ORIENTATION_HORIZONTAL, 0)
 	if err != nil {
@@ -2656,7 +3328,7 @@ func main() {
 	data := &FullscreenGlobalData{}
 
 	gtk.Init(nil)
-	app, err := gtk.ApplicationNew(APP_ID, glib.APPLICATION_FLAGS_NONE)
+	app, err := gtk.ApplicationNew(APP_SCHEMA_ID, glib.APPLICATION_FLAGS_NONE)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -2688,11 +3360,11 @@ func main() {
 		}
 		win.AddAction(act)
 
-		gsSettings, err := glib.SettingsNew(SETTINGS_ID)
+		appSettings, err := NewSettingsStore(SETTINGS_SCHEMA_ID, SETTINGS_SCHEMA_PATH, nil)
 		if err != nil {
 			log.Fatal(err)
 		}
-		act, err = createAboutAction(&win.Window, gsSettings)
+		act, err = createAboutAction(&win.Window, appSettings)
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -2878,7 +3550,7 @@ func main() {
 		win.ShowAll()
 
 		// Run code, when app message queue becomes empty.
-		if !gsSettings.GetBoolean(SETTINGS_DONT_SHOW_ABOUT_ON_STARTUP_KEY) {
+		if !appSettings.settings.GetBoolean(CFG_DONT_SHOW_ABOUT_ON_STARTUP_KEY) {
 			_, err2 := glib.IdleAdd(func() {
 				action := win.LookupAction("AboutAction")
 				if action != nil {
