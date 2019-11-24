@@ -534,8 +534,8 @@ func getLastIter(ls *ListStore) (*TreeIter, bool) {
 	}
 
 	for {
-		temp := *iter
-		last := &temp
+		temp := *iter.native()
+		last := wrapTreeIter(&temp)
 		if !ls.IterNext(iter) {
 			return last, true
 		}
@@ -576,7 +576,6 @@ func TestListStoreInsertBefore(t *testing.T) {
 	}
 }
 
-/*
 // When 'sibling' parameter is nil, the new iter should be appended to the liststore
 func TestListStoreInsertBefore_WhenNilSibling(t *testing.T) {
 	ls := setupListStore()
@@ -618,7 +617,6 @@ func TestListStoreInsertAfter(t *testing.T) {
 		t.Fatal("Expected the new iter added to end of list")
 	}
 }
-*/
 
 // When 'sibling' parameter is nil, the new iter should be prepended to the liststore
 func TestListStoreInsertAfter_WhenNilSibling(t *testing.T) {

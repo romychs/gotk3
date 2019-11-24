@@ -989,4 +989,33 @@ static inline void _gtk_print_run_page_setup_dialog_async(GtkWindow *parent, Gtk
 		(GtkPageSetupDoneFunc)(goPageSetupDone), data);
 }
 
+extern void goGtkListBoxUpdateHeader(GtkListBoxRow *current,
+                               GtkListBoxRow *before,
+                               gpointer list_box);
+
+static inline void _gtk_list_box_set_header_func(GtkListBox *box) {
+	gtk_list_box_set_header_func(box,
+		(GtkListBoxUpdateHeaderFunc)goGtkListBoxUpdateHeader,
+		(gpointer)box, NULL);
+}
+
+extern void goGtkListBoxFilter(GtkListBoxRow *row,
+                               gpointer list_box);
+
+static inline void _gtk_list_box_set_filter_func(GtkListBox *box) {
+	gtk_list_box_set_filter_func(box,
+		(GtkListBoxFilterFunc)goGtkListBoxFilter,
+		(gpointer)box, NULL);
+}
+
+extern void goGtkListBoxSort(GtkListBoxRow *row1,
+							   GtkListBoxRow *row2,
+                               gpointer list_box);
+
+static inline void _gtk_list_box_set_sort_func(GtkListBox *box) {
+	gtk_list_box_set_sort_func(box,
+		(GtkListBoxSortFunc)goGtkListBoxSort,
+		(gpointer)box, NULL);
+}
+
 #endif

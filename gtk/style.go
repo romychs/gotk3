@@ -7,6 +7,7 @@ package gtk
 // #include "gtk.go.h"
 import "C"
 import (
+	"runtime"
 	"unsafe"
 
 	"github.com/d2r2/gotk3/gdk"
@@ -57,6 +58,33 @@ func (v *StyleContext) RemoveClass(class_name string) {
 	defer C.free(unsafe.Pointer(cstr))
 
 	C.gtk_style_context_remove_class(v.native(), (*C.gchar)(cstr))
+}
+
+// HasClass is a wrapper around gtk_style_context_has_class().
+func (v *StyleContext) HasClass(className string) bool {
+	cstr := C.CString(className)
+	defer C.free(unsafe.Pointer(cstr))
+
+	return gobool(C.gtk_style_context_has_class(v.native(), (*C.gchar)(cstr)))
+}
+
+// ListClasses is a representation of gtk_style_context_list_classes().
+func (v *StyleContext) ListClasses() *glib.List {
+	clist := C.gtk_style_context_list_classes(v.native())
+
+	glist := glib.WrapList(uintptr(unsafe.Pointer(clist)))
+	glist.DataWrapper(func(ptr unsafe.Pointer) interface{} {
+		class := goString((*C.gchar)(ptr))
+		return class
+	})
+
+	if glist != nil {
+		runtime.SetFinalizer(glist, func(glist *glib.List) {
+			glist.Free()
+		})
+	}
+
+	return glist
 }
 
 // GetParent is a wrapper around gtk_style_context_get_parent().
@@ -145,14 +173,6 @@ func (v *StyleContext) SetParent(p *StyleContext) {
 	C.gtk_style_context_set_parent(v.native(), p.native())
 }
 
-// HasClass is a wrapper around gtk_style_context_has_class().
-func (v *StyleContext) HasClass(className string) bool {
-	cstr := C.CString(className)
-	defer C.free(unsafe.Pointer(cstr))
-
-	return gobool(C.gtk_style_context_has_class(v.native(), (*C.gchar)(cstr)))
-}
-
 // SetScreen is a wrapper around gtk_style_context_set_screen().
 func (v *StyleContext) SetScreen(screen *gdk.Screen) {
 	C.gtk_style_context_set_screen(v.native(), C.toGdkScreen(unsafe.Pointer(screen.Native())))
@@ -168,12 +188,12 @@ type IStyleProvider interface {
 }
 
 // AddProvider is a wrapper around gtk_style_context_add_provider().
-func (v *StyleContext) AddProvider(provider IStyleProvider, prio uint) {
+func (v *StyleContext) AddProvider(provider IStyleProvider, prio StyleProviderPriority) {
 	C.gtk_style_context_add_provider(v.native(), provider.toStyleProvider(), C.guint(prio))
 }
 
 // AddProviderForScreen is a wrapper around gtk_style_context_add_provider_for_screen().
-func AddProviderForScreen(screen *gdk.Screen, provider IStyleProvider, prio uint) {
+func AddProviderForScreen(screen *gdk.Screen, provider IStyleProvider, prio StyleProviderPriority) {
 	C.gtk_style_context_add_provider_for_screen(C.toGdkScreen(unsafe.Pointer(screen.Native())),
 		provider.toStyleProvider(), C.guint(prio))
 }

@@ -131,22 +131,22 @@ func WindowSetDefaultIcon(icon *gdk.Pixbuf) {
 	C.gtk_window_set_default_icon(iconPtr)
 }
 
-// TODO(jrick) GdkGeometry GdkWindowHints.
-/*
-func (v *Window) SetGeometryHints() {
+// SetGeometryHints is a wrapper around gtk_window_set_geometry_hints().
+func (v *Window) SetGeometryHints(geometryWidget *Widget, geometry *gdk.Geometry, geomMask gdk.WindowHints) {
+	C.gtk_window_set_geometry_hints(v.native(), geometryWidget.native(),
+		(*C.GdkGeometry)(unsafe.Pointer(geometry.Native())), C.GdkWindowHints(geomMask))
 }
-*/
 
 // SetGravity is a wrapper around gtk_window_set_gravity().
-func (v *Window) SetGravity(gravity gdk.GdkGravity) {
+func (v *Window) SetGravity(gravity gdk.Gravity) {
 	C.gtk_window_set_gravity(v.native(), C.GdkGravity(gravity))
 }
 
-// TODO(jrick) GdkGravity.
-/*
-func (v *Window) GetGravity() {
+// GetGravity is a wrapper around gtk_window_get_gravity().
+func (v *Window) GetGravity() gdk.Gravity {
+	c := C.gtk_window_get_gravity(v.native())
+	return gdk.Gravity(c)
 }
-*/
 
 // SetPosition is a wrapper around gtk_window_set_position().
 func (v *Window) SetPosition(position WindowPosition) {
@@ -155,7 +155,7 @@ func (v *Window) SetPosition(position WindowPosition) {
 
 // SetTransientFor is a wrapper around gtk_window_set_transient_for().
 func (v *Window) SetTransientFor(parent IWindow) {
-	var pw *C.GtkWindow = nil
+	var pw *C.GtkWindow
 	if parent != nil {
 		pw = parent.toWindow()
 	}
@@ -202,7 +202,7 @@ func (v *Window) SetFocus(widget IWidget) {
 	C.gtk_window_set_focus(v.native(), widget.toWidget())
 }
 
-// GetDefaultWidget is a wrapper arround gtk_window_get_default_widget().
+// GetDefaultWidget is a wrapper around gtk_window_get_default_widget().
 func (v *Window) GetDefaultWidget() *Widget {
 	c := C.gtk_window_get_default_widget(v.native())
 	if c == nil {
@@ -212,7 +212,7 @@ func (v *Window) GetDefaultWidget() *Widget {
 	return wrapWidget(obj)
 }
 
-// SetDefault is a wrapper arround gtk_window_set_default().
+// SetDefault is a wrapper around gtk_window_set_default().
 func (v *Window) SetDefault(widget IWidget) {
 	C.gtk_window_set_default(v.native(), widget.toWidget())
 }
@@ -392,7 +392,7 @@ func (v *Window) GetModal() bool {
 }
 
 // GetPosition is a wrapper around gtk_window_get_position().
-func (v *Window) GetPosition() (root_x, root_y int) {
+func (v *Window) GetPosition() (rootX, rootY int) {
 	var x, y C.gint
 	C.gtk_window_get_position(v.native(), &x, &y)
 	return int(x), int(y)
@@ -498,7 +498,7 @@ func (v *Window) Resize(width, height int) {
 func WindowSetDefaultIconFromFile(file string) error {
 	cstr := C.CString(file)
 	defer C.free(unsafe.Pointer(cstr))
-	var err *C.GError = nil
+	var err *C.GError
 	res := C.gtk_window_set_default_icon_from_file((*C.gchar)(cstr), &err)
 	if res == 0 {
 		defer C.g_error_free(err)
@@ -518,7 +518,7 @@ func WindowSetDefaultIconName(s string) {
 func (v *Window) SetIconFromFile(file string) error {
 	cstr := C.CString(file)
 	defer C.free(unsafe.Pointer(cstr))
-	var err *C.GError = nil
+	var err *C.GError
 	res := C.gtk_window_set_icon_from_file(v.native(), (*C.gchar)(cstr), &err)
 	if res == 0 {
 		defer C.g_error_free(err)
@@ -885,7 +885,7 @@ func wrapDialog(obj *glib.Object) *Dialog {
 	return &Dialog{*window}
 }
 
-// DialogNew() is a wrapper around gtk_dialog_new().
+// DialogNew is a wrapper around gtk_dialog_new().
 func DialogNew() (*Dialog, error) {
 	c := C.gtk_dialog_new()
 	if c == nil {
@@ -924,18 +924,18 @@ func DialogWithFlagsNew(title string, parent IWindow, flags DialogFlags) (*Dialo
 	return wrapDialog(obj), nil
 }
 
-// Run() is a wrapper around gtk_dialog_run().
+// Run is a wrapper around gtk_dialog_run().
 func (v *Dialog) Run() ResponseType {
 	c := C.gtk_dialog_run(v.native())
 	return ResponseType(c)
 }
 
-// Response() is a wrapper around gtk_dialog_response().
+// Response is a wrapper around gtk_dialog_response().
 func (v *Dialog) Response(response ResponseType) {
 	C.gtk_dialog_response(v.native(), C.gint(response))
 }
 
-// AddButton() is a wrapper around gtk_dialog_add_button().  text may
+// AddButton is a wrapper around gtk_dialog_add_button().  text may
 // be either the literal button text, or if using GTK 3.8 or earlier, a
 // Stock type converted to a string.
 func (v *Dialog) AddButton(text string, id ResponseType) (*Button, error) {
@@ -949,31 +949,31 @@ func (v *Dialog) AddButton(text string, id ResponseType) (*Button, error) {
 	return wrapButton(obj), nil
 }
 
-// AddActionWidget() is a wrapper around gtk_dialog_add_action_widget().
+// AddActionWidget is a wrapper around gtk_dialog_add_action_widget().
 func (v *Dialog) AddActionWidget(child IWidget, id ResponseType) {
 	C.gtk_dialog_add_action_widget(v.native(), child.toWidget(), C.gint(id))
 }
 
-// SetDefaultResponse() is a wrapper around gtk_dialog_set_default_response().
+// SetDefaultResponse is a wrapper around gtk_dialog_set_default_response().
 func (v *Dialog) SetDefaultResponse(id ResponseType) {
 	C.gtk_dialog_set_default_response(v.native(), C.gint(id))
 }
 
-// SetResponseSensitive() is a wrapper around
+// SetResponseSensitive is a wrapper around
 // gtk_dialog_set_response_sensitive().
 func (v *Dialog) SetResponseSensitive(id ResponseType, setting bool) {
 	C.gtk_dialog_set_response_sensitive(v.native(), C.gint(id),
 		gbool(setting))
 }
 
-// GetResponseForWidget() is a wrapper around
+// GetResponseForWidget is a wrapper around
 // gtk_dialog_get_response_for_widget().
 func (v *Dialog) GetResponseForWidget(widget IWidget) ResponseType {
 	c := C.gtk_dialog_get_response_for_widget(v.native(), widget.toWidget())
 	return ResponseType(c)
 }
 
-// GetWidgetForResponse() is a wrapper around
+// GetWidgetForResponse is a wrapper around
 // gtk_dialog_get_widget_for_response().
 func (v *Dialog) GetWidgetForResponse(id ResponseType) (*Widget, error) {
 	c := C.gtk_dialog_get_widget_for_response(v.native(), C.gint(id))
@@ -984,7 +984,7 @@ func (v *Dialog) GetWidgetForResponse(id ResponseType) (*Widget, error) {
 	return wrapWidget(obj), nil
 }
 
-// GetContentArea() is a wrapper around gtk_dialog_get_content_area().
+// GetContentArea is a wrapper around gtk_dialog_get_content_area().
 func (v *Dialog) GetContentArea() (*Box, error) {
 	c := C.gtk_dialog_get_content_area(v.native())
 	if c == nil {
@@ -1377,10 +1377,11 @@ func wrapAppChooserButton(obj *glib.Object) *AppChooserButton {
 	return &AppChooserButton{*comboBox, *ac}
 }
 
-// AppChooserButtonNew() is a wrapper around gtk_app_chooser_button_new().
-func AppChooserButtonNew(content_type string) (*AppChooserButton, error) {
-	cstr := C.CString(content_type)
+// AppChooserButtonNew is a wrapper around gtk_app_chooser_button_new().
+func AppChooserButtonNew(contentType string) (*AppChooserButton, error) {
+	cstr := C.CString(contentType)
 	defer C.free(unsafe.Pointer(cstr))
+
 	c := C.gtk_app_chooser_button_new((*C.gchar)(cstr))
 	if c == nil {
 		return nil, nilPtrErr
@@ -1392,39 +1393,39 @@ func AppChooserButtonNew(content_type string) (*AppChooserButton, error) {
 // TODO: Needs gio/GIcon implemented first
 // gtk_app_chooser_button_append_custom_item ()
 
-// AppendSeparator() is a wrapper around gtk_app_chooser_button_append_separator().
+// AppendSeparator is a wrapper around gtk_app_chooser_button_append_separator().
 func (v *AppChooserButton) AppendSeparator() {
 	C.gtk_app_chooser_button_append_separator(v.native())
 }
 
-// SetActiveCustomItem() is a wrapper around gtk_app_chooser_button_set_active_custom_item().
+// SetActiveCustomItem is a wrapper around gtk_app_chooser_button_set_active_custom_item().
 func (v *AppChooserButton) SetActiveCustomItem(name string) {
 	cstr := C.CString(name)
 	defer C.free(unsafe.Pointer(cstr))
 	C.gtk_app_chooser_button_set_active_custom_item(v.native(), (*C.gchar)(cstr))
 }
 
-// GetShowDefaultItem() is a wrapper around gtk_app_chooser_button_get_show_default_item().
+// GetShowDefaultItem is a wrapper around gtk_app_chooser_button_get_show_default_item().
 func (v *AppChooserButton) GetShowDefaultItem() bool {
 	return gobool(C.gtk_app_chooser_button_get_show_default_item(v.native()))
 }
 
-// SetShowDefaultItem() is a wrapper around gtk_app_chooser_button_set_show_default_item().
+// SetShowDefaultItem is a wrapper around gtk_app_chooser_button_set_show_default_item().
 func (v *AppChooserButton) SetShowDefaultItem(setting bool) {
 	C.gtk_app_chooser_button_set_show_default_item(v.native(), gbool(setting))
 }
 
-// GetShowDialogItem() is a wrapper around gtk_app_chooser_button_get_show_dialog_item().
+// GetShowDialogItem is a wrapper around gtk_app_chooser_button_get_show_dialog_item().
 func (v *AppChooserButton) GetShowDialogItem() bool {
 	return gobool(C.gtk_app_chooser_button_get_show_dialog_item(v.native()))
 }
 
-// SetShowDialogItem() is a wrapper around gtk_app_chooser_button_set_show_dialog_item().
+// SetShowDialogItem is a wrapper around gtk_app_chooser_button_set_show_dialog_item().
 func (v *AppChooserButton) SetShowDialogItem(setting bool) {
 	C.gtk_app_chooser_button_set_show_dialog_item(v.native(), gbool(setting))
 }
 
-// GetHeading() is a wrapper around gtk_app_chooser_button_get_heading().
+// GetHeading is a wrapper around gtk_app_chooser_button_get_heading().
 // In case when gtk_app_chooser_button_get_heading() returns a nil string,
 // GetHeading() returns a non-nil error.
 func (v *AppChooserButton) GetHeading() (string, error) {
@@ -1436,7 +1437,7 @@ func (v *AppChooserButton) GetHeading() (string, error) {
 	return goString(cstr), nil
 }
 
-// SetHeading() is a wrapper around gtk_app_chooser_button_set_heading().
+// SetHeading is a wrapper around gtk_app_chooser_button_set_heading().
 func (v *AppChooserButton) SetHeading(heading string) {
 	cstr := C.CString(heading)
 	defer C.free(unsafe.Pointer(cstr))
@@ -1475,10 +1476,11 @@ func wrapAppChooserWidget(obj *glib.Object) *AppChooserWidget {
 	return &AppChooserWidget{*box, *ac}
 }
 
-// AppChooserWidgetNew() is a wrapper around gtk_app_chooser_widget_new().
-func AppChooserWidgetNew(content_type string) (*AppChooserWidget, error) {
-	cstr := C.CString(content_type)
+// AppChooserWidgetNew is a wrapper around gtk_app_chooser_widget_new().
+func AppChooserWidgetNew(contentType string) (*AppChooserWidget, error) {
+	cstr := C.CString(contentType)
 	defer C.free(unsafe.Pointer(cstr))
+
 	c := C.gtk_app_chooser_widget_new((*C.gchar)(cstr))
 	if c == nil {
 		return nil, nilPtrErr
@@ -1487,57 +1489,57 @@ func AppChooserWidgetNew(content_type string) (*AppChooserWidget, error) {
 	return wrapAppChooserWidget(obj), nil
 }
 
-// GetShowDefault() is a wrapper around gtk_app_chooser_widget_get_show_default().
+// GetShowDefault is a wrapper around gtk_app_chooser_widget_get_show_default().
 func (v *AppChooserWidget) GetShowDefault() bool {
 	return gobool(C.gtk_app_chooser_widget_get_show_default(v.native()))
 }
 
-// SetShowDefault() is a wrapper around gtk_app_chooser_widget_set_show_default().
+// SetShowDefault is a wrapper around gtk_app_chooser_widget_set_show_default().
 func (v *AppChooserWidget) SetShowDefault(setting bool) {
 	C.gtk_app_chooser_widget_set_show_default(v.native(), gbool(setting))
 }
 
-// GetShowRecommended() is a wrapper around gtk_app_chooser_widget_get_show_recommended().
+// GetShowRecommended is a wrapper around gtk_app_chooser_widget_get_show_recommended().
 func (v *AppChooserWidget) GetShowRecommended() bool {
 	return gobool(C.gtk_app_chooser_widget_get_show_recommended(v.native()))
 }
 
-// SetShowRecommended() is a wrapper around gtk_app_chooser_widget_set_show_recommended().
+// SetShowRecommended is a wrapper around gtk_app_chooser_widget_set_show_recommended().
 func (v *AppChooserWidget) SetShowRecommended(setting bool) {
 	C.gtk_app_chooser_widget_set_show_recommended(v.native(), gbool(setting))
 }
 
-// GetShowFallback() is a wrapper around gtk_app_chooser_widget_get_show_fallback().
+// GetShowFallback is a wrapper around gtk_app_chooser_widget_get_show_fallback().
 func (v *AppChooserWidget) GetShowFallback() bool {
 	return gobool(C.gtk_app_chooser_widget_get_show_fallback(v.native()))
 }
 
-// SetShowFallback() is a wrapper around gtk_app_chooser_widget_set_show_fallback().
+// SetShowFallback is a wrapper around gtk_app_chooser_widget_set_show_fallback().
 func (v *AppChooserWidget) SetShowFallback(setting bool) {
 	C.gtk_app_chooser_widget_set_show_fallback(v.native(), gbool(setting))
 }
 
-// GetShowOther() is a wrapper around gtk_app_chooser_widget_get_show_other().
+// GetShowOther is a wrapper around gtk_app_chooser_widget_get_show_other().
 func (v *AppChooserWidget) GetShowOther() bool {
 	return gobool(C.gtk_app_chooser_widget_get_show_other(v.native()))
 }
 
-// SetShowOther() is a wrapper around gtk_app_chooser_widget_set_show_other().
+// SetShowOther is a wrapper around gtk_app_chooser_widget_set_show_other().
 func (v *AppChooserWidget) SetShowOther(setting bool) {
 	C.gtk_app_chooser_widget_set_show_other(v.native(), gbool(setting))
 }
 
-// GetShowAll() is a wrapper around gtk_app_chooser_widget_get_show_all().
+// GetShowAll is a wrapper around gtk_app_chooser_widget_get_show_all().
 func (v *AppChooserWidget) GetShowAll() bool {
 	return gobool(C.gtk_app_chooser_widget_get_show_all(v.native()))
 }
 
-// SetShowAll() is a wrapper around gtk_app_chooser_widget_set_show_all().
+// SetShowAll is a wrapper around gtk_app_chooser_widget_set_show_all().
 func (v *AppChooserWidget) SetShowAll(setting bool) {
 	C.gtk_app_chooser_widget_set_show_all(v.native(), gbool(setting))
 }
 
-// GetDefaultText() is a wrapper around gtk_app_chooser_widget_get_default_text().
+// GetDefaultText is a wrapper around gtk_app_chooser_widget_get_default_text().
 // In case when gtk_app_chooser_widget_get_default_text() returns a nil string,
 // GetDefaultText() returns a non-nil error.
 func (v *AppChooserWidget) GetDefaultText() (string, error) {
@@ -1549,7 +1551,7 @@ func (v *AppChooserWidget) GetDefaultText() (string, error) {
 	return goString(cstr), nil
 }
 
-// SetDefaultText() is a wrapper around gtk_app_chooser_widget_set_default_text().
+// SetDefaultText is a wrapper around gtk_app_chooser_widget_set_default_text().
 func (v *AppChooserWidget) SetDefaultText(text string) {
 	cstr := C.CString(text)
 	defer C.free(unsafe.Pointer(cstr))
@@ -1588,7 +1590,7 @@ func wrapAppChooserDialog(obj *glib.Object) *AppChooserDialog {
 	return &AppChooserDialog{*dialog, *ac}
 }
 
-// AppChooserDialogNew() is a wrapper around gtk_app_chooser_dialog_new().
+// AppChooserDialogNew is a wrapper around gtk_app_chooser_dialog_new().
 func AppChooserDialogNew(parent *Window, flags DialogFlags, file *glib.File) (*AppChooserDialog, error) {
 	c := C.gtk_app_chooser_dialog_new(parent.native(), C.GtkDialogFlags(flags),
 		C.toGFile(unsafe.Pointer(file.Native())))
@@ -1599,10 +1601,11 @@ func AppChooserDialogNew(parent *Window, flags DialogFlags, file *glib.File) (*A
 	return wrapAppChooserDialog(obj), nil
 }
 
-// AppChooserDialogNewForContentType() is a wrapper around gtk_app_chooser_dialog_new_for_content_type().
-func AppChooserDialogNewForContentType(parent *Window, flags DialogFlags, content_type string) (*AppChooserDialog, error) {
-	cstr := C.CString(content_type)
+// AppChooserDialogNewForContentType is a wrapper around gtk_app_chooser_dialog_new_for_content_type().
+func AppChooserDialogNewForContentType(parent *Window, flags DialogFlags, contentType string) (*AppChooserDialog, error) {
+	cstr := C.CString(contentType)
 	defer C.free(unsafe.Pointer(cstr))
+
 	c := C.gtk_app_chooser_dialog_new_for_content_type(parent.native(), C.GtkDialogFlags(flags), (*C.gchar)(cstr))
 	if c == nil {
 		return nil, nilPtrErr
@@ -1611,14 +1614,14 @@ func AppChooserDialogNewForContentType(parent *Window, flags DialogFlags, conten
 	return wrapAppChooserDialog(obj), nil
 }
 
-// GetWidget() is a wrapper around gtk_app_chooser_dialog_get_widget().
+// GetWidget is a wrapper around gtk_app_chooser_dialog_get_widget().
 func (v *AppChooserDialog) GetWidget() *AppChooserWidget {
 	c := C.gtk_app_chooser_dialog_get_widget(v.native())
 	obj := glib.Take(unsafe.Pointer(c))
 	return wrapAppChooserWidget(obj)
 }
 
-// GetHeading() is a wrapper around gtk_app_chooser_dialog_get_heading().
+// GetHeading is a wrapper around gtk_app_chooser_dialog_get_heading().
 // In case when gtk_app_chooser_dialog_get_heading() returns a nil string,
 // GetHeading() returns a non-nil error.
 func (v *AppChooserDialog) GetHeading() (string, error) {
@@ -1630,7 +1633,7 @@ func (v *AppChooserDialog) GetHeading() (string, error) {
 	return goString(cstr), nil
 }
 
-// SetHeading() is a wrapper around gtk_app_chooser_dialog_set_heading().
+// SetHeading is a wrapper around gtk_app_chooser_dialog_set_heading().
 func (v *AppChooserDialog) SetHeading(heading string) {
 	cstr := C.CString(heading)
 	defer C.free(unsafe.Pointer(cstr))
@@ -1692,41 +1695,41 @@ func (v *ColorChooser) toColorChooser() *C.GtkColorChooser {
 	return v.native()
 }
 
-// GetRGBA() is a wrapper around gtk_color_chooser_get_rgba().
+// GetRGBA is a wrapper around gtk_color_chooser_get_rgba().
 func (v *ColorChooser) GetRGBA() *gdk.RGBA {
 	gdkColor := gdk.NewRGBA()
 	C.gtk_color_chooser_get_rgba(v.native(), (*C.GdkRGBA)(unsafe.Pointer(gdkColor.Native())))
 	return gdkColor
 }
 
-// SetRGBA() is a wrapper around gtk_color_chooser_set_rgba().
+// SetRGBA is a wrapper around gtk_color_chooser_set_rgba().
 func (v *ColorChooser) SetRGBA(gdkColor *gdk.RGBA) {
 	C.gtk_color_chooser_set_rgba(v.native(), (*C.GdkRGBA)(unsafe.Pointer(gdkColor.Native())))
 }
 
-// GetUseAlpha() is a wrapper around gtk_color_chooser_get_use_alpha().
+// GetUseAlpha is a wrapper around gtk_color_chooser_get_use_alpha().
 func (v *ColorChooser) GetUseAlpha() bool {
 	return gobool(C.gtk_color_chooser_get_use_alpha(v.native()))
 }
 
-// SetUseAlpha() is a wrapper around gtk_color_chooser_set_use_alpha().
-func (v *ColorChooser) SetUseAlpha(use_alpha bool) {
-	C.gtk_color_chooser_set_use_alpha(v.native(), gbool(use_alpha))
+// SetUseAlpha is a wrapper around gtk_color_chooser_set_use_alpha().
+func (v *ColorChooser) SetUseAlpha(useAlpha bool) {
+	C.gtk_color_chooser_set_use_alpha(v.native(), gbool(useAlpha))
 }
 
-// AddPalette() is a wrapper around gtk_color_chooser_add_palette().
-func (v *ColorChooser) AddPalette(orientation Orientation, colors_per_line int, colors []*gdk.RGBA) {
-	n_colors := len(colors)
-	var c_colors []C.GdkRGBA
+// AddPalette is a wrapper around gtk_color_chooser_add_palette().
+func (v *ColorChooser) AddPalette(orientation Orientation, colorsPerLine int, colors []*gdk.RGBA) {
+	nColors := len(colors)
+	var cColors []C.GdkRGBA
 	for _, c := range colors {
-		c_colors = append(c_colors, *(*C.GdkRGBA)(unsafe.Pointer(c.Native())))
+		cColors = append(cColors, *(*C.GdkRGBA)(unsafe.Pointer(c.Native())))
 	}
 	C.gtk_color_chooser_add_palette(
 		v.native(),
 		C.GtkOrientation(orientation),
-		C.gint(colors_per_line),
-		C.gint(n_colors),
-		&c_colors[0],
+		C.gint(colorsPerLine),
+		C.gint(nColors),
+		&cColors[0],
 	)
 }
 
@@ -1762,7 +1765,7 @@ func wrapColorChooserDialog(obj *glib.Object) *ColorChooserDialog {
 	return &ColorChooserDialog{*dialog, *cc}
 }
 
-// ColorChooserDialogNew() is a wrapper around gtk_color_chooser_dialog_new().
+// ColorChooserDialogNew is a wrapper around gtk_color_chooser_dialog_new().
 func ColorChooserDialogNew(title string, parent *Window) (*ColorChooserDialog, error) {
 	cstr := C.CString(title)
 	defer C.free(unsafe.Pointer(cstr))
@@ -1849,7 +1852,7 @@ func wrapMessageDialog(obj *glib.Object) *MessageDialog {
 	return &MessageDialog{*dlg}
 }
 
-// MessageDialogNew() is a wrapper around gtk_message_dialog_new().
+// MessageDialogNew is a wrapper around gtk_message_dialog_new().
 // The text is created and formatted by the format specifier and any
 // additional arguments.
 func MessageDialogNew(parent IWindow, flags DialogFlags, mType MessageType, buttons ButtonsType,
@@ -1860,7 +1863,7 @@ func MessageDialogNew(parent IWindow, flags DialogFlags, mType MessageType, butt
 		cstr = C.CString(s)
 		defer C.free(unsafe.Pointer(cstr))
 	}
-	var w *C.GtkWindow = nil
+	var w *C.GtkWindow
 	if parent != nil {
 		w = parent.toWindow()
 	}
@@ -1880,7 +1883,7 @@ func MessageDialogNewWithMarkup(parent IWindow, flags DialogFlags, mType Message
 	s := fmt.Sprintf(format, a...)
 	cstr := C.CString(s)
 	defer C.free(unsafe.Pointer(cstr))
-	var w *C.GtkWindow = nil
+	var w *C.GtkWindow
 	if parent != nil {
 		w = parent.toWindow()
 	}
@@ -1922,7 +1925,7 @@ func (v *MessageDialog) FormatSecondaryMarkup(format string, a ...interface{}) {
 
 }
 
-// Wrap around gtk_message_dialog_get_message_area()
+// GetMessageArea is a wrapper around gtk_message_dialog_get_message_area()
 func (v *MessageDialog) GetMessageArea() (*Box, error) {
 	c := C.gtk_message_dialog_get_message_area(v.native())
 	if c == nil {
@@ -1936,7 +1939,7 @@ func (v *MessageDialog) GetMessageArea() (*Box, error) {
  * GtkFileChooser
  */
 
-// FileChoser is a representation of GTK's GtkFileChooser GInterface.
+// FileChooser is a representation of GTK's GtkFileChooser GInterface.
 type FileChooser struct {
 	glib.Interface
 }
@@ -2129,15 +2132,18 @@ func FileChooserDialogNewWith1Button(
 	title string,
 	parent *Window,
 	action FileChooserAction,
-	first_button_text string,
-	first_button_id ResponseType) (*FileChooserDialog, error) {
-	c_title := C.CString(title)
-	defer C.free(unsafe.Pointer(c_title))
-	c_first_button_text := C.CString(first_button_text)
-	defer C.free(unsafe.Pointer(c_first_button_text))
+	firstButtonText string,
+	firstButtonID ResponseType) (*FileChooserDialog, error) {
+
+	cTitle := C.CString(title)
+	defer C.free(unsafe.Pointer(cTitle))
+
+	cFirstButtonText := C.CString(firstButtonText)
+	defer C.free(unsafe.Pointer(cFirstButtonText))
+
 	c := C.gtk_file_chooser_dialog_new_1(
-		(*C.gchar)(c_title), parent.native(), C.GtkFileChooserAction(action),
-		(*C.gchar)(c_first_button_text), C.int(first_button_id))
+		(*C.gchar)(cTitle), parent.native(), C.GtkFileChooserAction(action),
+		(*C.gchar)(cFirstButtonText), C.int(firstButtonID))
 	if c == nil {
 		return nil, nilPtrErr
 	}
@@ -2150,20 +2156,24 @@ func FileChooserDialogNewWith2Buttons(
 	title string,
 	parent *Window,
 	action FileChooserAction,
-	first_button_text string,
-	first_button_id ResponseType,
-	second_button_text string,
-	second_button_id ResponseType) (*FileChooserDialog, error) {
-	c_title := C.CString(title)
-	defer C.free(unsafe.Pointer(c_title))
-	c_first_button_text := C.CString(first_button_text)
-	defer C.free(unsafe.Pointer(c_first_button_text))
-	c_second_button_text := C.CString(second_button_text)
-	defer C.free(unsafe.Pointer(c_second_button_text))
+	firstButtonText string,
+	firstButtonID ResponseType,
+	secondButtonText string,
+	secondButtonID ResponseType) (*FileChooserDialog, error) {
+
+	cTitle := C.CString(title)
+	defer C.free(unsafe.Pointer(cTitle))
+
+	cFirstButtonText := C.CString(firstButtonText)
+	defer C.free(unsafe.Pointer(cFirstButtonText))
+
+	cSecondButtonText := C.CString(secondButtonText)
+	defer C.free(unsafe.Pointer(cSecondButtonText))
+
 	c := C.gtk_file_chooser_dialog_new_2(
-		(*C.gchar)(c_title), parent.native(), C.GtkFileChooserAction(action),
-		(*C.gchar)(c_first_button_text), C.int(first_button_id),
-		(*C.gchar)(c_second_button_text), C.int(second_button_id))
+		(*C.gchar)(cTitle), parent.native(), C.GtkFileChooserAction(action),
+		(*C.gchar)(cFirstButtonText), C.int(firstButtonID),
+		(*C.gchar)(cSecondButtonText), C.int(secondButtonID))
 	if c == nil {
 		return nil, nilPtrErr
 	}
@@ -2217,7 +2227,7 @@ func FileChooserWidgetNew(action FileChooserAction) (*FileChooserWidget, error) 
  * GtkFileFilter
  */
 
-// FileChoser is a representation of GTK's GtkFileFilter GInterface.
+// FileFilter is a representation of GTK's GtkFileFilter GInterface.
 type FileFilter struct {
 	glib.Interface
 }

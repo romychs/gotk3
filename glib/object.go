@@ -29,7 +29,7 @@ type Object struct {
 	gobject *C.GObject
 }
 
-// Cast underlying GObject to uintptr with protection from nil.
+// Native cast underlying GObject to uintptr with protection from nil.
 // No need to check for nil in successor code.
 // Export this method for all other modules and successors
 func (v *Object) Native() uintptr {

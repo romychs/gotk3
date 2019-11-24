@@ -24,6 +24,7 @@ package gtk
 // #include "gtk_since_3_10.go.h"
 import "C"
 import (
+	"sync"
 	"unsafe"
 
 	"github.com/d2r2/gotk3/glib"
@@ -261,9 +262,140 @@ func (v *ListBox) InvalidateSort() {
 	C.gtk_list_box_invalidate_sort(v.native())
 }
 
-// TODO: SetFilterFunc
-// TODO: SetHeaderFunc
-// TODO: SetSortFunc
+type GtkListBoxUpdateHeaderCallback func(row, before *ListBoxRow)
+
+type GtkListBoxFilterCallback func(row *ListBoxRow) bool
+
+type GtkListBoxSortCallback func(row1, row2 *ListBoxRow) int
+
+type gtkListBoxUpdateHeaderCallbackData struct {
+	fn GtkListBoxUpdateHeaderCallback
+}
+
+type gtkListBoxFilterCallbackData struct {
+	fn GtkListBoxFilterCallback
+}
+
+type gtkListBoxSortCallbackData struct {
+	fn GtkListBoxSortCallback
+}
+
+var (
+	gtkListBoxUpdateHeaderCallbackRegistry = struct {
+		sync.RWMutex
+		m map[uintptr]gtkListBoxUpdateHeaderCallbackData
+	}{
+		m: make(map[uintptr]gtkListBoxUpdateHeaderCallbackData),
+	}
+)
+
+var (
+	gtkListBoxFilterCallbackRegistry = struct {
+		sync.RWMutex
+		m map[uintptr]gtkListBoxFilterCallbackData
+	}{
+		m: make(map[uintptr]gtkListBoxFilterCallbackData),
+	}
+)
+
+var (
+	gtkListBoxSortCallbackRegistry = struct {
+		sync.RWMutex
+		m map[uintptr]gtkListBoxSortCallbackData
+	}{
+		m: make(map[uintptr]gtkListBoxSortCallbackData),
+	}
+)
+
+//export goGtkListBoxUpdateHeader
+func goGtkListBoxUpdateHeader(current, before *C.GtkListBoxRow, listBox C.gpointer) {
+
+	id := uintptr(listBox)
+
+	gtkListBoxUpdateHeaderCallbackRegistry.RLock()
+	r := gtkListBoxUpdateHeaderCallbackRegistry.m[id]
+	gtkListBoxUpdateHeaderCallbackRegistry.RUnlock()
+
+	var currentListBoxRow, beforeListBoxRow *ListBoxRow
+	if current != nil {
+		currentListBoxRow = wrapListBoxRow(glib.ToObject(unsafe.Pointer(current)))
+	}
+	if before != nil {
+		beforeListBoxRow = wrapListBoxRow(glib.ToObject(unsafe.Pointer(before)))
+	}
+
+	r.fn(currentListBoxRow, beforeListBoxRow)
+}
+
+// SetHeaderFunc is a wrapper around gtk_list_box_set_header_func()
+func (v *ListBox) SetHeaderFunc(callback GtkListBoxUpdateHeaderCallback) {
+	gtkListBoxUpdateHeaderCallbackRegistry.Lock()
+	id := v.Object.Native()
+	gtkListBoxUpdateHeaderCallbackRegistry.m[id] =
+		gtkListBoxUpdateHeaderCallbackData{fn: callback}
+	gtkListBoxUpdateHeaderCallbackRegistry.Unlock()
+
+	C._gtk_list_box_set_header_func(v.native())
+}
+
+//export goGtkListBoxFilter
+func goGtkListBoxFilter(row *C.GtkListBoxRow, listBox C.gpointer) {
+
+	id := uintptr(listBox)
+
+	gtkListBoxFilterCallbackRegistry.RLock()
+	r := gtkListBoxFilterCallbackRegistry.m[id]
+	gtkListBoxFilterCallbackRegistry.RUnlock()
+
+	var listBoxRow *ListBoxRow
+	if row != nil {
+		listBoxRow = wrapListBoxRow(glib.ToObject(unsafe.Pointer(row)))
+	}
+
+	r.fn(listBoxRow)
+}
+
+// SetFilterFunc is a wrapper around gtk_list_box_set_filter_func()
+func (v *ListBox) SetFilterFunc(callback GtkListBoxFilterCallback) {
+	gtkListBoxFilterCallbackRegistry.Lock()
+	id := v.Object.Native()
+	gtkListBoxFilterCallbackRegistry.m[id] =
+		gtkListBoxFilterCallbackData{fn: callback}
+	gtkListBoxFilterCallbackRegistry.Unlock()
+
+	C._gtk_list_box_set_filter_func(v.native())
+}
+
+//export goGtkListBoxSort
+func goGtkListBoxSort(row1, row2 *C.GtkListBoxRow, listBox C.gpointer) {
+
+	id := uintptr(listBox)
+
+	gtkListBoxSortCallbackRegistry.RLock()
+	r := gtkListBoxSortCallbackRegistry.m[id]
+	gtkListBoxSortCallbackRegistry.RUnlock()
+
+	var listBoxRow1, listBoxRow2 *ListBoxRow
+	if row1 != nil {
+		listBoxRow1 = wrapListBoxRow(glib.ToObject(unsafe.Pointer(row1)))
+	}
+	if row2 != nil {
+		listBoxRow2 = wrapListBoxRow(glib.ToObject(unsafe.Pointer(row2)))
+	}
+
+	r.fn(listBoxRow1, listBoxRow2)
+}
+
+// SetSortFunc is a wrapper around gtk_list_box_set_sort_func()
+func (v *ListBox) SetSortFunc(callback GtkListBoxSortCallback) {
+	gtkListBoxSortCallbackRegistry.Lock()
+	id := v.Object.Native()
+	gtkListBoxSortCallbackRegistry.m[id] =
+		gtkListBoxSortCallbackData{fn: callback}
+	gtkListBoxSortCallbackRegistry.Unlock()
+
+	C._gtk_list_box_set_sort_func(v.native())
+}
 
 // DragHighlightRow is a wrapper around gtk_list_box_drag_highlight_row()
 func (v *ListBox) DragHighlightRow(row *ListBoxRow) {
@@ -337,12 +469,12 @@ func (v *ListBoxRow) GetIndex() int {
  * GtkGrid
  */
 
-// RemoveRow() is a wrapper around gtk_grid_remove_row().
+// RemoveRow is a wrapper around gtk_grid_remove_row().
 func (v *Grid) RemoveRow(position int) {
 	C.gtk_grid_remove_row(v.native(), C.gint(position))
 }
 
-// RemoveColumn() is a wrapper around gtk_grid_remove_column().
+// RemoveColumn is a wrapper around gtk_grid_remove_column().
 func (v *Grid) RemoveColumn(position int) {
 	C.gtk_grid_remove_column(v.native(), C.gint(position))
 }

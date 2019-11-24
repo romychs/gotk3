@@ -20,7 +20,7 @@ import (
  * GtkDialog
  */
 
-// GetActionArea() is a wrapper around gtk_dialog_get_action_area().
+// GetActionArea is a wrapper around gtk_dialog_get_action_area().
 func (v *Dialog) GetActionArea() (*Widget, error) {
 	c := C.gtk_dialog_get_action_area(v.native())
 	if c == nil {

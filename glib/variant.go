@@ -245,7 +245,7 @@ func (v *Variant) GetInt() (int64, error) {
 	return i, nil
 }
 
-// Type returns the VariantType for this variant.
+// GetType returns the VariantType for this variant.
 func (v *Variant) GetType() *VariantType {
 	return newVariantType(C.g_variant_get_type(v.native()))
 }

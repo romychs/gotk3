@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/usr/bin/env bash
 
 # Autodetected distributive specific versions
 GLIB=$(pkg-config --modversion glib-2.0 | tr . _| cut -d '_' -f 1-2)

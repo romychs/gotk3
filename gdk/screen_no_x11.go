@@ -1,4 +1,4 @@
-// +build !linux no_x11
+// +build !linux,!freebsd no_x11
 
 package gdk
 

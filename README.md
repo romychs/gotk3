@@ -36,6 +36,7 @@ modern GTK+3 application, which include menus, toolbars, actions and others
 widgets and tools (including pattern for fullscreen wrap/unwrap, preference dialog sample,
 save/restore settings and so on).
 
+Library successfully tested on both Linux (5.3.11-arch1-1) and FreeBSD (5.3.11-arch1-1) systems.
 
 Usage
 ------------
@@ -74,7 +75,7 @@ significantly depend on minor version. For instance, some noticeable changes in 
 made starting from 3.12. So library support next tags
 based on [golang build constraints approach](https://golang.org/pkg/go/build/#hdr-Build_Constraints):
 
-* List of supported GLIB tags: glib_2_40, glib_2_42, glib_2_44, glib_2_46, glib_2_48, glib_2_50, glib_2_52, glib_2_54, glib_2_56, glib_2_58, glib_2_60.
+* List of supported GLIB tags: glib_2_40, glib_2_42, glib_2_44, glib_2_46, glib_2_48, glib_2_50, glib_2_52, glib_2_54, glib_2_56, glib_2_58, glib_2_60, glib_2_62.
 
 * List of supported GTK tags: gtk_3_6, gtk_3_8, gtk_3_10, gtk_3_12, gtk_3_14, gtk_3_16, gtk_3_18, gtk_3_20, gtk_3_22, gtk_3_24.
 
@@ -102,7 +103,10 @@ otherwise any derived application will compile for a long-long time, so run in a
 ```
 go install -tags "gtk_$(pkg-config --modversion gtk+-3.0 | tr . _| cut -d '_' -f 1-2)" github.com/d2r2/gotk3/...
 ```
-either for Golang which support build cache feature (starting from 1.10), you can run existing build script with same results `./build_with_tags.sh`.
+, either for Golang which support build cache feature (starting from 1.10), you can run existing build script with same results
+```
+./build_with_tags.sh
+```
 
 
 Additional projects/links used

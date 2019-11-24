@@ -23,19 +23,19 @@ package gtk
 // #include "gtk.go.h"
 import "C"
 
-// ReorderOverlay() is a wrapper around gtk_overlay_reorder_overlay().
+// ReorderOverlay is a wrapper around gtk_overlay_reorder_overlay().
 func (v *Overlay) ReorderOverlay(child IWidget, position int) {
 	C.gtk_overlay_reorder_overlay(v.native(), child.toWidget(), C.gint(position))
 }
 
-// GetOverlayPassThrough() is a wrapper around
+// GetOverlayPassThrough is a wrapper around
 // gtk_overlay_get_overlay_pass_through().
 func (v *Overlay) GetOverlayPassThrough(widget IWidget) bool {
 	c := C.gtk_overlay_get_overlay_pass_through(v.native(), widget.toWidget())
 	return gobool(c)
 }
 
-// SetOverlayPassThrough() is a wrapper around
+// SetOverlayPassThrough is a wrapper around
 // gtk_overlay_set_overlay_pass_through().
 func (v *Overlay) SetOverlayPassThrough(widget IWidget, passThrough bool) {
 	C.gtk_overlay_set_overlay_pass_through(v.native(), widget.toWidget(), gbool(passThrough))

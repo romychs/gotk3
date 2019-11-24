@@ -488,17 +488,17 @@ func TextTagNew(name string) (*TextTag, error) {
 	return wrapTextTag(obj), nil
 }
 
-// GetPriority() is a wrapper around gtk_text_tag_get_priority().
+// GetPriority is a wrapper around gtk_text_tag_get_priority().
 func (v *TextTag) GetPriority() int {
 	return int(C.gtk_text_tag_get_priority(v.native()))
 }
 
-// SetPriority() is a wrapper around gtk_text_tag_set_priority().
+// SetPriority is a wrapper around gtk_text_tag_set_priority().
 func (v *TextTag) SetPriority(priority int) {
 	C.gtk_text_tag_set_priority(v.native(), C.gint(priority))
 }
 
-// Event() is a wrapper around gtk_text_tag_event().
+// Event is a wrapper around gtk_text_tag_event().
 func (v *TextTag) Event(eventObject *glib.Object, event *gdk.Event, iter *TextIter) bool {
 	ok := C.gtk_text_tag_event(v.native(),
 		C.toGObject(unsafe.Pointer(eventObject.Native())),
@@ -544,13 +544,13 @@ func TextTagTableNew() (*TextTagTable, error) {
 	return wrapTextTagTable(obj), nil
 }
 
-// Add() is a wrapper around gtk_text_tag_table_add().
+// Add is a wrapper around gtk_text_tag_table_add().
 func (v *TextTagTable) Add(tag *TextTag) {
 	C.gtk_text_tag_table_add(v.native(), tag.native())
 	//return gobool(c) // TODO version-separate
 }
 
-// Lookup() is a wrapper around gtk_text_tag_table_lookup().
+// Lookup is a wrapper around gtk_text_tag_table_lookup().
 func (v *TextTagTable) Lookup(name string) (*TextTag, error) {
 	cname := C.CString(name)
 	defer C.free(unsafe.Pointer(cname))
@@ -562,7 +562,7 @@ func (v *TextTagTable) Lookup(name string) (*TextTag, error) {
 	return wrapTextTag(obj), nil
 }
 
-// Remove() is a wrapper around gtk_text_tag_table_remove().
+// Remove is a wrapper around gtk_text_tag_table_remove().
 func (v *TextTagTable) Remove(tag *TextTag) {
 	C.gtk_text_tag_table_remove(v.native(), tag.native())
 }
@@ -595,7 +595,7 @@ func wrapTextBuffer(obj *glib.Object) *TextBuffer {
 	return &TextBuffer{obj}
 }
 
-// TextBufferNew() is a wrapper around gtk_text_buffer_new().
+// TextBufferNew is a wrapper around gtk_text_buffer_new().
 func TextBufferNew(table *TextTagTable) (*TextBuffer, error) {
 	c := C.gtk_text_buffer_new(table.native())
 	if c == nil {
@@ -606,12 +606,12 @@ func TextBufferNew(table *TextTagTable) (*TextBuffer, error) {
 	return wrapTextBuffer(obj), nil
 }
 
-// ApplyTag() is a wrapper around gtk_text_buffer_apply_tag().
+// ApplyTag is a wrapper around gtk_text_buffer_apply_tag().
 func (v *TextBuffer) ApplyTag(tag *TextTag, start, end *TextIter) {
 	C.gtk_text_buffer_apply_tag(v.native(), tag.native(), start.native(), end.native())
 }
 
-// ApplyTagByName() is a wrapper around gtk_text_buffer_apply_tag_by_name().
+// ApplyTagByName is a wrapper around gtk_text_buffer_apply_tag_by_name().
 func (v *TextBuffer) ApplyTagByName(name string, start, end *TextIter) {
 	cstr := C.CString(name)
 	defer C.free(unsafe.Pointer(cstr))
@@ -619,7 +619,7 @@ func (v *TextBuffer) ApplyTagByName(name string, start, end *TextIter) {
 		start.native(), end.native())
 }
 
-// Delete() is a wrapper around gtk_text_buffer_delete().
+// Delete is a wrapper around gtk_text_buffer_delete().
 func (v *TextBuffer) Delete(start, end *TextIter) {
 	C.gtk_text_buffer_delete(v.native(), start.native(), end.native())
 }
@@ -633,12 +633,12 @@ func (v *TextBuffer) GetBounds() (start, end *TextIter) {
 	return start, end
 }
 
-// GetCharCount() is a wrapper around gtk_text_buffer_get_char_count().
+// GetCharCount is a wrapper around gtk_text_buffer_get_char_count().
 func (v *TextBuffer) GetCharCount() int {
 	return int(C.gtk_text_buffer_get_char_count(v.native()))
 }
 
-// GetIterAtOffset() is a wrapper around gtk_text_buffer_get_iter_at_offset().
+// GetIterAtOffset is a wrapper around gtk_text_buffer_get_iter_at_offset().
 func (v *TextBuffer) GetIterAtOffset(charOffset int) *TextIter {
 	var iter C.GtkTextIter
 	C.gtk_text_buffer_get_iter_at_offset(v.native(), &iter, C.gint(charOffset))
@@ -646,7 +646,7 @@ func (v *TextBuffer) GetIterAtOffset(charOffset int) *TextIter {
 	return ti
 }
 
-// GetStartIter() is a wrapper around gtk_text_buffer_get_start_iter().
+// GetStartIter is a wrapper around gtk_text_buffer_get_start_iter().
 func (v *TextBuffer) GetStartIter() *TextIter {
 	var iter C.GtkTextIter
 	C.gtk_text_buffer_get_start_iter(v.native(), &iter)
@@ -654,7 +654,7 @@ func (v *TextBuffer) GetStartIter() *TextIter {
 	return ti
 }
 
-// GetEndIter() is a wrapper around gtk_text_buffer_get_end_iter().
+// GetEndIter is a wrapper around gtk_text_buffer_get_end_iter().
 func (v *TextBuffer) GetEndIter() *TextIter {
 	var iter C.GtkTextIter
 	C.gtk_text_buffer_get_end_iter(v.native(), &iter)
@@ -662,17 +662,17 @@ func (v *TextBuffer) GetEndIter() *TextIter {
 	return ti
 }
 
-// GetLineCount() is a wrapper around gtk_text_buffer_get_line_count().
+// GetLineCount is a wrapper around gtk_text_buffer_get_line_count().
 func (v *TextBuffer) GetLineCount() int {
 	return int(C.gtk_text_buffer_get_line_count(v.native()))
 }
 
-// GetModified() is a wrapper around gtk_text_buffer_get_modified().
+// GetModified is a wrapper around gtk_text_buffer_get_modified().
 func (v *TextBuffer) GetModified() bool {
 	return gobool(C.gtk_text_buffer_get_modified(v.native()))
 }
 
-// GetTagTable() is a wrapper around gtk_text_buffer_get_tag_table().
+// GetTagTable is a wrapper around gtk_text_buffer_get_tag_table().
 func (v *TextBuffer) GetTagTable() (*TextTagTable, error) {
 	c := C.gtk_text_buffer_get_tag_table(v.native())
 	if c == nil {
@@ -693,26 +693,26 @@ func (v *TextBuffer) GetText(start, end *TextIter, includeHiddenChars bool) (str
 	return gostr, nil
 }
 
-// Insert() is a wrapper around gtk_text_buffer_insert().
+// Insert is a wrapper around gtk_text_buffer_insert().
 func (v *TextBuffer) Insert(iter *TextIter, text string) {
 	cstr := C.CString(text)
 	defer C.free(unsafe.Pointer(cstr))
 	C.gtk_text_buffer_insert(v.native(), iter.native(), (*C.gchar)(cstr), C.gint(len(text)))
 }
 
-// InsertAtCursor() is a wrapper around gtk_text_buffer_insert_at_cursor().
+// InsertAtCursor is a wrapper around gtk_text_buffer_insert_at_cursor().
 func (v *TextBuffer) InsertAtCursor(text string) {
 	cstr := C.CString(text)
 	defer C.free(unsafe.Pointer(cstr))
 	C.gtk_text_buffer_insert_at_cursor(v.native(), (*C.gchar)(cstr), C.gint(len(text)))
 }
 
-// RemoveTag() is a wrapper around gtk_text_buffer_remove_tag().
+// RemoveTag is a wrapper around gtk_text_buffer_remove_tag().
 func (v *TextBuffer) RemoveTag(tag *TextTag, start, end *TextIter) {
 	C.gtk_text_buffer_remove_tag(v.native(), tag.native(), start.native(), end.native())
 }
 
-// SetModified() is a wrapper around gtk_text_buffer_set_modified().
+// SetModified is a wrapper around gtk_text_buffer_set_modified().
 func (v *TextBuffer) SetModified(setting bool) {
 	C.gtk_text_buffer_set_modified(v.native(), gbool(setting))
 }
@@ -724,7 +724,7 @@ func (v *TextBuffer) SetText(text string) {
 		C.gint(len(text)))
 }
 
-// GetIterAtMark() is a wrapper around gtk_text_buffer_get_iter_at_mark().
+// GetIterAtMark is a wrapper around gtk_text_buffer_get_iter_at_mark().
 func (v *TextBuffer) GetIterAtMark(mark *TextMark) *TextIter {
 	var iter C.GtkTextIter
 	C.gtk_text_buffer_get_iter_at_mark(v.native(), &iter, mark.native())
@@ -732,7 +732,7 @@ func (v *TextBuffer) GetIterAtMark(mark *TextMark) *TextIter {
 	return ti
 }
 
-// CreateMark() is a wrapper around gtk_text_buffer_create_mark().
+// CreateMark is a wrapper around gtk_text_buffer_create_mark().
 func (v *TextBuffer) CreateMark(mark_name string, where *TextIter, left_gravity bool) *TextMark {
 	cstr := C.CString(mark_name)
 	defer C.free(unsafe.Pointer(cstr))
@@ -741,12 +741,12 @@ func (v *TextBuffer) CreateMark(mark_name string, where *TextIter, left_gravity 
 	return tm
 }
 
-// InsertChildAnchor() is a wrapper around gtk_text_buffer_insert_child_anchor().
+// InsertChildAnchor is a wrapper around gtk_text_buffer_insert_child_anchor().
 func (v *TextBuffer) InsertChildAnchor(iter *TextIter, anchor *TextChildAnchor) {
 	C.gtk_text_buffer_insert_child_anchor(v.native(), iter.native(), anchor.native())
 }
 
-// CreateChildAnchor() is a wrapper around gtk_text_buffer_insert_child_anchor().
+// CreateChildAnchor is a wrapper around gtk_text_buffer_insert_child_anchor().
 func (v *TextBuffer) CreateChildAnchor(iter *TextIter) (*TextChildAnchor, error) {
 	c := C.gtk_text_buffer_create_child_anchor(v.native(), iter.native())
 	if c == nil {
@@ -785,7 +785,7 @@ func wrapTextChildAnchor(obj *glib.Object) *TextChildAnchor {
 	return &TextChildAnchor{obj}
 }
 
-// TextChildAnchorNew() is a wrapper around gtk_text_child_anchor_new().
+// TextChildAnchorNew is a wrapper around gtk_text_child_anchor_new().
 func TextChildAnchorNew() (*TextChildAnchor, error) {
 	c := C.gtk_text_child_anchor_new()
 	if c == nil {
@@ -1012,13 +1012,15 @@ func (v *TextView) GetInputPurpose() InputPurpose {
 }
 
 // ScrollToMark is a wrapper around gtk_text_view_scroll_to_mark().
-func (v *TextView) ScrollToMark(mark *TextMark, within_margin float64, use_align bool, xalign, yalign float64) {
-	C.gtk_text_view_scroll_to_mark(v.native(), mark.native(), C.gdouble(within_margin), gbool(use_align), C.gdouble(xalign), C.gdouble(yalign))
+func (v *TextView) ScrollToMark(mark *TextMark, withinMargin float64, useAlign bool, xalign, yalign float64) {
+	C.gtk_text_view_scroll_to_mark(v.native(), mark.native(), C.gdouble(withinMargin),
+		gbool(useAlign), C.gdouble(xalign), C.gdouble(yalign))
 }
 
 // ScrollToIter is a wrapper around gtk_text_view_scroll_to_iter().
-func (v *TextView) ScrollToIter(iter *TextIter, within_margin float64, use_align bool, xalign, yalign float64) bool {
-	return gobool(C.gtk_text_view_scroll_to_iter(v.native(), iter.native(), C.gdouble(within_margin), gbool(use_align), C.gdouble(xalign), C.gdouble(yalign)))
+func (v *TextView) ScrollToIter(iter *TextIter, withinMargin float64, useAlign bool, xalign, yalign float64) bool {
+	return gobool(C.gtk_text_view_scroll_to_iter(v.native(), iter.native(), C.gdouble(withinMargin),
+		gbool(useAlign), C.gdouble(xalign), C.gdouble(yalign)))
 }
 
 // ScrollMarkOnscreen is a wrapper around gtk_text_view_scroll_mark_onscreen().
@@ -1060,10 +1062,10 @@ func (v *TextView) GetCursorLocations(iter *TextIter) (strong, weak *gdk.Rectang
 // GetLineAtY is a wrapper around gtk_text_view_get_line_at_y().
 func (v *TextView) GetLineAtY(y int) (*TextIter, int) {
 	var iter C.GtkTextIter
-	var line_top C.gint
-	C.gtk_text_view_get_line_at_y(v.native(), &iter, C.gint(y), &line_top)
+	var lineTop C.gint
+	C.gtk_text_view_get_line_at_y(v.native(), &iter, C.gint(y), &lineTop)
 	ti := wrapTextIter(&iter)
-	return ti, int(line_top)
+	return ti, int(lineTop)
 }
 
 // GetLineYrange is a wrapper around gtk_text_view_get_line_yrange().
@@ -1091,16 +1093,18 @@ func (v *TextView) GetIterAtPosition(x, y int) (*TextIter, int) {
 }
 
 // BufferToWindowCoords is a wrapper around gtk_text_view_buffer_to_window_coords().
-func (v *TextView) BufferToWindowCoords(win TextWindowType, buffer_x, buffer_y int) (window_x, window_y int) {
+func (v *TextView) BufferToWindowCoords(win TextWindowType, bufferX, bufferY int) (windowX, windowY int) {
 	var wx, wy C.gint
-	C.gtk_text_view_buffer_to_window_coords(v.native(), C.GtkTextWindowType(win), C.gint(buffer_x), C.gint(buffer_y), &wx, &wy)
+	C.gtk_text_view_buffer_to_window_coords(v.native(), C.GtkTextWindowType(win),
+		C.gint(bufferX), C.gint(bufferY), &wx, &wy)
 	return int(wx), int(wy)
 }
 
 // WindowToBufferCoords is a wrapper around gtk_text_view_window_to_buffer_coords().
-func (v *TextView) WindowToBufferCoords(win TextWindowType, window_x, window_y int) (buffer_x, buffer_y int) {
+func (v *TextView) WindowToBufferCoords(win TextWindowType, windowX, windowY int) (bufferX, bufferY int) {
 	var bx, by C.gint
-	C.gtk_text_view_window_to_buffer_coords(v.native(), C.GtkTextWindowType(win), C.gint(window_x), C.gint(window_y), &bx, &by)
+	C.gtk_text_view_window_to_buffer_coords(v.native(), C.GtkTextWindowType(win),
+		C.gint(windowX), C.gint(windowY), &bx, &by)
 	return int(bx), int(by)
 }
 

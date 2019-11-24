@@ -24,6 +24,7 @@ package gtk
 // #include "gtk_since_3_12.go.h"
 import "C"
 import (
+	"runtime"
 	"unsafe"
 
 	"github.com/d2r2/gotk3/glib"
@@ -129,8 +130,8 @@ func (v *FlowBox) GetColumnSpacing() uint {
 }
 
 // SetMinChildrenPerLine is a wrapper around gtk_flow_box_set_min_children_per_line()
-func (v *FlowBox) SetMinChildrenPerLine(n_children uint) {
-	C.gtk_flow_box_set_min_children_per_line(v.native(), C.guint(n_children))
+func (v *FlowBox) SetMinChildrenPerLine(nChildren uint) {
+	C.gtk_flow_box_set_min_children_per_line(v.native(), C.guint(nChildren))
 }
 
 // GetMinChildrenPerLine is a wrapper around gtk_flow_box_get_min_children_per_line()
@@ -140,8 +141,8 @@ func (v *FlowBox) GetMinChildrenPerLine() uint {
 }
 
 // SetMaxChildrenPerLine is a wrapper around gtk_flow_box_set_max_children_per_line()
-func (v *FlowBox) SetMaxChildrenPerLine(n_children uint) {
-	C.gtk_flow_box_set_max_children_per_line(v.native(), C.guint(n_children))
+func (v *FlowBox) SetMaxChildrenPerLine(nChildren uint) {
+	C.gtk_flow_box_set_max_children_per_line(v.native(), C.guint(nChildren))
 }
 
 // GetMaxChildrenPerLine is a wrapper around gtk_flow_box_get_max_children_per_line()
@@ -163,21 +164,24 @@ func (v *FlowBox) GetActivateOnSingleClick() bool {
 
 // TODO: gtk_flow_box_selected_foreach()
 
-// GetSelectedChildren is a wrapper around gtk_flow_box_get_selected_children()
-func (v *FlowBox) GetSelectedChildren() (rv []*FlowBoxChild) {
-	c := C.gtk_flow_box_get_selected_children(v.native())
-	if c == nil {
-		return
-	}
-	list := glib.WrapList(uintptr(unsafe.Pointer(c)))
-	for l := list; l != nil; l = l.Next() {
-		o := wrapFlowBoxChild(glib.Take(l.Data().(unsafe.Pointer)))
-		rv = append(rv, o)
-	}
-	// We got a transfer container, so we must free the list.
-	list.Free()
+// GetSelectedChildren is a wrapper around gtk_flow_box_get_selected_children().
+// Returned list is wrapped to return *gtk.FlowBoxChild elements.
+func (v *FlowBox) GetSelectedChildren() *glib.List {
+	clist := C.gtk_flow_box_get_selected_children(v.native())
 
-	return
+	glist := glib.WrapList(uintptr(unsafe.Pointer(clist)))
+	glist.DataWrapper(func(ptr unsafe.Pointer) interface{} {
+		child := wrapFlowBoxChild(glib.Take(ptr))
+		return child
+	})
+
+	if glist != nil {
+		runtime.SetFinalizer(glist, func(glist *glib.List) {
+			glist.Free()
+		})
+	}
+
+	return glist
 }
 
 // SelectChild is a wrapper around gtk_flow_box_select_child()
@@ -269,7 +273,7 @@ func (v *FlowBoxChild) Changed() {
 	C.gtk_flow_box_child_changed(v.native())
 }
 
-//GtkActionBar
+// GtkActionBar
 type ActionBar struct {
 	Bin
 }

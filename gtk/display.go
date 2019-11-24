@@ -312,7 +312,7 @@ func wrapImage(obj *glib.Object) *Image {
 	return &Image{*widget}
 }
 
-// ImageNew() is a wrapper around gtk_image_new().
+// ImageNew is a wrapper around gtk_image_new().
 func ImageNew() (*Image, error) {
 	c := C.gtk_image_new()
 	if c == nil {
@@ -322,7 +322,7 @@ func ImageNew() (*Image, error) {
 	return wrapImage(obj), nil
 }
 
-// ImageNewFromFile() is a wrapper around gtk_image_new_from_file().
+// ImageNewFromFile is a wrapper around gtk_image_new_from_file().
 func ImageNewFromFile(filename string) (*Image, error) {
 	cstr := C.CString(filename)
 	defer C.free(unsafe.Pointer(cstr))
@@ -334,7 +334,7 @@ func ImageNewFromFile(filename string) (*Image, error) {
 	return wrapImage(obj), nil
 }
 
-// ImageNewFromResource() is a wrapper around gtk_image_new_from_resource().
+// ImageNewFromResource is a wrapper around gtk_image_new_from_resource().
 func ImageNewFromResource(resourcePath string) (*Image, error) {
 	cstr := C.CString(resourcePath)
 	defer C.free(unsafe.Pointer(cstr))
@@ -357,7 +357,7 @@ func ImageNewFromPixbuf(pixbuf *gdk.Pixbuf) (*Image, error) {
 	return wrapImage(obj), nil
 }
 
-// ImageNewFromPixbuf is a wrapper around gtk_image_new_from_pixbuf().
+// ImageNewFromAnimation is a wrapper around gtk_image_new_from_animation().
 func ImageNewFromAnimation(animation *gdk.PixbufAnimation) (*Image, error) {
 	ptr := (*C.GdkPixbufAnimation)(unsafe.Pointer(animation.Native()))
 	c := C.gtk_image_new_from_animation(ptr)
@@ -374,13 +374,7 @@ func ImageNewFromIconSet() {
 }
 */
 
-// TODO(jrick) GdkPixbufAnimation
-/*
-func ImageNewFromAnimation() {
-}
-*/
-
-// ImageNewFromIconName() is a wrapper around gtk_image_new_from_icon_name().
+// ImageNewFromIconName is a wrapper around gtk_image_new_from_icon_name().
 func ImageNewFromIconName(iconName string, size IconSize) (*Image, error) {
 	cstr := C.CString(iconName)
 	defer C.free(unsafe.Pointer(cstr))
@@ -399,26 +393,26 @@ func ImageNewFromGIcon() {
 }
 */
 
-// Clear() is a wrapper around gtk_image_clear().
+// Clear is a wrapper around gtk_image_clear().
 func (v *Image) Clear() {
 	C.gtk_image_clear(v.native())
 }
 
-// SetFromFile() is a wrapper around gtk_image_set_from_file().
+// SetFromFile is a wrapper around gtk_image_set_from_file().
 func (v *Image) SetFromFile(filename string) {
 	cstr := C.CString(filename)
 	defer C.free(unsafe.Pointer(cstr))
 	C.gtk_image_set_from_file(v.native(), (*C.gchar)(cstr))
 }
 
-// SetFromResource() is a wrapper around gtk_image_set_from_resource().
+// SetFromResource is a wrapper around gtk_image_set_from_resource().
 func (v *Image) SetFromResource(resourcePath string) {
 	cstr := C.CString(resourcePath)
 	defer C.free(unsafe.Pointer(cstr))
 	C.gtk_image_set_from_resource(v.native(), (*C.gchar)(cstr))
 }
 
-// SetFromFixbuf is a wrapper around gtk_image_set_from_pixbuf().
+// SetFromPixbuf is a wrapper around gtk_image_set_from_pixbuf().
 func (v *Image) SetFromPixbuf(pixbuf *gdk.Pixbuf) {
 	pbptr := (*C.GdkPixbuf)(unsafe.Pointer(pixbuf.Native()))
 	C.gtk_image_set_from_pixbuf(v.native(), pbptr)
@@ -436,7 +430,7 @@ func (v *Image) SetFromAnimation() {
 }
 */
 
-// SetFromIconName() is a wrapper around gtk_image_set_from_icon_name().
+// SetFromIconName is a wrapper around gtk_image_set_from_icon_name().
 func (v *Image) SetFromIconName(iconName string, size IconSize) {
 	cstr := C.CString(iconName)
 	defer C.free(unsafe.Pointer(cstr))
@@ -450,18 +444,18 @@ func (v *Image) SetFromGIcon() {
 }
 */
 
-// SetPixelSize() is a wrapper around gtk_image_set_pixel_size().
+// SetPixelSize is a wrapper around gtk_image_set_pixel_size().
 func (v *Image) SetPixelSize(pixelSize int) {
 	C.gtk_image_set_pixel_size(v.native(), C.gint(pixelSize))
 }
 
-// GetStorageType() is a wrapper around gtk_image_get_storage_type().
+// GetStorageType is a wrapper around gtk_image_get_storage_type().
 func (v *Image) GetStorageType() ImageType {
 	c := C.gtk_image_get_storage_type(v.native())
 	return ImageType(c)
 }
 
-// GetPixbuf() is a wrapper around gtk_image_get_pixbuf().
+// GetPixbuf is a wrapper around gtk_image_get_pixbuf().
 func (v *Image) GetPixbuf() *gdk.Pixbuf {
 	c := C.gtk_image_get_pixbuf(v.native())
 	if c == nil {
@@ -484,7 +478,7 @@ func (v *Image) GetAnimation() {
 }
 */
 
-// GetIconName() is a wrapper around gtk_image_get_icon_name().
+// GetIconName is a wrapper around gtk_image_get_icon_name().
 func (v *Image) GetIconName() (string, IconSize) {
 	var iconName *C.gchar
 	var size C.GtkIconSize
@@ -498,7 +492,7 @@ func (v *Image) GetGIcon() {
 }
 */
 
-// GetPixelSize() is a wrapper around gtk_image_get_pixel_size().
+// GetPixelSize is a wrapper around gtk_image_get_pixel_size().
 func (v *Image) GetPixelSize() int {
 	c := C.gtk_image_get_pixel_size(v.native())
 	return int(c)
@@ -600,23 +594,23 @@ func InfoBarNew() (*InfoBar, error) {
 	return wrapInfoBar(obj), nil
 }
 
-func (v *InfoBar) AddActionWidget(w IWidget, responseId ResponseType) {
-	C.gtk_info_bar_add_action_widget(v.native(), w.toWidget(), C.gint(responseId))
+func (v *InfoBar) AddActionWidget(w IWidget, responseID ResponseType) {
+	C.gtk_info_bar_add_action_widget(v.native(), w.toWidget(), C.gint(responseID))
 }
 
-func (v *InfoBar) AddButton(buttonText string, responseId ResponseType) {
+func (v *InfoBar) AddButton(buttonText string, responseID ResponseType) {
 	cstr := C.CString(buttonText)
 	defer C.free(unsafe.Pointer(cstr))
 
-	C.gtk_info_bar_add_button(v.native(), (*C.gchar)(cstr), C.gint(responseId))
+	C.gtk_info_bar_add_button(v.native(), (*C.gchar)(cstr), C.gint(responseID))
 }
 
-func (v *InfoBar) SetResponseSensitive(responseId ResponseType, setting bool) {
-	C.gtk_info_bar_set_response_sensitive(v.native(), C.gint(responseId), gbool(setting))
+func (v *InfoBar) SetResponseSensitive(responseID ResponseType, setting bool) {
+	C.gtk_info_bar_set_response_sensitive(v.native(), C.gint(responseID), gbool(setting))
 }
 
-func (v *InfoBar) SetDefaultResponse(responseId ResponseType) {
-	C.gtk_info_bar_set_default_response(v.native(), C.gint(responseId))
+func (v *InfoBar) SetDefaultResponse(responseID ResponseType) {
+	C.gtk_info_bar_set_default_response(v.native(), C.gint(responseID))
 }
 
 func (v *InfoBar) SetMessageType(messageType MessageType) {
@@ -689,7 +683,7 @@ func wrapProgressBar(obj *glib.Object) *ProgressBar {
 	return &ProgressBar{*widget, *o}
 }
 
-// ProgressBarNew() is a wrapper around gtk_progress_bar_new().
+// ProgressBarNew is a wrapper around gtk_progress_bar_new().
 func ProgressBarNew() (*ProgressBar, error) {
 	c := C.gtk_progress_bar_new()
 	if c == nil {
@@ -699,12 +693,12 @@ func ProgressBarNew() (*ProgressBar, error) {
 	return wrapProgressBar(obj), nil
 }
 
-// SetFraction() is a wrapper around gtk_progress_bar_set_fraction().
+// SetFraction is a wrapper around gtk_progress_bar_set_fraction().
 func (v *ProgressBar) SetFraction(fraction float64) {
 	C.gtk_progress_bar_set_fraction(v.native(), C.gdouble(fraction))
 }
 
-// GetFraction() is a wrapper around gtk_progress_bar_get_fraction().
+// GetFraction is a wrapper around gtk_progress_bar_get_fraction().
 func (v *ProgressBar) GetFraction() float64 {
 	c := C.gtk_progress_bar_get_fraction(v.native())
 	return float64(c)
@@ -721,7 +715,7 @@ func (v *ProgressBar) GetShowText() bool {
 	return gobool(c)
 }
 
-// SetText() is a wrapper around gtk_progress_bar_set_text().
+// SetText is a wrapper around gtk_progress_bar_set_text().
 func (v *ProgressBar) SetText(text string) {
 	var cstr *C.char
 	if text != "" {
@@ -810,7 +804,7 @@ func wrapLevelBar(obj *glib.Object) *LevelBar {
 	return &LevelBar{Widget{glib.InitiallyUnowned{obj}}}
 }
 
-// LevelBarNew() is a wrapper around gtk_level_bar_new().
+// LevelBarNew is a wrapper around gtk_level_bar_new().
 func LevelBarNew() (*LevelBar, error) {
 	c := C.gtk_level_bar_new()
 	if c == nil {
@@ -820,7 +814,7 @@ func LevelBarNew() (*LevelBar, error) {
 	return wrapLevelBar(obj), nil
 }
 
-// LevelBarNewForInterval() is a wrapper around gtk_level_bar_new_for_interval().
+// LevelBarNewForInterval is a wrapper around gtk_level_bar_new_for_interval().
 func LevelBarNewForInterval(min_value, max_value float64) (*LevelBar, error) {
 	c := C.gtk_level_bar_new_for_interval(C.gdouble(min_value), C.gdouble(max_value))
 	if c == nil {
@@ -830,44 +824,44 @@ func LevelBarNewForInterval(min_value, max_value float64) (*LevelBar, error) {
 	return wrapLevelBar(obj), nil
 }
 
-// SetMode() is a wrapper around gtk_level_bar_set_mode().
+// SetMode is a wrapper around gtk_level_bar_set_mode().
 func (v *LevelBar) SetMode(m LevelBarMode) {
 	C.gtk_level_bar_set_mode(v.native(), C.GtkLevelBarMode(m))
 }
 
-// GetMode() is a wrapper around gtk_level_bar_get_mode().
+// GetMode is a wrapper around gtk_level_bar_get_mode().
 func (v *LevelBar) GetMode() LevelBarMode {
 	return LevelBarMode(C.gtk_level_bar_get_mode(v.native()))
 }
 
-// SetValue() is a wrapper around gtk_level_bar_set_value().
+// SetValue is a wrapper around gtk_level_bar_set_value().
 func (v *LevelBar) SetValue(value float64) {
 	C.gtk_level_bar_set_value(v.native(), C.gdouble(value))
 }
 
-// GetValue() is a wrapper around gtk_level_bar_get_value().
+// GetValue is a wrapper around gtk_level_bar_get_value().
 func (v *LevelBar) GetValue() float64 {
 	c := C.gtk_level_bar_get_value(v.native())
 	return float64(c)
 }
 
-// SetMinValue() is a wrapper around gtk_level_bar_set_min_value().
+// SetMinValue is a wrapper around gtk_level_bar_set_min_value().
 func (v *LevelBar) SetMinValue(value float64) {
 	C.gtk_level_bar_set_min_value(v.native(), C.gdouble(value))
 }
 
-// GetMinValue() is a wrapper around gtk_level_bar_get_min_value().
+// GetMinValue is a wrapper around gtk_level_bar_get_min_value().
 func (v *LevelBar) GetMinValue() float64 {
 	c := C.gtk_level_bar_get_min_value(v.native())
 	return float64(c)
 }
 
-// SetMaxValue() is a wrapper around gtk_level_bar_set_max_value().
+// SetMaxValue is a wrapper around gtk_level_bar_set_max_value().
 func (v *LevelBar) SetMaxValue(value float64) {
 	C.gtk_level_bar_set_max_value(v.native(), C.gdouble(value))
 }
 
-// GetMaxValue() is a wrapper around gtk_level_bar_get_max_value().
+// GetMaxValue is a wrapper around gtk_level_bar_get_max_value().
 func (v *LevelBar) GetMaxValue() float64 {
 	c := C.gtk_level_bar_get_max_value(v.native())
 	return float64(c)
@@ -878,21 +872,21 @@ const (
 	LEVEL_BAR_OFFSET_HIGH string = C.GTK_LEVEL_BAR_OFFSET_HIGH
 )
 
-// AddOffsetValue() is a wrapper around gtk_level_bar_add_offset_value().
+// AddOffsetValue is a wrapper around gtk_level_bar_add_offset_value().
 func (v *LevelBar) AddOffsetValue(name string, value float64) {
 	cstr := C.CString(name)
 	defer C.free(unsafe.Pointer(cstr))
 	C.gtk_level_bar_add_offset_value(v.native(), (*C.gchar)(cstr), C.gdouble(value))
 }
 
-// RemoveOffsetValue() is a wrapper around gtk_level_bar_remove_offset_value().
+// RemoveOffsetValue is a wrapper around gtk_level_bar_remove_offset_value().
 func (v *LevelBar) RemoveOffsetValue(name string) {
 	cstr := C.CString(name)
 	defer C.free(unsafe.Pointer(cstr))
 	C.gtk_level_bar_remove_offset_value(v.native(), (*C.gchar)(cstr))
 }
 
-// GetOffsetValue() is a wrapper around gtk_level_bar_get_offset_value().
+// GetOffsetValue is a wrapper around gtk_level_bar_get_offset_value().
 func (v *LevelBar) GetOffsetValue(name string) (float64, bool) {
 	cstr := C.CString(name)
 	defer C.free(unsafe.Pointer(cstr))
@@ -930,7 +924,7 @@ func wrapStatusbar(obj *glib.Object) *Statusbar {
 	return &Statusbar{*box}
 }
 
-// StatusbarNew() is a wrapper around gtk_statusbar_new().
+// StatusbarNew is a wrapper around gtk_statusbar_new().
 func StatusbarNew() (*Statusbar, error) {
 	c := C.gtk_statusbar_new()
 	if c == nil {
@@ -940,7 +934,7 @@ func StatusbarNew() (*Statusbar, error) {
 	return wrapStatusbar(obj), nil
 }
 
-// GetContextId() is a wrapper around gtk_statusbar_get_context_id().
+// GetContextId is a wrapper around gtk_statusbar_get_context_id().
 func (v *Statusbar) GetContextId(contextDescription string) uint {
 	cstr := C.CString(contextDescription)
 	defer C.free(unsafe.Pointer(cstr))
@@ -948,7 +942,7 @@ func (v *Statusbar) GetContextId(contextDescription string) uint {
 	return uint(c)
 }
 
-// Push() is a wrapper around gtk_statusbar_push().
+// Push is a wrapper around gtk_statusbar_push().
 func (v *Statusbar) Push(contextID uint, text string) uint {
 	cstr := C.CString(text)
 	defer C.free(unsafe.Pointer(cstr))
@@ -957,12 +951,12 @@ func (v *Statusbar) Push(contextID uint, text string) uint {
 	return uint(c)
 }
 
-// Pop() is a wrapper around gtk_statusbar_pop().
+// Pop is a wrapper around gtk_statusbar_pop().
 func (v *Statusbar) Pop(contextID uint) {
 	C.gtk_statusbar_pop(v.native(), C.guint(contextID))
 }
 
-// GetMessageArea() is a wrapper around gtk_statusbar_get_message_area().
+// GetMessageArea is a wrapper around gtk_statusbar_get_message_area().
 func (v *Statusbar) GetMessageArea() (*Box, error) {
 	c := C.gtk_statusbar_get_message_area(v.native())
 	if c == nil {

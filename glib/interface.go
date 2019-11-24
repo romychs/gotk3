@@ -25,14 +25,6 @@ func InterfaceFromObjectNew(obj *Object) *Interface {
 	return InterfaceNew(p)
 }
 
-/*
-func (v *Interface) ToPtr() unsafe.Pointer {
-	if v == nil {
-		return nil
-	}
-	return unsafe.Pointer(v.GInterface)
-}
-*/
 func (v *Interface) Native() uintptr {
 	if v == nil {
 		return 0

@@ -404,23 +404,23 @@ func marshalSettingsSchema(p uintptr) (interface{}, error) {
 	return &SettingsSchema{(*C.GSettingsSchema)(unsafe.Pointer(c))}, nil
 }
 
-// Ref() is a wrapper around g_settings_schema_ref().
+// Ref is a wrapper around g_settings_schema_ref().
 func (v *SettingsSchema) Ref() *SettingsSchema {
 	return wrapSettingsSchema(C.g_settings_schema_ref(v.native()))
 }
 
-// Unref() is a wrapper around g_settings_schema_unref().
+// Unref is a wrapper around g_settings_schema_unref().
 func (v *SettingsSchema) Unref() {
 	C.g_settings_schema_unref(v.native())
 }
 
-// GetID() is a wrapper around g_settings_schema_get_id().
+// GetID is a wrapper around g_settings_schema_get_id().
 func (v *SettingsSchema) GetID() string {
 	c := C.g_settings_schema_get_id(v.native())
 	return goString(c)
 }
 
-// GetPath() is a wrapper around g_settings_schema_get_path().
+// GetPath is a wrapper around g_settings_schema_get_path().
 func (v *SettingsSchema) GetPath() *string {
 	c := C.g_settings_schema_get_path(v.native())
 	if c == nil {
@@ -430,7 +430,7 @@ func (v *SettingsSchema) GetPath() *string {
 	return &str
 }
 
-// HasKey() is a wrapper around g_settings_schema_has_key().
+// HasKey is a wrapper around g_settings_schema_has_key().
 func (v *SettingsSchema) HasKey(v1 string) bool {
 	cstr := C.CString(v1)
 	defer C.free(unsafe.Pointer(cstr))
@@ -490,17 +490,17 @@ func SettingsSchemaSourceGetDefault() *SettingsSchemaSource {
 	return wrapSettingsSchemaSource(c)
 }
 
-// Ref() is a wrapper around g_settings_schema_source_ref().
+// Ref is a wrapper around g_settings_schema_source_ref().
 func (v *SettingsSchemaSource) Ref() *SettingsSchemaSource {
 	return wrapSettingsSchemaSource(C.g_settings_schema_source_ref(v.native()))
 }
 
-// Unref() is a wrapper around g_settings_schema_source_unref().
+// Unref is a wrapper around g_settings_schema_source_unref().
 func (v *SettingsSchemaSource) Unref() {
 	C.g_settings_schema_source_unref(v.native())
 }
 
-// SettingsSchemaSourceNewFromDirectory() is a wrapper around g_settings_schema_source_new_from_directory().
+// SettingsSchemaSourceNewFromDirectory is a wrapper around g_settings_schema_source_new_from_directory().
 func SettingsSchemaSourceNewFromDirectory(dir string, parent *SettingsSchemaSource, trusted bool) (*SettingsSchemaSource, error) {
 	cstr := C.CString(dir)
 	defer C.free(unsafe.Pointer(cstr))
@@ -512,7 +512,7 @@ func SettingsSchemaSourceNewFromDirectory(dir string, parent *SettingsSchemaSour
 	return wrapSettingsSchemaSource(c), nil
 }
 
-// Lookup() is a wrapper around g_settings_schema_source_lookup().
+// Lookup is a wrapper around g_settings_schema_source_lookup().
 func (v *SettingsSchemaSource) Lookup(schema string, recursive bool) *SettingsSchema {
 	cstr := C.CString(schema)
 	defer C.free(unsafe.Pointer(cstr))
@@ -544,7 +544,7 @@ type SettingsBackend struct {
 	*Object
 }
 
-// native() returns a pointer to the underlying GSettingsBackend.
+// native returns a pointer to the underlying GSettingsBackend.
 func (v *SettingsBackend) native() *C.GSettingsBackend {
 	if v == nil {
 		return nil

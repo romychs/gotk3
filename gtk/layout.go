@@ -58,13 +58,13 @@ func wrapOrientable(intf glib.Interface) *Orientable {
 	return &Orientable{intf}
 }
 
-// GetOrientation() is a wrapper around gtk_orientable_get_orientation().
+// GetOrientation is a wrapper around gtk_orientable_get_orientation().
 func (v *Orientable) GetOrientation() Orientation {
 	c := C.gtk_orientable_get_orientation(v.native())
 	return Orientation(c)
 }
 
-// SetOrientation() is a wrapper around gtk_orientable_set_orientation().
+// SetOrientation is a wrapper around gtk_orientable_set_orientation().
 func (v *Orientable) SetOrientation(orientation Orientation) {
 	C.gtk_orientable_set_orientation(v.native(),
 		C.GtkOrientation(orientation))
@@ -79,7 +79,7 @@ type Box struct {
 	Container
 }
 
-// native() returns a pointer to the underlying GtkBox.
+// native returns a pointer to the underlying GtkBox.
 func (v *Box) native() *C.GtkBox {
 	if v == nil {
 		return nil
@@ -106,17 +106,17 @@ func (v *Box) toOrientable() *C.GtkOrientable {
 	return C.toGtkOrientable(unsafe.Pointer(v.Native()))
 }
 
-// GetOrientation() is a wrapper around C.gtk_orientable_get_orientation() for a GtkBox
+// GetOrientation is a wrapper around C.gtk_orientable_get_orientation() for a GtkBox
 func (v *Box) GetOrientation() Orientation {
 	return Orientation(C.gtk_orientable_get_orientation(v.toOrientable()))
 }
 
-// SetOrientation() is a wrapper around C.gtk_orientable_set_orientation() for a GtkBox
+// SetOrientation is a wrapper around C.gtk_orientable_set_orientation() for a GtkBox
 func (v *Box) SetOrientation(o Orientation) {
 	C.gtk_orientable_set_orientation(v.toOrientable(), C.GtkOrientation(o))
 }
 
-// BoxNew() is a wrapper around gtk_box_new().
+// BoxNew is a wrapper around gtk_box_new().
 func BoxNew(orientation Orientation, spacing int) (*Box, error) {
 	c := C.gtk_box_new(C.GtkOrientation(orientation), C.gint(spacing))
 	if c == nil {
@@ -126,46 +126,46 @@ func BoxNew(orientation Orientation, spacing int) (*Box, error) {
 	return wrapBox(obj), nil
 }
 
-// PackStart() is a wrapper around gtk_box_pack_start().
+// PackStart is a wrapper around gtk_box_pack_start().
 func (v *Box) PackStart(child IWidget, expand, fill bool, padding uint) {
 	C.gtk_box_pack_start(v.native(), child.toWidget(), gbool(expand),
 		gbool(fill), C.guint(padding))
 }
 
-// PackEnd() is a wrapper around gtk_box_pack_end().
+// PackEnd is a wrapper around gtk_box_pack_end().
 func (v *Box) PackEnd(child IWidget, expand, fill bool, padding uint) {
 	C.gtk_box_pack_end(v.native(), child.toWidget(), gbool(expand),
 		gbool(fill), C.guint(padding))
 }
 
-// GetHomogeneous() is a wrapper around gtk_box_get_homogeneous().
+// GetHomogeneous is a wrapper around gtk_box_get_homogeneous().
 func (v *Box) GetHomogeneous() bool {
 	c := C.gtk_box_get_homogeneous(v.native())
 	return gobool(c)
 }
 
-// SetHomogeneous() is a wrapper around gtk_box_set_homogeneous().
+// SetHomogeneous is a wrapper around gtk_box_set_homogeneous().
 func (v *Box) SetHomogeneous(homogeneous bool) {
 	C.gtk_box_set_homogeneous(v.native(), gbool(homogeneous))
 }
 
-// GetSpacing() is a wrapper around gtk_box_get_spacing().
+// GetSpacing is a wrapper around gtk_box_get_spacing().
 func (v *Box) GetSpacing() int {
 	c := C.gtk_box_get_spacing(v.native())
 	return int(c)
 }
 
-// SetSpacing() is a wrapper around gtk_box_set_spacing()
+// SetSpacing is a wrapper around gtk_box_set_spacing()
 func (v *Box) SetSpacing(spacing int) {
 	C.gtk_box_set_spacing(v.native(), C.gint(spacing))
 }
 
-// ReorderChild() is a wrapper around gtk_box_reorder_child().
+// ReorderChild is a wrapper around gtk_box_reorder_child().
 func (v *Box) ReorderChild(child IWidget, position int) {
 	C.gtk_box_reorder_child(v.native(), child.toWidget(), C.gint(position))
 }
 
-// QueryChildPacking() is a wrapper around gtk_box_query_child_packing().
+// QueryChildPacking is a wrapper around gtk_box_query_child_packing().
 func (v *Box) QueryChildPacking(child IWidget) (expand, fill bool, padding uint, packType PackType) {
 	var cexpand, cfill C.gboolean
 	var cpadding C.guint
@@ -176,7 +176,7 @@ func (v *Box) QueryChildPacking(child IWidget) (expand, fill bool, padding uint,
 	return gobool(cexpand), gobool(cfill), uint(cpadding), PackType(cpackType)
 }
 
-// SetChildPacking() is a wrapper around gtk_box_set_child_packing().
+// SetChildPacking is a wrapper around gtk_box_set_child_packing().
 func (v *Box) SetChildPacking(child IWidget, expand, fill bool, padding uint, packType PackType) {
 	C.gtk_box_set_child_packing(v.native(), child.toWidget(), gbool(expand),
 		gbool(fill), C.guint(padding), C.GtkPackType(packType))
@@ -221,7 +221,7 @@ func wrapGrid(obj *glib.Object) *Grid {
 	return &Grid{*container, *o}
 }
 
-// GridNew() is a wrapper around gtk_grid_new().
+// GridNew is a wrapper around gtk_grid_new().
 func GridNew() (*Grid, error) {
 	c := C.gtk_grid_new()
 	if c == nil {
@@ -231,20 +231,20 @@ func GridNew() (*Grid, error) {
 	return wrapGrid(obj), nil
 }
 
-// Attach() is a wrapper around gtk_grid_attach().
+// Attach is a wrapper around gtk_grid_attach().
 func (v *Grid) Attach(child IWidget, left, top, width, height int) {
 	C.gtk_grid_attach(v.native(), child.toWidget(), C.gint(left),
 		C.gint(top), C.gint(width), C.gint(height))
 }
 
-// AttachNextTo() is a wrapper around gtk_grid_attach_next_to().
+// AttachNextTo is a wrapper around gtk_grid_attach_next_to().
 func (v *Grid) AttachNextTo(child, sibling IWidget, side PositionType, width, height int) {
 	C.gtk_grid_attach_next_to(v.native(), child.toWidget(),
 		sibling.toWidget(), C.GtkPositionType(side), C.gint(width),
 		C.gint(height))
 }
 
-// GetChildAt() is a wrapper around gtk_grid_get_child_at().
+// GetChildAt is a wrapper around gtk_grid_get_child_at().
 func (v *Grid) GetChildAt(left, top int) (*Widget, error) {
 	c := C.gtk_grid_get_child_at(v.native(), C.gint(left), C.gint(top))
 	if c == nil {
@@ -254,61 +254,61 @@ func (v *Grid) GetChildAt(left, top int) (*Widget, error) {
 	return wrapWidget(obj), nil
 }
 
-// InsertRow() is a wrapper around gtk_grid_insert_row().
+// InsertRow is a wrapper around gtk_grid_insert_row().
 func (v *Grid) InsertRow(position int) {
 	C.gtk_grid_insert_row(v.native(), C.gint(position))
 }
 
-// InsertColumn() is a wrapper around gtk_grid_insert_column().
+// InsertColumn is a wrapper around gtk_grid_insert_column().
 func (v *Grid) InsertColumn(position int) {
 	C.gtk_grid_insert_column(v.native(), C.gint(position))
 }
 
-// InsertNextTo() is a wrapper around gtk_grid_insert_next_to()
+// InsertNextTo is a wrapper around gtk_grid_insert_next_to()
 func (v *Grid) InsertNextTo(sibling IWidget, side PositionType) {
 	C.gtk_grid_insert_next_to(v.native(), sibling.toWidget(),
 		C.GtkPositionType(side))
 }
 
-// SetRowHomogeneous() is a wrapper around gtk_grid_set_row_homogeneous().
+// SetRowHomogeneous is a wrapper around gtk_grid_set_row_homogeneous().
 func (v *Grid) SetRowHomogeneous(homogeneous bool) {
 	C.gtk_grid_set_row_homogeneous(v.native(), gbool(homogeneous))
 }
 
-// GetRowHomogeneous() is a wrapper around gtk_grid_get_row_homogeneous().
+// GetRowHomogeneous is a wrapper around gtk_grid_get_row_homogeneous().
 func (v *Grid) GetRowHomogeneous() bool {
 	c := C.gtk_grid_get_row_homogeneous(v.native())
 	return gobool(c)
 }
 
-// SetRowSpacing() is a wrapper around gtk_grid_set_row_spacing().
+// SetRowSpacing is a wrapper around gtk_grid_set_row_spacing().
 func (v *Grid) SetRowSpacing(spacing uint) {
 	C.gtk_grid_set_row_spacing(v.native(), C.guint(spacing))
 }
 
-// GetRowSpacing() is a wrapper around gtk_grid_get_row_spacing().
+// GetRowSpacing is a wrapper around gtk_grid_get_row_spacing().
 func (v *Grid) GetRowSpacing() uint {
 	c := C.gtk_grid_get_row_spacing(v.native())
 	return uint(c)
 }
 
-// SetColumnHomogeneous() is a wrapper around gtk_grid_set_column_homogeneous().
+// SetColumnHomogeneous is a wrapper around gtk_grid_set_column_homogeneous().
 func (v *Grid) SetColumnHomogeneous(homogeneous bool) {
 	C.gtk_grid_set_column_homogeneous(v.native(), gbool(homogeneous))
 }
 
-// GetColumnHomogeneous() is a wrapper around gtk_grid_get_column_homogeneous().
+// GetColumnHomogeneous is a wrapper around gtk_grid_get_column_homogeneous().
 func (v *Grid) GetColumnHomogeneous() bool {
 	c := C.gtk_grid_get_column_homogeneous(v.native())
 	return gobool(c)
 }
 
-// SetColumnSpacing() is a wrapper around gtk_grid_set_column_spacing().
+// SetColumnSpacing is a wrapper around gtk_grid_set_column_spacing().
 func (v *Grid) SetColumnSpacing(spacing uint) {
 	C.gtk_grid_set_column_spacing(v.native(), C.guint(spacing))
 }
 
-// GetColumnSpacing() is a wrapper around gtk_grid_get_column_spacing().
+// GetColumnSpacing is a wrapper around gtk_grid_get_column_spacing().
 func (v *Grid) GetColumnSpacing() uint {
 	c := C.gtk_grid_get_column_spacing(v.native())
 	return uint(c)
@@ -343,7 +343,7 @@ func wrapOverlay(obj *glib.Object) *Overlay {
 	return &Overlay{*bin}
 }
 
-// OverlayNew() is a wrapper around gtk_overlay_new().
+// OverlayNew is a wrapper around gtk_overlay_new().
 func OverlayNew() (*Overlay, error) {
 	c := C.gtk_overlay_new()
 	if c == nil {
@@ -353,7 +353,7 @@ func OverlayNew() (*Overlay, error) {
 	return wrapOverlay(obj), nil
 }
 
-// AddOverlay() is a wrapper around gtk_overlay_add_overlay().
+// AddOverlay is a wrapper around gtk_overlay_add_overlay().
 func (v *Overlay) AddOverlay(widget IWidget) {
 	C.gtk_overlay_add_overlay(v.native(), widget.toWidget())
 }
@@ -378,7 +378,7 @@ func marshalButtonBoxStyle(p uintptr) (interface{}, error) {
  * GtkButtonBox
  */
 
-// ButtonBox is a representaon of GTK's GtkButtonBox
+// ButtonBox is a representation of GTK's GtkButtonBox
 type ButtonBox struct {
 	Box
 }
@@ -403,7 +403,7 @@ func wrapButtonBox(obj *glib.Object) *ButtonBox {
 	return &ButtonBox{*box}
 }
 
-// ButtonBoxNew() is a wrapper around gtk_button_box_new().
+// ButtonBoxNew is a wrapper around gtk_button_box_new().
 func ButtonBoxNew(orientation Orientation) (*ButtonBox, error) {
 	c := C.gtk_button_box_new(C.GtkOrientation(orientation))
 	if c == nil {
@@ -413,12 +413,12 @@ func ButtonBoxNew(orientation Orientation) (*ButtonBox, error) {
 	return wrapButtonBox(obj), nil
 }
 
-// SetLayout() is a wrapper around gtk_button_box_set_layout().
+// SetLayout is a wrapper around gtk_button_box_set_layout().
 func (v *ButtonBox) SetLayout(layoutStyle ButtonBoxStyle) {
 	C.gtk_button_box_set_layout(v.native(), C.GtkButtonBoxStyle(layoutStyle))
 }
 
-// GetLayout() is a wrapper around gtk_button_box_get_layout().
+// GetLayout is a wrapper around gtk_button_box_get_layout().
 func (v *ButtonBox) GetLayout() ButtonBoxStyle {
 	c := C.gtk_button_box_get_layout(v.native())
 	return ButtonBoxStyle(c)
@@ -453,7 +453,7 @@ func wrapPaned(obj *glib.Object) *Paned {
 	return &Paned{*bin}
 }
 
-// PanedNew() is a wrapper around gtk_paned_new().
+// PanedNew is a wrapper around gtk_paned_new().
 func PanedNew(orientation Orientation) (*Paned, error) {
 	c := C.gtk_paned_new(C.GtkOrientation(orientation))
 	if c == nil {
@@ -463,32 +463,32 @@ func PanedNew(orientation Orientation) (*Paned, error) {
 	return wrapPaned(obj), nil
 }
 
-// Add1() is a wrapper around gtk_paned_add1().
+// Add1 is a wrapper around gtk_paned_add1().
 func (v *Paned) Add1(child IWidget) {
 	C.gtk_paned_add1(v.native(), child.toWidget())
 }
 
-// Add2() is a wrapper around gtk_paned_add2().
+// Add2 is a wrapper around gtk_paned_add2().
 func (v *Paned) Add2(child IWidget) {
 	C.gtk_paned_add2(v.native(), child.toWidget())
 }
 
-// Pack1() is a wrapper around gtk_paned_pack1().
+// Pack1 is a wrapper around gtk_paned_pack1().
 func (v *Paned) Pack1(child IWidget, resize, shrink bool) {
 	C.gtk_paned_pack1(v.native(), child.toWidget(), gbool(resize), gbool(shrink))
 }
 
-// Pack2() is a wrapper around gtk_paned_pack2().
+// Pack2 is a wrapper around gtk_paned_pack2().
 func (v *Paned) Pack2(child IWidget, resize, shrink bool) {
 	C.gtk_paned_pack2(v.native(), child.toWidget(), gbool(resize), gbool(shrink))
 }
 
-// SetPosition() is a wrapper around gtk_paned_set_position().
+// SetPosition is a wrapper around gtk_paned_set_position().
 func (v *Paned) SetPosition(position int) {
 	C.gtk_paned_set_position(v.native(), C.gint(position))
 }
 
-// GetChild1() is a wrapper around gtk_paned_get_child1().
+// GetChild1 is a wrapper around gtk_paned_get_child1().
 func (v *Paned) GetChild1() (*Widget, error) {
 	c := C.gtk_paned_get_child1(v.native())
 	if c == nil {
@@ -498,7 +498,7 @@ func (v *Paned) GetChild1() (*Widget, error) {
 	return wrapWidget(obj), nil
 }
 
-// GetChild2() is a wrapper around gtk_paned_get_child2().
+// GetChild2 is a wrapper around gtk_paned_get_child2().
 func (v *Paned) GetChild2() (*Widget, error) {
 	c := C.gtk_paned_get_child2(v.native())
 	if c == nil {
@@ -508,7 +508,7 @@ func (v *Paned) GetChild2() (*Widget, error) {
 	return wrapWidget(obj), nil
 }
 
-// GetHandleWindow() is a wrapper around gtk_paned_get_handle_window().
+// GetHandleWindow is a wrapper around gtk_paned_get_handle_window().
 func (v *Paned) GetHandleWindow() (*Window, error) {
 	c := C.gtk_paned_get_handle_window(v.native())
 	if c == nil {
@@ -518,7 +518,7 @@ func (v *Paned) GetHandleWindow() (*Window, error) {
 	return wrapWindow(obj), nil
 }
 
-// GetPosition() is a wrapper around gtk_paned_get_position().
+// GetPosition is a wrapper around gtk_paned_get_position().
 func (v *Paned) GetPosition() int {
 	return int(C.gtk_paned_get_position(v.native()))
 }
@@ -563,22 +563,22 @@ func LayoutNew(hadjustment, vadjustment *Adjustment) (*Layout, error) {
 	return wrapLayout(obj), nil
 }
 
-// Layout.Put is a wrapper around gtk_layout_put().
+// Put is a wrapper around gtk_layout_put().
 func (v *Layout) Put(w IWidget, x, y int) {
 	C.gtk_layout_put(v.native(), w.toWidget(), C.gint(x), C.gint(y))
 }
 
-// Layout.Move is a wrapper around gtk_layout_move().
+// Move is a wrapper around gtk_layout_move().
 func (v *Layout) Move(w IWidget, x, y int) {
 	C.gtk_layout_move(v.native(), w.toWidget(), C.gint(x), C.gint(y))
 }
 
-// Layout.SetSize is a wrapper around gtk_layout_set_size
+// SetSize is a wrapper around gtk_layout_set_size
 func (v *Layout) SetSize(width, height uint) {
 	C.gtk_layout_set_size(v.native(), C.guint(width), C.guint(height))
 }
 
-// Layout.GetSize is a wrapper around gtk_layout_get_size
+// GetSize is a wrapper around gtk_layout_get_size
 func (v *Layout) GetSize() (width, height uint) {
 	var w, h C.guint
 	C.gtk_layout_get_size(v.native(), &w, &h)
@@ -614,7 +614,7 @@ func wrapNotebook(obj *glib.Object) *Notebook {
 	return &Notebook{*container}
 }
 
-// NotebookNew() is a wrapper around gtk_notebook_new().
+// NotebookNew is a wrapper around gtk_notebook_new().
 func NotebookNew() (*Notebook, error) {
 	c := C.gtk_notebook_new()
 	if c == nil {
@@ -624,112 +624,112 @@ func NotebookNew() (*Notebook, error) {
 	return wrapNotebook(obj), nil
 }
 
-// AppendPage() is a wrapper around gtk_notebook_append_page().
+// AppendPage is a wrapper around gtk_notebook_append_page().
 func (v *Notebook) AppendPage(child IWidget, tabLabel IWidget) int {
 	c := C.gtk_notebook_append_page(v.native(), child.toWidget(),
 		tabLabel.toWidget())
 	return int(c)
 }
 
-// AppendPageMenu() is a wrapper around gtk_notebook_append_page_menu().
+// AppendPageMenu is a wrapper around gtk_notebook_append_page_menu().
 func (v *Notebook) AppendPageMenu(child IWidget, tabLabel IWidget, menuLabel IWidget) int {
 	c := C.gtk_notebook_append_page_menu(v.native(), child.toWidget(),
 		tabLabel.toWidget(), menuLabel.toWidget())
 	return int(c)
 }
 
-// PrependPage() is a wrapper around gtk_notebook_prepend_page().
+// PrependPage is a wrapper around gtk_notebook_prepend_page().
 func (v *Notebook) PrependPage(child IWidget, tabLabel IWidget) int {
 	c := C.gtk_notebook_prepend_page(v.native(), child.toWidget(),
 		tabLabel.toWidget())
 	return int(c)
 }
 
-// PrependPageMenu() is a wrapper around gtk_notebook_prepend_page_menu().
+// PrependPageMenu is a wrapper around gtk_notebook_prepend_page_menu().
 func (v *Notebook) PrependPageMenu(child IWidget, tabLabel IWidget, menuLabel IWidget) int {
 	c := C.gtk_notebook_prepend_page_menu(v.native(), child.toWidget(),
 		tabLabel.toWidget(), menuLabel.toWidget())
 	return int(c)
 }
 
-// InsertPage() is a wrapper around gtk_notebook_insert_page().
+// InsertPage is a wrapper around gtk_notebook_insert_page().
 func (v *Notebook) InsertPage(child IWidget, tabLabel IWidget, position int) int {
 	c := C.gtk_notebook_insert_page(v.native(), child.toWidget(),
 		tabLabel.toWidget(), C.gint(position))
 	return int(c)
 }
 
-// InsertPageMenu() is a wrapper around gtk_notebook_insert_page_menu().
+// InsertPageMenu is a wrapper around gtk_notebook_insert_page_menu().
 func (v *Notebook) InsertPageMenu(child IWidget, tabLabel IWidget, menuLabel IWidget, position int) int {
 	c := C.gtk_notebook_insert_page_menu(v.native(), child.toWidget(),
 		tabLabel.toWidget(), menuLabel.toWidget(), C.gint(position))
 	return int(c)
 }
 
-// RemovePage() is a wrapper around gtk_notebook_remove_page().
+// RemovePage is a wrapper around gtk_notebook_remove_page().
 func (v *Notebook) RemovePage(pageNum int) {
 	C.gtk_notebook_remove_page(v.native(), C.gint(pageNum))
 }
 
-// PageNum() is a wrapper around gtk_notebook_page_num().
+// PageNum is a wrapper around gtk_notebook_page_num().
 func (v *Notebook) PageNum(child IWidget) int {
 	c := C.gtk_notebook_page_num(v.native(), child.toWidget())
 	return int(c)
 }
 
-// NextPage() is a wrapper around gtk_notebook_next_page().
+// NextPage is a wrapper around gtk_notebook_next_page().
 func (v *Notebook) NextPage() {
 	C.gtk_notebook_next_page(v.native())
 }
 
-// PrevPage() is a wrapper around gtk_notebook_prev_page().
+// PrevPage is a wrapper around gtk_notebook_prev_page().
 func (v *Notebook) PrevPage() {
 	C.gtk_notebook_prev_page(v.native())
 }
 
-// ReorderChild() is a wrapper around gtk_notebook_reorder_child().
+// ReorderChild is a wrapper around gtk_notebook_reorder_child().
 func (v *Notebook) ReorderChild(child IWidget, position int) {
 	C.gtk_notebook_reorder_child(v.native(), child.toWidget(),
 		C.gint(position))
 }
 
-// SetTabPos() is a wrapper around gtk_notebook_set_tab_pos().
+// SetTabPos is a wrapper around gtk_notebook_set_tab_pos().
 func (v *Notebook) SetTabPos(pos PositionType) {
 	C.gtk_notebook_set_tab_pos(v.native(), C.GtkPositionType(pos))
 }
 
-// SetShowTabs() is a wrapper around gtk_notebook_set_show_tabs().
+// SetShowTabs is a wrapper around gtk_notebook_set_show_tabs().
 func (v *Notebook) SetShowTabs(showTabs bool) {
 	C.gtk_notebook_set_show_tabs(v.native(), gbool(showTabs))
 }
 
-// SetShowBorder() is a wrapper around gtk_notebook_set_show_border().
+// SetShowBorder is a wrapper around gtk_notebook_set_show_border().
 func (v *Notebook) SetShowBorder(showBorder bool) {
 	C.gtk_notebook_set_show_border(v.native(), gbool(showBorder))
 }
 
-// SetScrollable() is a wrapper around gtk_notebook_set_scrollable().
+// SetScrollable is a wrapper around gtk_notebook_set_scrollable().
 func (v *Notebook) SetScrollable(scrollable bool) {
 	C.gtk_notebook_set_scrollable(v.native(), gbool(scrollable))
 }
 
-// PopupEnable() is a wrapper around gtk_notebook_popup_enable().
+// PopupEnable is a wrapper around gtk_notebook_popup_enable().
 func (v *Notebook) PopupEnable() {
 	C.gtk_notebook_popup_enable(v.native())
 }
 
-// PopupDisable() is a wrapper around gtk_notebook_popup_disable().
+// PopupDisable is a wrapper around gtk_notebook_popup_disable().
 func (v *Notebook) PopupDisable() {
 	C.gtk_notebook_popup_disable(v.native())
 }
 
-// GetCurrentPage() is a wrapper around gtk_notebook_get_current_page().
+// GetCurrentPage is a wrapper around gtk_notebook_get_current_page().
 func (v *Notebook) GetCurrentPage() int {
 	c := C.gtk_notebook_get_current_page(v.native())
 	return int(c)
 }
 
-// GetMenuLabel() is a wrapper around gtk_notebook_get_menu_label().
+// GetMenuLabel is a wrapper around gtk_notebook_get_menu_label().
 func (v *Notebook) GetMenuLabel(child IWidget) (*Widget, error) {
 	c := C.gtk_notebook_get_menu_label(v.native(), child.toWidget())
 	if c == nil {
@@ -739,7 +739,7 @@ func (v *Notebook) GetMenuLabel(child IWidget) (*Widget, error) {
 	return wrapWidget(obj), nil
 }
 
-// GetNthPage() is a wrapper around gtk_notebook_get_nth_page().
+// GetNthPage is a wrapper around gtk_notebook_get_nth_page().
 func (v *Notebook) GetNthPage(pageNum int) (*Widget, error) {
 	c := C.gtk_notebook_get_nth_page(v.native(), C.gint(pageNum))
 	if c == nil {
@@ -749,13 +749,13 @@ func (v *Notebook) GetNthPage(pageNum int) (*Widget, error) {
 	return wrapWidget(obj), nil
 }
 
-// GetNPages() is a wrapper around gtk_notebook_get_n_pages().
+// GetNPages is a wrapper around gtk_notebook_get_n_pages().
 func (v *Notebook) GetNPages() int {
 	c := C.gtk_notebook_get_n_pages(v.native())
 	return int(c)
 }
 
-// GetTabLabel() is a wrapper around gtk_notebook_get_tab_label().
+// GetTabLabel is a wrapper around gtk_notebook_get_tab_label().
 func (v *Notebook) GetTabLabel(child IWidget) (*Widget, error) {
 	c := C.gtk_notebook_get_tab_label(v.native(), child.toWidget())
 	if c == nil {
@@ -765,13 +765,13 @@ func (v *Notebook) GetTabLabel(child IWidget) (*Widget, error) {
 	return wrapWidget(obj), nil
 }
 
-// SetMenuLabel() is a wrapper around gtk_notebook_set_menu_label().
+// SetMenuLabel is a wrapper around gtk_notebook_set_menu_label().
 func (v *Notebook) SetMenuLabel(child, menuLabel IWidget) {
 	C.gtk_notebook_set_menu_label(v.native(), child.toWidget(),
 		menuLabel.toWidget())
 }
 
-// SetMenuLabelText() is a wrapper around gtk_notebook_set_menu_label_text().
+// SetMenuLabelText is a wrapper around gtk_notebook_set_menu_label_text().
 func (v *Notebook) SetMenuLabelText(child IWidget, menuText string) {
 	cstr := C.CString(menuText)
 	defer C.free(unsafe.Pointer(cstr))
@@ -779,13 +779,13 @@ func (v *Notebook) SetMenuLabelText(child IWidget, menuText string) {
 		(*C.gchar)(cstr))
 }
 
-// SetTabLabel() is a wrapper around gtk_notebook_set_tab_label().
+// SetTabLabel is a wrapper around gtk_notebook_set_tab_label().
 func (v *Notebook) SetTabLabel(child, tabLabel IWidget) {
 	C.gtk_notebook_set_tab_label(v.native(), child.toWidget(),
 		tabLabel.toWidget())
 }
 
-// SetTabLabelText() is a wrapper around gtk_notebook_set_tab_label_text().
+// SetTabLabelText is a wrapper around gtk_notebook_set_tab_label_text().
 func (v *Notebook) SetTabLabelText(child IWidget, tabText string) {
 	cstr := C.CString(tabText)
 	defer C.free(unsafe.Pointer(cstr))
@@ -793,19 +793,19 @@ func (v *Notebook) SetTabLabelText(child IWidget, tabText string) {
 		(*C.gchar)(cstr))
 }
 
-// SetTabReorderable() is a wrapper around gtk_notebook_set_tab_reorderable().
+// SetTabReorderable is a wrapper around gtk_notebook_set_tab_reorderable().
 func (v *Notebook) SetTabReorderable(child IWidget, reorderable bool) {
 	C.gtk_notebook_set_tab_reorderable(v.native(), child.toWidget(),
 		gbool(reorderable))
 }
 
-// SetTabDetachable() is a wrapper around gtk_notebook_set_tab_detachable().
+// SetTabDetachable is a wrapper around gtk_notebook_set_tab_detachable().
 func (v *Notebook) SetTabDetachable(child IWidget, detachable bool) {
 	C.gtk_notebook_set_tab_detachable(v.native(), child.toWidget(),
 		gbool(detachable))
 }
 
-// GetMenuLabelText() is a wrapper around gtk_notebook_get_menu_label_text().
+// GetMenuLabelText is a wrapper around gtk_notebook_get_menu_label_text().
 func (v *Notebook) GetMenuLabelText(child IWidget) (string, error) {
 	c := C.gtk_notebook_get_menu_label_text(v.native(), child.toWidget())
 	if c == nil {
@@ -814,25 +814,25 @@ func (v *Notebook) GetMenuLabelText(child IWidget) (string, error) {
 	return goString(c), nil
 }
 
-// GetScrollable() is a wrapper around gtk_notebook_get_scrollable().
+// GetScrollable is a wrapper around gtk_notebook_get_scrollable().
 func (v *Notebook) GetScrollable() bool {
 	c := C.gtk_notebook_get_scrollable(v.native())
 	return gobool(c)
 }
 
-// GetShowBorder() is a wrapper around gtk_notebook_get_show_border().
+// GetShowBorder is a wrapper around gtk_notebook_get_show_border().
 func (v *Notebook) GetShowBorder() bool {
 	c := C.gtk_notebook_get_show_border(v.native())
 	return gobool(c)
 }
 
-// GetShowTabs() is a wrapper around gtk_notebook_get_show_tabs().
+// GetShowTabs is a wrapper around gtk_notebook_get_show_tabs().
 func (v *Notebook) GetShowTabs() bool {
 	c := C.gtk_notebook_get_show_tabs(v.native())
 	return gobool(c)
 }
 
-// GetTabLabelText() is a wrapper around gtk_notebook_get_tab_label_text().
+// GetTabLabelText is a wrapper around gtk_notebook_get_tab_label_text().
 func (v *Notebook) GetTabLabelText(child IWidget) (string, error) {
 	c := C.gtk_notebook_get_tab_label_text(v.native(), child.toWidget())
 	if c == nil {
@@ -841,37 +841,37 @@ func (v *Notebook) GetTabLabelText(child IWidget) (string, error) {
 	return goString(c), nil
 }
 
-// GetTabPos() is a wrapper around gtk_notebook_get_tab_pos().
+// GetTabPos is a wrapper around gtk_notebook_get_tab_pos().
 func (v *Notebook) GetTabPos() PositionType {
 	c := C.gtk_notebook_get_tab_pos(v.native())
 	return PositionType(c)
 }
 
-// GetTabReorderable() is a wrapper around gtk_notebook_get_tab_reorderable().
+// GetTabReorderable is a wrapper around gtk_notebook_get_tab_reorderable().
 func (v *Notebook) GetTabReorderable(child IWidget) bool {
 	c := C.gtk_notebook_get_tab_reorderable(v.native(), child.toWidget())
 	return gobool(c)
 }
 
-// GetTabDetachable() is a wrapper around gtk_notebook_get_tab_detachable().
+// GetTabDetachable is a wrapper around gtk_notebook_get_tab_detachable().
 func (v *Notebook) GetTabDetachable(child IWidget) bool {
 	c := C.gtk_notebook_get_tab_detachable(v.native(), child.toWidget())
 	return gobool(c)
 }
 
-// SetCurrentPage() is a wrapper around gtk_notebook_set_current_page().
+// SetCurrentPage is a wrapper around gtk_notebook_set_current_page().
 func (v *Notebook) SetCurrentPage(pageNum int) {
 	C.gtk_notebook_set_current_page(v.native(), C.gint(pageNum))
 }
 
-// SetGroupName() is a wrapper around gtk_notebook_set_group_name().
+// SetGroupName is a wrapper around gtk_notebook_set_group_name().
 func (v *Notebook) SetGroupName(groupName string) {
 	cstr := C.CString(groupName)
 	defer C.free(unsafe.Pointer(cstr))
 	C.gtk_notebook_set_group_name(v.native(), (*C.gchar)(cstr))
 }
 
-// GetGroupName() is a wrapper around gtk_notebook_get_group_name().
+// GetGroupName is a wrapper around gtk_notebook_get_group_name().
 func (v *Notebook) GetGroupName() (string, error) {
 	c := C.gtk_notebook_get_group_name(v.native())
 	if c == nil {
@@ -880,13 +880,13 @@ func (v *Notebook) GetGroupName() (string, error) {
 	return goString(c), nil
 }
 
-// SetActionWidget() is a wrapper around gtk_notebook_set_action_widget().
+// SetActionWidget is a wrapper around gtk_notebook_set_action_widget().
 func (v *Notebook) SetActionWidget(widget IWidget, packType PackType) {
 	C.gtk_notebook_set_action_widget(v.native(), widget.toWidget(),
 		C.GtkPackType(packType))
 }
 
-// GetActionWidget() is a wrapper around gtk_notebook_get_action_widget().
+// GetActionWidget is a wrapper around gtk_notebook_get_action_widget().
 func (v *Notebook) GetActionWidget(packType PackType) (*Widget, error) {
 	c := C.gtk_notebook_get_action_widget(v.native(),
 		C.GtkPackType(packType))
@@ -994,7 +994,7 @@ func (v *Expander) GetUseUnderline() bool {
 	return gobool(c)
 }
 
-// SetUseUnderline is a wrapper around gtk_expander_set_use_markup().
+// SetUseMarkup is a wrapper around gtk_expander_set_use_markup().
 func (v *Expander) SetUseMarkup(useMarkup bool) {
 	C.gtk_expander_set_use_markup(v.native(), gbool(useMarkup))
 }

@@ -24,6 +24,7 @@
 #include <stdio.h>
 #include <gdk/gdk.h>
 
+
 // Type Casting
 static GdkAtom
 toGdkAtom(void *p)
@@ -159,4 +160,24 @@ toGInputStream(void *p)
 	return (G_INPUT_STREAM(p));
 }
 
+static guint
+_gdk_major_version()
+{
+	return GDK_MAJOR_VERSION;
+}
+
+static guint
+_gdk_minor_version()
+{
+	return GDK_MINOR_VERSION;
+}
+
+static guint
+_gdk_micro_version()
+{
+	return GDK_MICRO_VERSION;
+}
+
+
 #endif
+

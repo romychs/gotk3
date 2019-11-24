@@ -21,6 +21,7 @@ package gtk
 import "C"
 import (
 	"errors"
+	"runtime"
 	"unsafe"
 
 	"github.com/d2r2/gotk3/cairo"
@@ -263,12 +264,12 @@ func (v *Widget) CanActivateAccel(signalId uint) bool {
 	return gobool(C.gtk_widget_can_activate_accel(v.native(), C.guint(signalId)))
 }
 
-// AddAccelGroup() is a wrapper around gtk_window_add_accel_group().
+// AddAccelGroup is a wrapper around gtk_window_add_accel_group().
 func (v *Window) AddAccelGroup(accelGroup *AccelGroup) {
 	C.gtk_window_add_accel_group(v.native(), accelGroup.native())
 }
 
-// RemoveAccelGroup() is a wrapper around gtk_window_add_accel_group().
+// RemoveAccelGroup is a wrapper around gtk_window_add_accel_group().
 func (v *Window) RemoveAccelGroup(accelGroup *AccelGroup) {
 	C.gtk_window_remove_accel_group(v.native(), accelGroup.native())
 }
@@ -329,29 +330,29 @@ func (v *Widget) Intersect() {
 }
 */
 
-// IsFocus() is a wrapper around gtk_widget_is_focus().
+// IsFocus is a wrapper around gtk_widget_is_focus().
 func (v *Widget) IsFocus() bool {
 	return gobool(C.gtk_widget_is_focus(v.native()))
 }
 
-// GrabFocus() is a wrapper around gtk_widget_grab_focus().
+// GrabFocus is a wrapper around gtk_widget_grab_focus().
 func (v *Widget) GrabFocus() {
 	C.gtk_widget_grab_focus(v.native())
 }
 
-// GrabDefault() is a wrapper around gtk_widget_grab_default().
+// GrabDefault is a wrapper around gtk_widget_grab_default().
 func (v *Widget) GrabDefault() {
 	C.gtk_widget_grab_default(v.native())
 }
 
-// SetName() is a wrapper around gtk_widget_set_name().
+// SetName is a wrapper around gtk_widget_set_name().
 func (v *Widget) SetName(name string) {
 	cstr := C.CString(name)
 	defer C.free(unsafe.Pointer(cstr))
 	C.gtk_widget_set_name(v.native(), (*C.gchar)(cstr))
 }
 
-// GetName() is a wrapper around gtk_widget_get_name().  A non-nil
+// GetName is a wrapper around gtk_widget_get_name().  A non-nil
 // error is returned in the case that gtk_widget_get_name returns NULL to
 // differentiate between NULL and an empty string.
 func (v *Widget) GetName() (string, error) {
@@ -563,6 +564,17 @@ func (v *Widget) SetTooltipMarkup(text string) {
 	C.gtk_widget_set_tooltip_markup(v.native(), (*C.gchar)(cstr))
 }
 
+// GetTooltipWindow is a wrapper around gtk_widget_get_tooltip_window().
+func (v *Widget) GetTooltipWindow() *Window {
+	c := C.gtk_widget_get_tooltip_window(v.native())
+	if c == nil {
+		return nil
+	}
+	obj := glib.Take(unsafe.Pointer(c))
+	widget := wrapWidget(obj)
+	return &Window{Bin{Container{*widget}}}
+}
+
 // GetHAlign is a wrapper around gtk_widget_get_halign().
 func (v *Widget) GetHAlign() Align {
 	c := C.gtk_widget_get_halign(v.native())
@@ -761,12 +773,20 @@ func (v *Container) CheckResize() {
 // TODO: gtk_container_foreach
 
 // GetChildren is a wrapper around gtk_container_get_children().
+// Returned list is wrapped to return *gtk.Widget elements.
 func (v *Container) GetChildren() *glib.List {
 	clist := C.gtk_container_get_children(v.native())
+
 	glist := glib.WrapList(uintptr(unsafe.Pointer(clist)))
 	glist.DataWrapper(func(ptr unsafe.Pointer) interface{} {
 		return wrapWidget(glib.Take(ptr))
 	})
+
+	if glist != nil {
+		runtime.SetFinalizer(glist, func(glist *glib.List) {
+			glist.Free()
+		})
+	}
 
 	return glist
 }
@@ -886,7 +906,7 @@ func (v *Container) PropagateDraw(child IWidget, cr *cairo.Context) {
 	C.gtk_container_propagate_draw(v.native(), child.toWidget(), context)
 }
 
-// GdkCairoSetSourcePixBuf() is a wrapper around gdk_cairo_set_source_pixbuf().
+// GdkCairoSetSourcePixBuf is a wrapper around gdk_cairo_set_source_pixbuf().
 func GdkCairoSetSourcePixBuf(cr *cairo.Context, pixbuf *gdk.Pixbuf, pixbufX, pixbufY float64) {
 	context := (*C.cairo_t)(unsafe.Pointer(cr.Native()))
 	ptr := (*C.GdkPixbuf)(unsafe.Pointer(pixbuf.Native()))
