@@ -7,7 +7,6 @@ package gdk
 // #cgo pkg-config: gdk-3.0
 // #include <gdk/gdk.h>
 // #include "gdk.go.h"
-// #include "gdk_since_3_20.go.h"
 import "C"
 
 const (
