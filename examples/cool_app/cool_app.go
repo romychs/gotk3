@@ -54,6 +54,17 @@ func SetupLabelJustifyLeft(caption string) (*gtk.Label, error) {
 	return lbl, nil
 }
 
+// SetupLabelJustifyCenter create GtkLabel with justification to the center by default.
+func SetupLabelJustifyCenter(caption string) (*gtk.Label, error) {
+	lbl, err := gtk.LabelNew(caption)
+	if err != nil {
+		return nil, err
+	}
+	lbl.SetHAlign(gtk.ALIGN_CENTER)
+	lbl.SetJustify(gtk.JUSTIFY_CENTER)
+	return lbl, nil
+}
+
 // SetupHeader construct Header widget with standard initialization.
 func SetupHeader(title, subtitle string, showCloseButton bool) (*gtk.HeaderBar, error) {
 	hdr, err := gtk.HeaderBarNew()
@@ -1224,6 +1235,15 @@ var (
 	CFG_PROFILE_DESCRIPTION = "profile-description"
 )
 
+type AppRunMode int
+
+const (
+	AppRegularRun AppRunMode = iota
+	AppRunReload
+)
+
+var appRunMode AppRunMode
+
 // Keeps here global fullscreen data, which available throughout the application.
 // TODO: add thread-safe protection.
 type FullscreenGlobalData struct {
@@ -1693,11 +1713,24 @@ func createQuitAction(win *gtk.Window) (glib.IAction, error) {
 		log.Println(spew.Sprintf("%v action activated with current state %v and args %v",
 			name, state, param))
 
-		application, err := win.GetApplication()
+		app, err := win.GetApplication()
 		if err != nil {
 			log.Fatal(err)
 		}
-		application.Quit()
+		// loop through and close all windows currently opened
+		for {
+			win2 := app.GetActiveWindow()
+			if win2 != nil {
+				win2.Close()
+				for gtk.EventsPending() {
+					gtk.MainIterationDo(true)
+				}
+			} else {
+				break
+			}
+		}
+		// quit application
+		app.Quit()
 	})
 	if err != nil {
 		return nil, err
@@ -1730,7 +1763,7 @@ func createAboutAction(win *gtk.Window, appSettings *SettingsStore) (glib.IActio
 		dlg.SetAuthors([]string{"Written by Denis Dyakov <denis.dyakov@gmail.com>"})
 		dlg.SetProgramName("Cool App")
 		dlg.SetLogoIconName("face-cool-symbolic")
-		dlg.SetVersion("v0.2")
+		dlg.SetVersion("v0.3")
 
 		bh := appSettings.NewBindingHelper()
 		// Show about dialog on application startup
@@ -2104,7 +2137,7 @@ func createDialogAction5(win *gtk.Window) (glib.IAction, error) {
 // Action activation require to have GLib Setting Schema
 // preliminary installed, otherwise will not work raising message.
 // Installation bash script from app folder must be performed in advance.
-func createPreferenceAction(win *gtk.Window) (glib.IAction, error) {
+func createPreferenceAction(mainWin *gtk.ApplicationWindow) (glib.IAction, error) {
 	act, err := glib.SimpleActionNew("PreferenceAction", nil)
 	if err != nil {
 		return nil, err
@@ -2118,7 +2151,7 @@ func createPreferenceAction(win *gtk.Window) (glib.IAction, error) {
 		log.Println(spew.Sprintf("%v action activated with current state %v and args %v",
 			name, state, param))
 
-		app, err := win.GetApplication()
+		app, err := mainWin.GetApplication()
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -2130,7 +2163,7 @@ func createPreferenceAction(win *gtk.Window) (glib.IAction, error) {
 
 		if found {
 
-			win, err := createPreferenceDialog(SETTINGS_SCHEMA_ID, SETTINGS_SCHEMA_PATH, app)
+			win, err := createPreferenceDialog(SETTINGS_SCHEMA_ID, SETTINGS_SCHEMA_PATH, mainWin)
 			if err != nil {
 				log.Fatal(err)
 			}
@@ -2438,7 +2471,7 @@ func PreferenceRowNew(name, title string) (*PreferenceRow, *gtk.ListBoxRow, erro
 
 // Create preference dialog with "Global" page, where controls
 // being bound to GLib Setting object to save/restore functionality.
-func GlobalPreferencesNew(appSettings *SettingsStore) (*gtk.Container, error) {
+func GlobalPreferencesNew(appSettings *SettingsStore, actions *glib.ActionMap) (*gtk.Container, error) {
 	box, err := gtk.BoxNew(gtk.ORIENTATION_VERTICAL, 6)
 	if err != nil {
 		return nil, err
@@ -2446,9 +2479,67 @@ func GlobalPreferencesNew(appSettings *SettingsStore) (*gtk.Container, error) {
 
 	SetAllMargins(box, 18)
 
+	restartBox, err := gtk.BoxNew(gtk.ORIENTATION_HORIZONTAL, 6)
+	if err != nil {
+		return nil, err
+	}
+	css := `
+		box {
+			background-color: shade(@theme_bg_color, 0.8);
+			padding: 10px;
+		}
+	`
+	err = ApplyStyleCSS(&restartBox.Widget, css)
+	if err != nil {
+		return nil, err
+	}
+	rvl, err := gtk.RevealerNew()
+	if err != nil {
+		return nil, err
+	}
+	rvl.Add(restartBox)
+	box.Add(rvl)
+
+	img, err := gtk.ImageNew()
+	if err != nil {
+		return nil, err
+	}
+	css = `
+		image {
+			color: @theme_selected_bg_color;
+		}
+	`
+	err = ApplyStyleCSS(&img.Widget, css)
+	if err != nil {
+		return nil, err
+	}
+	img.SetFromIconName("emblem-important-symbolic", gtk.ICON_SIZE_BUTTON)
+	restartBox.Add(img)
+	lblRestart, err := SetupLabelJustifyLeft("")
+	if err != nil {
+		return nil, err
+	}
+	lblRestart.SetMarkup("Application reload required. Click to <a href=\"restart_uri\">restart</a> application.")
+	_, err = lblRestart.Connect("activate-link", func(v *gtk.Label, href string) {
+		if href == "restart_uri" {
+			appRunMode = AppRunReload
+
+			actionName := "QuitAction"
+			action := actions.LookupAction(actionName)
+			if action != nil {
+				action.Activate(nil)
+			}
+		}
+	})
+	if err != nil {
+		return nil, err
+	}
+	restartBox.Add(lblRestart)
+	box.Add(restartBox)
+
 	bh := appSettings.NewBindingHelper()
 
-	lblBehavior, err := gtk.LabelNew(fmt.Sprintf("<b>%s</b>", "Behavior"))
+	lblBehavior, err := gtk.LabelNew(fmt.Sprintf("<b>%s</b>", "Behavior (with app reload demo)"))
 	if err != nil {
 		return nil, err
 	}
@@ -2456,12 +2547,26 @@ func GlobalPreferencesNew(appSettings *SettingsStore) (*gtk.Container, error) {
 	lblBehavior.SetHAlign(gtk.ALIGN_START)
 	box.Add(lblBehavior)
 
+	fnActivateRestartService := func(v *gtk.CheckButton, initialValue bool) {
+		activate := initialValue != v.GetActive()
+		// Show "restart app" panel only when language has changed
+		// from original setting. Otherwise - hide panel.
+		rvl.SetRevealChild(activate)
+		if err != nil {
+			log.Fatal(err)
+		}
+	}
+
 	// Show about dialog on application startup
 	cbAboutInfo, err := gtk.CheckButtonNewWithLabel("Do not show about information on app startup")
 	if err != nil {
 		return nil, err
 	}
 	bh.Bind(CFG_DONT_SHOW_ABOUT_ON_STARTUP_KEY, cbAboutInfo, "active", glib.SETTINGS_BIND_DEFAULT)
+	_, err = cbAboutInfo.Connect("clicked", fnActivateRestartService, cbAboutInfo.GetActive())
+	if err != nil {
+		return nil, err
+	}
 	box.Add(cbAboutInfo)
 
 	//Prompt on new session
@@ -2470,6 +2575,10 @@ func GlobalPreferencesNew(appSettings *SettingsStore) (*gtk.Container, error) {
 		return nil, err
 	}
 	bh.Bind(CFG_PROMPT_ON_NEW_SESSION_KEY, cbPrompt, "active", glib.SETTINGS_BIND_DEFAULT)
+	_, err = cbPrompt.Connect("clicked", fnActivateRestartService, cbPrompt.GetActive())
+	if err != nil {
+		return nil, err
+	}
 	box.Add(cbPrompt)
 
 	//Focus follows the mouse
@@ -2478,6 +2587,10 @@ func GlobalPreferencesNew(appSettings *SettingsStore) (*gtk.Container, error) {
 		return nil, err
 	}
 	bh.Bind(CFG_TERMINAL_FOCUS_FOLLOWS_MOUSE_KEY, cbFocusMouse, "active", glib.SETTINGS_BIND_DEFAULT)
+	_, err = cbFocusMouse.Connect("clicked", fnActivateRestartService, cbFocusMouse.GetActive())
+	if err != nil {
+		return nil, err
+	}
 	box.Add(cbFocusMouse)
 
 	//Auto hide the mouse
@@ -2486,6 +2599,10 @@ func GlobalPreferencesNew(appSettings *SettingsStore) (*gtk.Container, error) {
 		return nil, err
 	}
 	bh.Bind(CFG_AUTO_HIDE_MOUSE_KEY, cbAutoHideMouse, "active", glib.SETTINGS_BIND_DEFAULT)
+	_, err = cbAutoHideMouse.Connect("clicked", fnActivateRestartService, cbAutoHideMouse.GetActive())
+	if err != nil {
+		return nil, err
+	}
 	box.Add(cbAutoHideMouse)
 
 	//middle click closes the terminal
@@ -2494,6 +2611,10 @@ func GlobalPreferencesNew(appSettings *SettingsStore) (*gtk.Container, error) {
 		return nil, err
 	}
 	bh.Bind(CFG_MIDDLE_CLICK_CLOSE_KEY, cbMiddleClickClose, "active", glib.SETTINGS_BIND_DEFAULT)
+	_, err = cbMiddleClickClose.Connect("clicked", fnActivateRestartService, cbMiddleClickClose.GetActive())
+	if err != nil {
+		return nil, err
+	}
 	box.Add(cbMiddleClickClose)
 
 	//zoom in/out terminal with scroll wheel
@@ -2502,6 +2623,10 @@ func GlobalPreferencesNew(appSettings *SettingsStore) (*gtk.Container, error) {
 		return nil, err
 	}
 	bh.Bind(CFG_CONTROL_SCROLL_ZOOM_KEY, cbControlScrollZoom, "active", glib.SETTINGS_BIND_DEFAULT)
+	_, err = cbControlScrollZoom.Connect("clicked", fnActivateRestartService, cbControlScrollZoom.GetActive())
+	if err != nil {
+		return nil, err
+	}
 	box.Add(cbControlScrollZoom)
 
 	//require control modifier when clicking title
@@ -2510,6 +2635,10 @@ func GlobalPreferencesNew(appSettings *SettingsStore) (*gtk.Container, error) {
 		return nil, err
 	}
 	bh.Bind(CFG_CONTROL_CLICK_TITLE_KEY, cbControlClickTitle, "active", glib.SETTINGS_BIND_DEFAULT)
+	_, err = cbControlClickTitle.Connect("clicked", fnActivateRestartService, cbControlClickTitle.GetActive())
+	if err != nil {
+		return nil, err
+	}
 	box.Add(cbControlClickTitle)
 
 	//Closing of last session closes window
@@ -2518,6 +2647,10 @@ func GlobalPreferencesNew(appSettings *SettingsStore) (*gtk.Container, error) {
 		return nil, err
 	}
 	bh.Bind(CFG_CLOSE_WITH_LAST_SESSION_KEY, cbCloseWithLastSession, "active", glib.SETTINGS_BIND_DEFAULT)
+	_, err = cbCloseWithLastSession.Connect("clicked", fnActivateRestartService, cbCloseWithLastSession.GetActive())
+	if err != nil {
+		return nil, err
+	}
 	box.Add(cbCloseWithLastSession)
 
 	cbNewWindowInheritState, err := gtk.CheckButtonNewWithLabel("New window inherits directory and profile from active terminal")
@@ -2525,6 +2658,10 @@ func GlobalPreferencesNew(appSettings *SettingsStore) (*gtk.Container, error) {
 		return nil, err
 	}
 	bh.Bind(CFG_INHERIT_WINDOW_STATE_KEY, cbNewWindowInheritState, "active", glib.SETTINGS_BIND_DEFAULT)
+	_, err = cbNewWindowInheritState.Connect("clicked", fnActivateRestartService, cbNewWindowInheritState.GetActive())
+	if err != nil {
+		return nil, err
+	}
 	box.Add(cbNewWindowInheritState)
 
 	// Save window state (maximized, minimized, fullscreen) between invocations
@@ -2533,6 +2670,10 @@ func GlobalPreferencesNew(appSettings *SettingsStore) (*gtk.Container, error) {
 		return nil, err
 	}
 	bh.Bind(CFG_WINDOW_SAVE_STATE_KEY, cbWindowSaveState, "active", glib.SETTINGS_BIND_DEFAULT)
+	_, err = cbWindowSaveState.Connect("clicked", fnActivateRestartService, cbWindowSaveState.GetActive())
+	if err != nil {
+		return nil, err
+	}
 	box.Add(cbWindowSaveState)
 
 	// *********** Clipboard Options
@@ -2621,6 +2762,9 @@ func AppearancePreferencesNew(appSettings *SettingsStore) (*gtk.Container, error
 	bh := appSettings.NewBindingHelper()
 
 	grid, err := gtk.GridNew()
+	if err != nil {
+		return nil, err
+	}
 	grid.SetColumnSpacing(12)
 	grid.SetRowSpacing(6)
 	row := 0
@@ -2633,6 +2777,9 @@ func AppearancePreferencesNew(appSettings *SettingsStore) (*gtk.Container, error
 	lbl.SetHAlign(gtk.ALIGN_END)
 	grid.Attach(lbl, 0, row, 1, 1)
 	bWindowStyle, err := gtk.BoxNew(gtk.ORIENTATION_HORIZONTAL, 6)
+	if err != nil {
+		return nil, err
+	}
 	values := []struct{ value, key string }{
 		{"Normal", "normal"},
 		{"Disable CSD", "disable-csd"},
@@ -2670,6 +2817,9 @@ func AppearancePreferencesNew(appSettings *SettingsStore) (*gtk.Container, error
 		{"None", CFG_TERMINAL_TITLE_STYLE_VALUE_NONE},
 	}
 	cbTitleStyle, err := CreateNameValueCombo(values)
+	if err != nil {
+		return nil, err
+	}
 	bh.Bind(CFG_TERMINAL_TITLE_STYLE_KEY, cbTitleStyle, "active-id", glib.SETTINGS_BIND_DEFAULT)
 	grid.Attach(cbTitleStyle, 1, row, 1, 1)
 	row++
@@ -2687,6 +2837,9 @@ func AppearancePreferencesNew(appSettings *SettingsStore) (*gtk.Container, error
 		{"Bottom", "bottom"},
 	}
 	cbTabPosition, err := CreateNameValueCombo(values)
+	if err != nil {
+		return nil, err
+	}
 	bh.Bind(CFG_TAB_POSITION_KEY, cbTabPosition, "active-id", glib.SETTINGS_BIND_DEFAULT)
 	grid.Attach(cbTabPosition, 1, row, 1, 1)
 	row++
@@ -2704,6 +2857,9 @@ func AppearancePreferencesNew(appSettings *SettingsStore) (*gtk.Container, error
 		{"Dark", CFG_THEME_VARIANT_DARK_VALUE},
 	}
 	cbThemeVariant, err := CreateNameValueCombo(values)
+	if err != nil {
+		return nil, err
+	}
 	bh.Bind(CFG_THEME_VARIANT_KEY, cbThemeVariant, "active-id", glib.SETTINGS_BIND_DEFAULT)
 	grid.Attach(cbThemeVariant, 1, row, 1, 1)
 	row++
@@ -2782,10 +2938,16 @@ func AppearancePreferencesNew(appSettings *SettingsStore) (*gtk.Container, error
 	bh.Bind(CFG_ENABLE_TRANSPARENCY_KEY, cbImageMode, "sensitive", glib.SETTINGS_BIND_DEFAULT)
 
 	bChooser, err := gtk.BoxNew(gtk.ORIENTATION_HORIZONTAL, 2)
+	if err != nil {
+		return nil, err
+	}
 	bChooser.Add(fcbImage)
 	bChooser.Add(btnReset)
 
 	bImage, err := gtk.BoxNew(gtk.ORIENTATION_HORIZONTAL, 6)
+	if err != nil {
+		return nil, err
+	}
 	bImage.Add(bChooser)
 	bImage.Add(cbImageMode)
 	grid.Attach(bImage, 1, row, 1, 1)
@@ -2808,6 +2970,9 @@ func AppearancePreferencesNew(appSettings *SettingsStore) (*gtk.Container, error
 	box.Add(cbTitleShowWhenSingle)
 
 	cbUseTabs, err := gtk.CheckButtonNewWithLabel("Use tabs instead of sidebar (Application restart required)")
+	if err != nil {
+		return nil, err
+	}
 	bh.Bind(CFG_USE_TABS_KEY, cbUseTabs, "active", glib.SETTINGS_BIND_DEFAULT)
 	box.Add(cbUseTabs)
 
@@ -2900,6 +3065,9 @@ func ProfilePreferencesNew(win *gtk.ApplicationWindow, appSettings *SettingsStor
 	}
 
 	grid, err := gtk.GridNew()
+	if err != nil {
+		return nil, "", err
+	}
 	grid.SetColumnSpacing(12)
 	grid.SetRowSpacing(6)
 	grid.SetHAlign(gtk.ALIGN_FILL)
@@ -3067,8 +3235,13 @@ func checkSchemaSettingsIsInstalled(app *gtk.Application) (bool, error) {
 
 // Create sophisticated multi-page preference dialog
 // with save/restore functionallity to/from the GLib Setting object.
-func createPreferenceDialog(settingsID, settingsPath string, app *gtk.Application) (*gtk.ApplicationWindow, error) {
-	parentWin := app.GetActiveWindow()
+func createPreferenceDialog(settingsID, settingsPath string,
+	mainWin *gtk.ApplicationWindow) (*gtk.ApplicationWindow, error) {
+
+	app, err := mainWin.GetApplication()
+	if err != nil {
+		return nil, err
+	}
 	win, err := gtk.ApplicationWindowNew(app)
 	if err != nil {
 		return nil, err
@@ -3076,7 +3249,7 @@ func createPreferenceDialog(settingsID, settingsPath string, app *gtk.Applicatio
 
 	// Settings
 	win.SetTitle("Preferences")
-	win.SetTransientFor(parentWin)
+	win.SetTransientFor(mainWin)
 	win.SetDestroyWithParent(true)
 	win.SetShowMenubar(false)
 	appSettings, err := NewSettingsStore(settingsID, settingsPath, nil)
@@ -3098,8 +3271,14 @@ func createPreferenceDialog(settingsID, settingsPath string, app *gtk.Applicatio
 	hbSide.SetHExpand(false)
 
 	bTitle, err := gtk.BoxNew(gtk.ORIENTATION_HORIZONTAL, 0)
+	if err != nil {
+		return nil, err
+	}
 	bTitle.Add(hbSide)
 	sTitle, err := gtk.SeparatorNew(gtk.ORIENTATION_VERTICAL)
+	if err != nil {
+		return nil, err
+	}
 	bTitle.Add(sTitle)
 	bTitle.Add(hbMain)
 
@@ -3160,7 +3339,7 @@ func createPreferenceDialog(settingsID, settingsPath string, app *gtk.Applicatio
 		}
 	}
 
-	gp, err := GlobalPreferencesNew(appSettings)
+	gp, err := GlobalPreferencesNew(appSettings, &mainWin.ActionMap)
 	if err != nil {
 		return nil, err
 	}
@@ -3323,14 +3502,10 @@ func createPreferenceDialog(settingsID, settingsPath string, app *gtk.Applicatio
 	return win, nil
 }
 
-func main() {
-
-	data := &FullscreenGlobalData{}
-
-	gtk.Init(nil)
+func createApp(data *FullscreenGlobalData) (*gtk.Application, error) {
 	app, err := gtk.ApplicationNew(APP_SCHEMA_ID, glib.APPLICATION_FLAGS_NONE)
 	if err != nil {
-		log.Fatal(err)
+		return nil, err
 	}
 
 	_, err = app.Application.Connect("activate", func(application *gtk.Application) {
@@ -3412,7 +3587,7 @@ func main() {
 		}
 		win.AddAction(act)
 
-		act, err = createPreferenceAction(&win.Window)
+		act, err = createPreferenceAction(win)
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -3517,21 +3692,6 @@ func main() {
 		sw.Add(vp)
 		_, err = sw.Connect("destroy", func() {
 			log.Println("Destroy sw")
-			// chd, err := sw.GetChild()
-			// if err != nil {
-			// 	log.Fatal(err)
-			// }
-			// log.Println(spew.Sprintf("%+v", chd))
-			// log.Println(spew.Sprintf("%+v", box2))
-			// sw.Remove(chd)
-			// chd.Unref()
-			// chd.Destroy()
-
-			// parent, err := chd.GetParent()
-			// if err != nil {
-			// log.Fatal(err)
-			// }
-
 		})
 		if err != nil {
 			log.Fatal(err)
@@ -3563,8 +3723,33 @@ func main() {
 		}
 	})
 	if err != nil {
-		log.Fatal(err)
+		return nil, err
 	}
+	return app, nil
+}
 
-	app.Run([]string{})
+func main() {
+
+	gtk.Init(nil)
+
+	appRunMode = AppRegularRun
+	for {
+		data := &FullscreenGlobalData{}
+
+		app, err := createApp(data)
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		// Run application.
+		app.Run([]string{})
+
+		// If request was made to reload app, then we re-run app
+		// without exiting (can be used for changing app UI language).
+		if appRunMode == AppRegularRun {
+			break
+		} else if appRunMode == AppRunReload {
+			appRunMode = AppRegularRun
+		}
+	}
 }
