@@ -1,7 +1,7 @@
 package main
 
 import (
-	"github.com/d2r2/gotk3/gtk"
+	"github.com/romychs/gotk3/gtk"
 )
 
 // Setup the Window.

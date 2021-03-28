@@ -9,7 +9,7 @@ import "C"
 import (
 	"unsafe"
 
-	"github.com/d2r2/gotk3/gdk"
+	"github.com/romychs/gotk3/gdk"
 )
 
 // PopupAtPointer is a wrapper for gtk_menu_popup_at_pointer(), on older versions it uses PopupAtMouseCursor

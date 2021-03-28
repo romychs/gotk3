@@ -9,9 +9,9 @@ import (
 	"sync"
 	"unsafe"
 
-	"github.com/d2r2/gotk3/cairo"
-	"github.com/d2r2/gotk3/glib"
-	"github.com/d2r2/gotk3/pango"
+	"github.com/romychs/gotk3/cairo"
+	"github.com/romychs/gotk3/glib"
+	"github.com/romychs/gotk3/pango"
 )
 
 func init() {

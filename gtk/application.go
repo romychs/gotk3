@@ -10,7 +10,7 @@ import (
 	"runtime"
 	"unsafe"
 
-	"github.com/d2r2/gotk3/glib"
+	"github.com/romychs/gotk3/glib"
 )
 
 // Actionable is a representation of GTK's GtkActionable GInterface.

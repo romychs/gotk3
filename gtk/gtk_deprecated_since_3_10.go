@@ -30,7 +30,7 @@ import "C"
 import (
 	"unsafe"
 
-	"github.com/d2r2/gotk3/glib"
+	"github.com/romychs/gotk3/glib"
 )
 
 // GetIconStock is a wrapper around gtk_entry_get_icon_stock().

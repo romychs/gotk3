@@ -18,10 +18,10 @@ import (
 	"sync"
 	"time"
 
-	"github.com/d2r2/gotk3/gdk"
-	"github.com/d2r2/gotk3/glib"
-	"github.com/d2r2/gotk3/gtk"
-	"github.com/d2r2/gotk3/pango"
+	"github.com/romychs/gotk3/gdk"
+	"github.com/romychs/gotk3/glib"
+	"github.com/romychs/gotk3/gtk"
+	"github.com/romychs/gotk3/pango"
 	"github.com/davecgh/go-spew/spew"
 )
 

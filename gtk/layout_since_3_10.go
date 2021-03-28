@@ -27,7 +27,7 @@ import (
 	"sync"
 	"unsafe"
 
-	"github.com/d2r2/gotk3/glib"
+	"github.com/romychs/gotk3/glib"
 )
 
 // RevealerTransitionType is a representation of GTK's GtkRevealerTransitionType.

@@ -12,7 +12,7 @@ import (
 	"errors"
 	"unsafe"
 
-	"github.com/d2r2/gotk3/gdk"
+	"github.com/romychs/gotk3/gdk"
 )
 
 // ShowUri is a wrapper for gtk_show_uri().

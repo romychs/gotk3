@@ -22,7 +22,7 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/d2r2/gotk3/gtk"
+	"github.com/romychs/gotk3/gtk"
 )
 
 func setup_window(title string) *gtk.Window {

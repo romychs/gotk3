@@ -11,7 +11,7 @@ import (
 	"runtime"
 	"unsafe"
 
-	"github.com/d2r2/gotk3/glib"
+	"github.com/romychs/gotk3/glib"
 )
 
 // GetFocusChain is a wrapper around gtk_container_get_focus_chain().

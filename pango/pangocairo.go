@@ -27,8 +27,7 @@ import "C"
 import (
 	//	"github.com/d2r2/gotk3/glib"
 	"unsafe"
-
-	"github.com/d2r2/gotk3/cairo"
+	"github.com/romychs/gotk3/cairo"
 )
 
 func init() {

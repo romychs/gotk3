@@ -11,9 +11,9 @@ import (
 	"fmt"
 	"unsafe"
 
-	"github.com/d2r2/gotk3/cairo"
-	"github.com/d2r2/gotk3/gdk"
-	"github.com/d2r2/gotk3/glib"
+	"github.com/romychs/gotk3/cairo"
+	"github.com/romychs/gotk3/gdk"
+	"github.com/romychs/gotk3/glib"
 )
 
 /*
