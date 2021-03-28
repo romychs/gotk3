@@ -1820,7 +1820,7 @@ func createAboutAction(win *gtk.Window, appSettings *SettingsStore) (glib.IActio
 		buf.WriteString(fmt.Sprint("Follow my golang projects on GitHub:"))
 		dlg.SetComments(buf.String())
 
-		dlg.SetWebsite("https://github.com/d2r2/")
+		dlg.SetWebsite("https://github.com/romychs/")
 
 		dlg.SetTransientFor(win)
 		dlg.SetModal(true)
