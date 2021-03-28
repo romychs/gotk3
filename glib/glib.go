@@ -912,7 +912,7 @@ func (v *Value) GetString() (string, error) {
 
 // GetInt is a wrapper around g_value_get_int().
 //
-func (v *Value) GetInt() inAt {
+func (v *Value) GetInt() int {
 	i := C.g_value_get_int(v.native())
 	return int(i)
 }
