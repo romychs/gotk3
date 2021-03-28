@@ -910,6 +910,13 @@ func (v *Value) GetString() (string, error) {
 	return goString(c), nil
 }
 
+// GetInt is a wrapper around g_value_get_int().
+//
+func (v *Value) GetInt() inAt {
+	i := C.g_value_get_int(v.native())
+	return int(i)
+}
+
 type Signal struct {
 	name     string
 	signalId C.guint
